@@ -10,15 +10,25 @@ import {
 } from "@raydium-io/raydium-sdk";
 import fs from "fs";
 import path from "path";
-import secret from '../cli/.config/secret.json';
+import secret from '../cli/.config/admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV.json';
 import { assert, expect } from "chai";
 import { Bridge } from "../target/types/bridge";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import { BN } from "@coral-xyz/anchor";
 export interface TestValues {
   payerAdmin: Keypair;
-  total_supply: anchor.BN;
+  feeRecipient: PublicKey;
+  chainId: anchor.BN;
+  supportedTokensKeypairs: Keypair[];
+  prices: anchor.BN[];
+  supportedChains: Buffer;
+  tokenFeePercentages: anchor.BN[];
+  decimals: anchor.BN[];
+  tokenMinAmounts: anchor.BN[];
+  bridgeConfigPDA: PublicKey;
 }
+export const DECIMALS9 = new anchor.BN(1_000_000_000);
+export const FeeDenominator = new anchor.BN(1000000);
 
 export async function sleep(seconds: number) {
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -39,6 +49,18 @@ export const expectRevert = async (promise: Promise<any>) => {
     return;
   }
 };
+function keypairsToUint8Arrays(keypairs): PublicKey[] {
+  if (!Array.isArray(keypairs)) {
+    throw new Error("Input must be an array");
+  }
+
+  return keypairs.map(keypair => {
+    if (!(keypair instanceof Keypair)) {
+      throw new Error("Array elements must be Keypair instances");
+    }
+    return keypair.publicKey;
+  });
+}
 
 
 type TestValuesDefaults = {
@@ -46,19 +68,45 @@ type TestValuesDefaults = {
 };
 export function createValues(defaults?: TestValuesDefaults): TestValues {
   const payerAdmin = Keypair.fromSecretKey(new Uint8Array(secret));
-
+  const feeRecipient = Keypair.generate().publicKey;
+  const supportedTokensKeypairs = [Keypair.generate(), Keypair.generate()];
+  const decimals = [DECIMALS9, DECIMALS9]
+  const prices = [new anchor.BN(9999).mul(decimals[0]), new anchor.BN(9999).mul(decimals[1])];
+  const supportedChainsUint8Array = new Uint8Array([2, 3, 4]);
+  const supportedChains = Buffer.from(supportedChainsUint8Array);
+  const tokenFeePercentages = [new anchor.BN(100), new anchor.BN(2000)];
+  const tokenMinAmounts = [new anchor.BN(100).mul(decimals[0]), new anchor.BN(2000).mul(decimals[1])];
+  const curChainId = new anchor.BN(1);
+  const bridgeConfigPDA = PublicKey.findProgramAddressSync(
+    [Buffer.from("global_memoo_config"), curChainId.toBuffer()],
+    anchor.workspace.bridge.programId
+  )[0];
+  console.log(`programId : ${anchor.workspace.bridge.programId}`);
   return {
-    
-    total_supply: new anchor.BN(1_000_000_000).mul(new anchor.BN(10 ** 9)),
+    chainId: curChainId,
     payerAdmin,
-    
+    feeRecipient,
+    supportedTokensKeypairs,
+    prices,
+    supportedChains,
+    decimals,
+    tokenFeePercentages,
+    tokenMinAmounts,
+    bridgeConfigPDA
   };
 }
 export async function createBridgeConfig(program: anchor.Program<Bridge>, values: TestValues) {
   return await program.methods
-    .creat(
+    .createBridgeConfig(
+      values.chainId.toNumber(),
+      values.feeRecipient,
+      keypairsToUint8Arrays(values.supportedTokensKeypairs),
+      values.prices,
+      values.supportedChains,
+      values.tokenFeePercentages,
+      values.tokenMinAmounts
     )
-    .accounts({ memooConfig: values.memooConfigPda })
+    .accounts({ bridgeConfig: values.bridgeConfigPDA })
     .rpc();
 }
 export async function createLookupTable(authority: PublicKey, payer: Keypair, connection: Connection) {

@@ -10,7 +10,7 @@ use crate::{
 };
 use std::ops::DerefMut;
 // Hardcoded pubkey for create memoo config
-const HARDCODED_PUBKEY: Pubkey = pubkey!("aaaPoyXwYeg7hjfCB4wVxzz5B3SB5rjLyAZxKU5hXw2");
+const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, '_, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,

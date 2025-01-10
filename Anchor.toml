@@ -21,10 +21,10 @@ url = "https://api.apr.dev"
 
 [provider]
 cluster = "https://broken-twilight-paper.solana-devnet.quiknode.pro/e0bcf0275d294a569bd60a39c2a3f99d678b14d4"
-wallet = "./cli/.config/secret.json"
+wallet = "./cli/.config/admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV.json"
 
 [scripts]
-test = "vitest --test-timeout=500000 9."
+test = "vitest --test-timeout=500000 1."
 
 # use localnet for test
 [test]

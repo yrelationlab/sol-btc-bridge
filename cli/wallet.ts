@@ -2,11 +2,11 @@ import { Keypair, LAMPORTS_PER_SOL, Connection } from "@solana/web3.js";
 
 require('dotenv').config({ path: `.env.${process.env.E}` });
 
-import secret from './.config/secret.json';
+import secret from './.config/admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV.json';
 export const userWalletKey = Keypair.fromSecretKey(new Uint8Array(secret));
 console.log(`userWallet publicKey is ${userWalletKey.publicKey}`);
 
-import id from '../target/deploy/memoo-keypair.json';
+import id from '../target/deploy/bridge-keypair.json';
 export const programWalletKey = Keypair.fromSecretKey(new Uint8Array(id));
 export const PROGRAM_ID = programWalletKey.publicKey;
 console.log(`PROGRAM_ID is ${PROGRAM_ID}`);
