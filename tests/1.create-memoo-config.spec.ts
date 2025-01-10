@@ -23,5 +23,22 @@ describe("Create and mint token with metadata", () => {
     expect(configAccount.admin.toString()).to.equal(
       values.payerAdmin.publicKey.toString()
     );
+    expect(configAccount.chainId.toString()).to.equal(values.chainId.toString());
+
+
+    for (const [index, supportedChainPda] of values.supportedChainsPdas.entries()) {
+      const supportedChain = await program.account.supportedChainConfig.fetch(supportedChainPda);
+      console.log(`supportedChain is ${JSON.stringify(supportedChain)}`);
+      expect(supportedChain.chainId.toString()).to.equal(values.supportedChainsBuffer[index].toString());
+    }
+
+    
+    for (const [index, tokenConfigPda] of values.tokenConfigPdas.entries()) {
+      const tokenConfig = await program.account.tokenConfig.fetch(tokenConfigPda);
+      console.log(`tokenConfig is ${JSON.stringify(tokenConfig)}`);
+      expect(tokenConfig.tokenAddress.toString()).to.equal(values.supportedTokensKeypairs[index].publicKey.toString());
+      expect(tokenConfig.chainId.toString()).to.equal(values.supportedChainsBuffer[index].toString());
+    }
   });
+
 });

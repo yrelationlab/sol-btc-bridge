@@ -21,11 +21,14 @@ export interface TestValues {
   chainId: anchor.BN;
   supportedTokensKeypairs: Keypair[];
   prices: anchor.BN[];
-  supportedChains: Buffer;
+  supportedChainsBuffer: Buffer;
   tokenFeePercentages: anchor.BN[];
   decimals: anchor.BN[];
   tokenMinAmounts: anchor.BN[];
   bridgeConfigPDA: PublicKey;
+  tokenConfigPdas: PublicKey[];
+  supportedChainsPdas: PublicKey[];
+
 }
 export const DECIMALS9 = new anchor.BN(1_000_000_000);
 export const FeeDenominator = new anchor.BN(1000000);
@@ -72,27 +75,44 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   const supportedTokensKeypairs = [Keypair.generate(), Keypair.generate()];
   const decimals = [DECIMALS9, DECIMALS9]
   const prices = [new anchor.BN(9999).mul(decimals[0]), new anchor.BN(9999).mul(decimals[1])];
-  const supportedChainsUint8Array = new Uint8Array([2, 3, 4]);
-  const supportedChains = Buffer.from(supportedChainsUint8Array);
+  const supportedChains = [2, 3, 4];
+  const supportedChainsBuffer = Buffer.from(new Uint8Array(supportedChains));
   const tokenFeePercentages = [new anchor.BN(100), new anchor.BN(2000)];
   const tokenMinAmounts = [new anchor.BN(100).mul(decimals[0]), new anchor.BN(2000).mul(decimals[1])];
   const curChainId = new anchor.BN(1);
   const bridgeConfigPDA = PublicKey.findProgramAddressSync(
-    [Buffer.from("global_memoo_config"), curChainId.toBuffer()],
+    [Buffer.from("GLOBAL_CONFIG"), curChainId.toBuffer()],
     anchor.workspace.bridge.programId
   )[0];
   console.log(`programId : ${anchor.workspace.bridge.programId}`);
+
+  const tokenConfigPdas = supportedTokensKeypairs.map((keypair, index) =>
+    PublicKey.findProgramAddressSync(
+      [Buffer.from("TOKEN_CONFIG"), keypair.publicKey.toBuffer(), curChainId.toBuffer()],
+      anchor.workspace.bridge.programId
+    )[0]
+  );
+
+  const supportedChainsPdas = supportedChains.map((chainId) => {
+    return PublicKey.findProgramAddressSync(
+      [Buffer.from("SUPPORTED_CHAINS_CONFIG"), new anchor.BN(chainId).toBuffer()],
+      anchor.workspace.bridge.programId
+    )[0];
+  });
+
   return {
     chainId: curChainId,
     payerAdmin,
     feeRecipient,
     supportedTokensKeypairs,
     prices,
-    supportedChains,
+    supportedChainsBuffer,
     decimals,
     tokenFeePercentages,
     tokenMinAmounts,
-    bridgeConfigPDA
+    bridgeConfigPDA,
+    tokenConfigPdas,
+    supportedChainsPdas
   };
 }
 export async function createBridgeConfig(program: anchor.Program<Bridge>, values: TestValues) {
@@ -102,12 +122,17 @@ export async function createBridgeConfig(program: anchor.Program<Bridge>, values
       values.feeRecipient,
       keypairsToUint8Arrays(values.supportedTokensKeypairs),
       values.prices,
-      values.supportedChains,
+      values.supportedChainsBuffer,
       values.tokenFeePercentages,
       values.tokenMinAmounts
     )
     .accounts({ bridgeConfig: values.bridgeConfigPDA })
-    .rpc();
+    .remainingAccounts([
+      ...values.tokenConfigPdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
+      ,...values.supportedChainsPdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
+      
+    ])
+    .rpc({skipPreflight: false});
 }
 export async function createLookupTable(authority: PublicKey, payer: Keypair, connection: Connection) {
   // Step 1 - Get a lookup table address and create lookup table instruction

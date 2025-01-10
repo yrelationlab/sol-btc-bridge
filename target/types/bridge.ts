@@ -13,6 +13,16 @@ export type Bridge = {
       "value": "\"TOKEN_CONFIG\""
     },
     {
+      "name": "SUPPORTED_CHAINS_CONFIG",
+      "type": "string",
+      "value": "\"SUPPORTED_CHAINS_CONFIG\""
+    },
+    {
+      "name": "AUTHORITY_SEED",
+      "type": "string",
+      "value": "\"authority\""
+    },
+    {
       "name": "DECIMALS9",
       "type": "u8",
       "value": "9"
@@ -113,8 +123,8 @@ export type Bridge = {
             ],
             "type": {
               "array": [
-                "u8",
-                128
+                "u64",
+                16
               ]
             }
           }
@@ -122,7 +132,7 @@ export type Bridge = {
       }
     },
     {
-      "name": "bridgeConfigOfToken",
+      "name": "tokenConfig",
       "type": {
         "kind": "struct",
         "fields": [
@@ -161,8 +171,36 @@ export type Bridge = {
             ],
             "type": {
               "array": [
-                "u8",
-                128
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "supportedChainConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "supported",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
               ]
             }
           }
@@ -279,23 +317,33 @@ export type Bridge = {
     },
     {
       "code": 6008,
+      "name": "SupportedChainAddressMissing",
+      "msg": "Token Config Address Missing"
+    },
+    {
+      "code": 6009,
       "name": "DeserializeAirdropMessageError",
       "msg": "Deserialize Airdrop Message Error"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "DeserializeWhitelistMessageError",
       "msg": "Deserialize Whitelist Message Error"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "DeserializationError",
       "msg": "Deserialization Error"
     },
     {
-      "code": 6011,
-      "name": "SerializationError",
-      "msg": "Serialization Error"
+      "code": 6012,
+      "name": "BridgeConfigSerializationError",
+      "msg": "Bridge Config Serialization Error"
+    },
+    {
+      "code": 6013,
+      "name": "SupportedChainSerializationError",
+      "msg": "Supported Chain Serialization Error"
     }
   ]
 };
@@ -315,6 +363,16 @@ export const IDL: Bridge = {
       "value": "\"TOKEN_CONFIG\""
     },
     {
+      "name": "SUPPORTED_CHAINS_CONFIG",
+      "type": "string",
+      "value": "\"SUPPORTED_CHAINS_CONFIG\""
+    },
+    {
+      "name": "AUTHORITY_SEED",
+      "type": "string",
+      "value": "\"authority\""
+    },
+    {
       "name": "DECIMALS9",
       "type": "u8",
       "value": "9"
@@ -415,8 +473,8 @@ export const IDL: Bridge = {
             ],
             "type": {
               "array": [
-                "u8",
-                128
+                "u64",
+                16
               ]
             }
           }
@@ -424,7 +482,7 @@ export const IDL: Bridge = {
       }
     },
     {
-      "name": "bridgeConfigOfToken",
+      "name": "tokenConfig",
       "type": {
         "kind": "struct",
         "fields": [
@@ -463,8 +521,36 @@ export const IDL: Bridge = {
             ],
             "type": {
               "array": [
-                "u8",
-                128
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "supportedChainConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "supported",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
               ]
             }
           }
@@ -581,23 +667,33 @@ export const IDL: Bridge = {
     },
     {
       "code": 6008,
+      "name": "SupportedChainAddressMissing",
+      "msg": "Token Config Address Missing"
+    },
+    {
+      "code": 6009,
       "name": "DeserializeAirdropMessageError",
       "msg": "Deserialize Airdrop Message Error"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "DeserializeWhitelistMessageError",
       "msg": "Deserialize Whitelist Message Error"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "DeserializationError",
       "msg": "Deserialization Error"
     },
     {
-      "code": 6011,
-      "name": "SerializationError",
-      "msg": "Serialization Error"
+      "code": 6012,
+      "name": "BridgeConfigSerializationError",
+      "msg": "Bridge Config Serialization Error"
+    },
+    {
+      "code": 6013,
+      "name": "SupportedChainSerializationError",
+      "msg": "Supported Chain Serialization Error"
     }
   ]
 };

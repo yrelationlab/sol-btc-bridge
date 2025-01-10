@@ -1,18 +1,20 @@
+use std::ops::DerefMut;
 
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::pubkey::Pubkey;
-use solana_program::pubkey;
 use crate::{
-    constants::{ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, TOKEN_CONFIG},
+    constants::{
+        ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
+    },
     create_or_allocate_account,
     errors::BridgeError,
-    state::{BridgeConfig, BridgeConfigOfToken},
+    state::{BridgeConfig, SupportedChainConfig, TokenConfig},
 };
-use std::ops::DerefMut;
+use anchor_lang::solana_program::pubkey::Pubkey;
+use anchor_lang::{prelude::*, Discriminator};
+use solana_program::pubkey;
 // Hardcoded pubkey for create memoo config
 const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
 pub fn create_bridge_config<'info>(
-    ctx: Context<'_, '_, '_, 'info, CreateBridgeConfig<'info>>,
+    ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
     fee_recipient: Pubkey,
     supported_tokens: Vec<Pubkey>,
@@ -22,10 +24,6 @@ pub fn create_bridge_config<'info>(
     token_min_amount: Vec<u64>,
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
-    require!(
-        supported_tokens.len() == 1,
-        BridgeError::InvalidSupportedTokenAddresses
-    );
     require!(
         supported_tokens.len() == token_fee_percentages.len(),
         BridgeError::InvalidTokenFeePercentage
@@ -48,14 +46,15 @@ pub fn create_bridge_config<'info>(
     let find_ata_in_accounts = |ata_pubkey: &Pubkey| {
         ctx.remaining_accounts
             .iter()
-            .find(|ac: &&AccountInfo| ac.key.eq(ata_pubkey))
+            .find(|ac: &&AccountInfo<'info>| ac.key.eq(ata_pubkey))
     };
     for (i, token_address) in supported_tokens.iter().enumerate() {
-        require!(
-            supported_chains[i] != bridge_config.chain_id,
-            BridgeError::CannotSupportSelf
-        );
-        let seeds = &[TOKEN_CONFIG.as_bytes(), &supported_chains[i].to_be_bytes()];
+        let chain_id_bytes = bridge_config.chain_id.to_be_bytes();
+        let seeds = &[
+            TOKEN_CONFIG.as_ref(),
+            token_address.as_ref(),
+            chain_id_bytes.as_ref(),
+        ];
         let (pda_of_token_config_addr, bump) = Pubkey::find_program_address(seeds, ctx.program_id);
         let pda_of_token_config = find_ata_in_accounts(&pda_of_token_config_addr)
             .ok_or(BridgeError::TokenConfigAddressMissing)?;
@@ -65,28 +64,73 @@ pub fn create_bridge_config<'info>(
             ctx.accounts.system_program.to_account_info(),
             pda_of_token_config.clone(),
             &[
-                TOKEN_CONFIG.as_bytes(),
-                &supported_chains[i].to_be_bytes(),
+                TOKEN_CONFIG.as_ref(),
+                token_address.as_ref(),
+                chain_id_bytes.as_ref(),
                 &[bump],
             ],
-            BridgeConfigOfToken::LEN,
+            TokenConfig::LEN,
         )?;
-        let mut data = pda_of_token_config.try_borrow_mut_data()?;
-        let mut bridge_config_of_token = BridgeConfigOfToken::try_from_slice(
-            &data.deref_mut()[ANCHOR_HEADER_LEN..BridgeConfigOfToken::LEN],
-        )
-        .map_err(|_| BridgeError::DeserializationError)?;
-        bridge_config_of_token.chain_id = supported_chains[i];
-        bridge_config_of_token.token_address = *token_address;
-        bridge_config_of_token.decimal = DECIMALS9;
-        bridge_config_of_token.native = false;
-        bridge_config_of_token.token_price = token_prices[i];
-        bridge_config_of_token.token_fee_percentage = token_fee_percentages[i];
-        bridge_config_of_token.token_min_amount = token_min_amount[i];
-        bridge_config_of_token.padding = [0u8; BridgeConfigOfToken::LEN_OF_PADDING];
+        let discriminator = TokenConfig::discriminator(); // 获取 discriminator
+        let account_data = &mut *pda_of_token_config.try_borrow_mut_data()?;
+        account_data[..8].copy_from_slice(&discriminator);
+        let bridge_config_of_token = TokenConfig {
+            chain_id: supported_chains[i],
+            token_address: *token_address,
+            decimal: DECIMALS9,
+            native: false,
+            token_price: token_prices[i],
+            token_fee_percentage: token_fee_percentages[i],
+            token_min_amount: token_min_amount[i],
+            padding: [0u64; TokenConfig::LEN_OF_PADDING],
+        };
         bridge_config_of_token
-            .serialize(&mut &mut data.deref_mut()[ANCHOR_HEADER_LEN..BridgeConfigOfToken::LEN])
-            .map_err(|_| BridgeError::SerializationError)?;
+            .serialize(&mut &mut account_data[8..]) // 从第 9 字节开始写入
+            .map_err(|error| {
+                msg!("BridgeConfigSerializationError: error={}", error);
+                BridgeError::BridgeConfigSerializationError
+            })?;
+    }
+    for (_i, chain_id) in supported_chains.iter().enumerate() {
+        require!(
+            *chain_id != bridge_config.chain_id,
+            BridgeError::CannotSupportSelf
+        );
+
+        let seeds = &[SUPPORTED_CHAINS_CONFIG.as_bytes(), &chain_id.to_be_bytes()];
+        let (pda_of_supported_chains_config_addr, bump) =
+            Pubkey::find_program_address(seeds, ctx.program_id);
+        let pda_of_supported_chains_config =
+            find_ata_in_accounts(&pda_of_supported_chains_config_addr)
+                .ok_or(BridgeError::SupportedChainAddressMissing)?;
+        create_or_allocate_account(
+            &ctx.program_id,
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+            pda_of_supported_chains_config.clone(),
+            &[
+                SUPPORTED_CHAINS_CONFIG.as_bytes(),
+                &chain_id.to_be_bytes(),
+                &[bump],
+            ],
+            SupportedChainConfig::LEN,
+        )?;
+
+        let discriminator = SupportedChainConfig::discriminator(); // 获取 discriminator
+        let account_data = &mut *pda_of_supported_chains_config.try_borrow_mut_data()?;
+        account_data[..8].copy_from_slice(&discriminator);
+        let supported_chain = SupportedChainConfig {
+            chain_id: *chain_id,
+            supported: true,
+            padding: [0u64; SupportedChainConfig::LEN_OF_PADDING],
+        };
+
+        supported_chain
+            .serialize(&mut &mut account_data[8..]) //
+            .map_err(|error| {
+                msg!("SupportedChainSerializationError: error={}", error);
+                BridgeError::SupportedChainSerializationError
+            })?;
     }
     Ok(())
 }
@@ -94,7 +138,7 @@ pub fn create_bridge_config<'info>(
 #[instruction(chain_id: u8)]
 pub struct CreateBridgeConfig<'info> {
     #[account(
-        init,
+        init_if_needed,
         payer = payer,
         space = BridgeConfig::LEN,
         seeds = [

@@ -13,6 +13,16 @@
       "value": "\"TOKEN_CONFIG\""
     },
     {
+      "name": "SUPPORTED_CHAINS_CONFIG",
+      "type": "string",
+      "value": "\"SUPPORTED_CHAINS_CONFIG\""
+    },
+    {
+      "name": "AUTHORITY_SEED",
+      "type": "string",
+      "value": "\"authority\""
+    },
+    {
       "name": "DECIMALS9",
       "type": "u8",
       "value": "9"
@@ -113,8 +123,8 @@
             ],
             "type": {
               "array": [
-                "u8",
-                128
+                "u64",
+                16
               ]
             }
           }
@@ -122,7 +132,7 @@
       }
     },
     {
-      "name": "BridgeConfigOfToken",
+      "name": "TokenConfig",
       "type": {
         "kind": "struct",
         "fields": [
@@ -161,8 +171,36 @@
             ],
             "type": {
               "array": [
-                "u8",
-                128
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SupportedChainConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "supported",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
               ]
             }
           }
@@ -279,26 +317,36 @@
     },
     {
       "code": 6008,
+      "name": "SupportedChainAddressMissing",
+      "msg": "Token Config Address Missing"
+    },
+    {
+      "code": 6009,
       "name": "DeserializeAirdropMessageError",
       "msg": "Deserialize Airdrop Message Error"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "DeserializeWhitelistMessageError",
       "msg": "Deserialize Whitelist Message Error"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "DeserializationError",
       "msg": "Deserialization Error"
     },
     {
-      "code": 6011,
-      "name": "SerializationError",
-      "msg": "Serialization Error"
+      "code": 6012,
+      "name": "BridgeConfigSerializationError",
+      "msg": "Bridge Config Serialization Error"
+    },
+    {
+      "code": 6013,
+      "name": "SupportedChainSerializationError",
+      "msg": "Supported Chain Serialization Error"
     }
   ],
   "metadata": {
-    "address": "J76Hqtvx27u4oFvTUTouBLStx2hkN8GQbQrUWYGkwnn1"
+    "address": "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
   }
 }

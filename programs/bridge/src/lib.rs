@@ -6,7 +6,7 @@ mod errors;
 mod instructions;
 mod state;
 // Set the correct key here
-declare_id!("J76Hqtvx27u4oFvTUTouBLStx2hkN8GQbQrUWYGkwnn1");
+declare_id!("4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx");
 #[program]
 pub mod bridge {
     pub use super::instructions::*;
@@ -15,7 +15,7 @@ pub mod bridge {
     //     instructions::close_memoo_config(ctx)
     // }
     pub fn create_bridge_config<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateBridgeConfig<'info>>,
+        ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
         chain_id: u8,
         fee_recipient: Pubkey,
         supported_tokens: Vec<Pubkey>,

@@ -18,12 +18,17 @@ pub enum BridgeError {
     CannotSupportSelf,
     #[msg("Token Config Address Missing")]
     TokenConfigAddressMissing,
+    #[msg("Token Config Address Missing")]
+    SupportedChainAddressMissing,
     #[msg("Deserialize Airdrop Message Error")]
     DeserializeAirdropMessageError,
     #[msg("Deserialize Whitelist Message Error")]
     DeserializeWhitelistMessageError,
     #[msg("Deserialization Error")]
     DeserializationError,
-    #[msg("Serialization Error")]
-    SerializationError
+    #[msg("Bridge Config Serialization Error")]
+    BridgeConfigSerializationError,
+    #[msg("Supported Chain Serialization Error")]
+    SupportedChainSerializationError
+   
 }

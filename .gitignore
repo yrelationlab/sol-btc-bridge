@@ -5,7 +5,6 @@
 /target/*
 target/deploy/bridge.so
 !/target/deploy/
-!/target/deploy/bridge-keypair.json
 !/target/idl/
 !/target/idl/bridge.json
 !/target/types/
