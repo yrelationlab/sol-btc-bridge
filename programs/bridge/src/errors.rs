@@ -1,4 +1,3 @@
-
 use anchor_lang::prelude::*;
 #[error_code]
 pub enum BridgeError {
@@ -29,6 +28,12 @@ pub enum BridgeError {
     #[msg("Bridge Config Serialization Error")]
     BridgeConfigSerializationError,
     #[msg("Supported Chain Serialization Error")]
-    SupportedChainSerializationError
-   
+    SupportedChainSerializationError,
+
+    #[msg("Committee Length Exceeds Limit")]
+    CommitteeLengthExceedsLimit,
+    #[msg("Committee And Stake Length Mismatch")]
+    CommitteeAndStakeLengthMismatch,
+    #[msg("Insufficient Total Stake")]
+    InsufficientTotalStake
 }

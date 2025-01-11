@@ -33,6 +33,11 @@
         "defined": "usize"
       },
       "value": "8"
+    },
+    {
+      "name": "HARDCODED_PUBKEY",
+      "type": "publicKey",
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -99,6 +104,66 @@
     }
   ],
   "accounts": [
+    {
+      "name": "BridgeCommittee",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "stakeAmount",
+            "type": "u16"
+          },
+          {
+            "name": "isBlocklisted",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Submitter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "member",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSubmitter",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "BridgeConfig",
       "type": {
@@ -344,9 +409,21 @@
       "code": 6013,
       "name": "SupportedChainSerializationError",
       "msg": "Supported Chain Serialization Error"
+    },
+    {
+      "code": 6014,
+      "name": "CommitteeLengthExceedsLimit",
+      "msg": "Committee Length Exceeds Limit"
+    },
+    {
+      "code": 6015,
+      "name": "CommitteeAndStakeLengthMismatch",
+      "msg": "Committee And Stake Length Mismatch"
+    },
+    {
+      "code": 6016,
+      "name": "InsufficientTotalStake",
+      "msg": "Insufficient Total Stake"
     }
-  ],
-  "metadata": {
-    "address": "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
-  }
+  ]
 }

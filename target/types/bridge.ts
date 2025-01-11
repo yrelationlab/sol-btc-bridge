@@ -33,6 +33,11 @@ export type Bridge = {
         "defined": "usize"
       },
       "value": "8"
+    },
+    {
+      "name": "HARDCODED_PUBKEY",
+      "type": "publicKey",
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -99,6 +104,66 @@ export type Bridge = {
     }
   ],
   "accounts": [
+    {
+      "name": "bridgeCommittee",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "stakeAmount",
+            "type": "u16"
+          },
+          {
+            "name": "isBlocklisted",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "submitter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "member",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSubmitter",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "bridgeConfig",
       "type": {
@@ -344,6 +409,21 @@ export type Bridge = {
       "code": 6013,
       "name": "SupportedChainSerializationError",
       "msg": "Supported Chain Serialization Error"
+    },
+    {
+      "code": 6014,
+      "name": "CommitteeLengthExceedsLimit",
+      "msg": "Committee Length Exceeds Limit"
+    },
+    {
+      "code": 6015,
+      "name": "CommitteeAndStakeLengthMismatch",
+      "msg": "Committee And Stake Length Mismatch"
+    },
+    {
+      "code": 6016,
+      "name": "InsufficientTotalStake",
+      "msg": "Insufficient Total Stake"
     }
   ]
 };
@@ -383,6 +463,11 @@ export const IDL: Bridge = {
         "defined": "usize"
       },
       "value": "8"
+    },
+    {
+      "name": "HARDCODED_PUBKEY",
+      "type": "publicKey",
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -449,6 +534,66 @@ export const IDL: Bridge = {
     }
   ],
   "accounts": [
+    {
+      "name": "bridgeCommittee",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "stakeAmount",
+            "type": "u16"
+          },
+          {
+            "name": "isBlocklisted",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "submitter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "member",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSubmitter",
+            "type": "bool"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          }
+        ]
+      }
+    },
     {
       "name": "bridgeConfig",
       "type": {
@@ -694,6 +839,21 @@ export const IDL: Bridge = {
       "code": 6013,
       "name": "SupportedChainSerializationError",
       "msg": "Supported Chain Serialization Error"
+    },
+    {
+      "code": 6014,
+      "name": "CommitteeLengthExceedsLimit",
+      "msg": "Committee Length Exceeds Limit"
+    },
+    {
+      "code": 6015,
+      "name": "CommitteeAndStakeLengthMismatch",
+      "msg": "Committee And Stake Length Mismatch"
+    },
+    {
+      "code": 6016,
+      "name": "InsufficientTotalStake",
+      "msg": "Insufficient Total Stake"
     }
   ]
 };

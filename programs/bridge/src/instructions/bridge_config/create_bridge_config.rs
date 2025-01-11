@@ -1,13 +1,10 @@
 use crate::{
     constants::{
-        DECIMALS9, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
+        DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG
     }, create_or_allocate_account, errors::BridgeError, BridgeConfig, SupportedChainConfig, TokenConfig
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
-use solana_program::pubkey;
-// Hardcoded pubkey for create memoo config
-const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
 
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,

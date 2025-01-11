@@ -1,5 +1,6 @@
 
 use anchor_lang::prelude::*;
+use solana_program::pubkey;
 #[constant]
 pub const GLOBAL_CONFIG: &str = "GLOBAL_CONFIG";
 #[constant]
@@ -12,3 +13,7 @@ pub const AUTHORITY_SEED: &str = "authority";
 pub const DECIMALS9: u8 = 9;
 #[constant]
 pub const ANCHOR_HEADER_LEN: usize = 8;
+
+#[constant]
+// Hardcoded pubkey for create memoo config
+pub const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
