@@ -24,20 +24,22 @@ describe("Create and mint token with metadata", () => {
       values.payerAdmin.publicKey.toString()
     );
     expect(configAccount.chainId.toString()).to.equal(values.chainId.toString());
+    expect(configAccount.feeRecipient.toString()).to.equal(values.feeRecipient.toString());
 
-
-    for (const [index, supportedChainPda] of values.supportedChainsPdas.entries()) {
-      const supportedChain = await program.account.supportedChainConfig.fetch(supportedChainPda);
-      console.log(`supportedChain is ${JSON.stringify(supportedChain)}`);
-      expect(supportedChain.chainId.toString()).to.equal(values.supportedChainsBuffer[index].toString());
-    }
-
-    
     for (const [index, tokenConfigPda] of values.tokenConfigPdas.entries()) {
       const tokenConfig = await program.account.tokenConfig.fetch(tokenConfigPda);
       console.log(`tokenConfig is ${JSON.stringify(tokenConfig)}`);
       expect(tokenConfig.tokenAddress.toString()).to.equal(values.supportedTokensKeypairs[index].publicKey.toString());
       expect(tokenConfig.chainId.toString()).to.equal(values.supportedChainsBuffer[index].toString());
+      expect(tokenConfig.tokenPrice.toString()).to.equal(values.prices[index].toString());
+      expect(tokenConfig.tokenFeePercentage.toString()).to.equal(values.tokenFeePercentages[index].toString());
+      expect(tokenConfig.tokenMinAmount.toString()).to.equal(values.tokenMinAmounts[index].toString());
+    }
+
+    for (const [index, supportedChainPda] of values.supportedChainsPdas.entries()) {
+      const supportedChain = await program.account.supportedChainConfig.fetch(supportedChainPda);
+      console.log(`supportedChain is ${JSON.stringify(supportedChain)}`);
+      expect(supportedChain.chainId.toString()).to.equal(values.supportedChainsBuffer[index].toString());
     }
   });
 
