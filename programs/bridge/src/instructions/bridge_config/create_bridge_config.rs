@@ -1,18 +1,14 @@
-use std::ops::DerefMut;
-
 use crate::{
     constants::{
-        ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
-    },
-    create_or_allocate_account,
-    errors::BridgeError,
-    state::{BridgeConfig, SupportedChainConfig, TokenConfig},
+        DECIMALS9, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
+    }, create_or_allocate_account, errors::BridgeError, BridgeConfig, SupportedChainConfig, TokenConfig
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
 use solana_program::pubkey;
 // Hardcoded pubkey for create memoo config
 const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
+
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
@@ -134,6 +130,7 @@ pub fn create_bridge_config<'info>(
     }
     Ok(())
 }
+
 #[derive(Accounts)]
 #[instruction(chain_id: u8)]
 pub struct CreateBridgeConfig<'info> {

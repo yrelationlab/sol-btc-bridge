@@ -4,7 +4,7 @@ use anchor_lang::prelude::*;
 mod constants;
 mod errors;
 mod instructions;
-mod state;
+
 // Set the correct key here
 declare_id!("4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx");
 #[program]
