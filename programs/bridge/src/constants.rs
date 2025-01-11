@@ -6,6 +6,8 @@ pub const GLOBAL_CONFIG: &str = "GLOBAL_CONFIG";
 #[constant]
 pub const TOKEN_CONFIG: &str = "TOKEN_CONFIG";
 #[constant]
+pub const BRIDGE_COMMITTEE_CONFIG: &str = "BRIDGE_COMMITTEE_CONFIG";
+#[constant]
 pub const SUPPORTED_CHAINS_CONFIG: &str = "SUPPORTED_CHAINS_CONFIG";
 #[constant]
 pub const AUTHORITY_SEED: &str = "authority";

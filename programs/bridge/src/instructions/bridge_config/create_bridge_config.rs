@@ -1,7 +1,7 @@
 use crate::{
     constants::{
         DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG
-    }, create_or_allocate_account, errors::BridgeError, BridgeConfig, SupportedChainConfig, TokenConfig
+    }, create_account, errors::BridgeError, BridgeConfig, SupportedChainConfig, TokenConfig
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
@@ -51,7 +51,7 @@ pub fn create_bridge_config<'info>(
         let (pda_of_token_config_addr, bump) = Pubkey::find_program_address(seeds, ctx.program_id);
         let pda_of_token_config = find_ata_in_accounts(&pda_of_token_config_addr)
             .ok_or(BridgeError::TokenConfigAddressMissing)?;
-        create_or_allocate_account(
+        create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
@@ -96,7 +96,7 @@ pub fn create_bridge_config<'info>(
         let pda_of_supported_chains_config =
             find_ata_in_accounts(&pda_of_supported_chains_config_addr)
                 .ok_or(BridgeError::SupportedChainAddressMissing)?;
-        create_or_allocate_account(
+        create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
             ctx.accounts.system_program.to_account_info(),

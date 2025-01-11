@@ -35,5 +35,9 @@ pub enum BridgeError {
     #[msg("Committee And Stake Length Mismatch")]
     CommitteeAndStakeLengthMismatch,
     #[msg("Insufficient Total Stake")]
-    InsufficientTotalStake
+    InsufficientTotalStake,
+    #[msg("Committee Config Address Missing")]
+    CommitteeConfigAddressMissing,
+    #[msg("Bridge Committee Serialization Error")]
+    BridgeCommitteeSerializationError
 }

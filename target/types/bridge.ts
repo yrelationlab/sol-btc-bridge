@@ -13,6 +13,11 @@ export type Bridge = {
       "value": "\"TOKEN_CONFIG\""
     },
     {
+      "name": "BRIDGE_COMMITTEE_CONFIG",
+      "type": "string",
+      "value": "\"BRIDGE_COMMITTEE_CONFIG\""
+    },
+    {
       "name": "SUPPORTED_CHAINS_CONFIG",
       "type": "string",
       "value": "\"SUPPORTED_CHAINS_CONFIG\""
@@ -424,6 +429,16 @@ export type Bridge = {
       "code": 6016,
       "name": "InsufficientTotalStake",
       "msg": "Insufficient Total Stake"
+    },
+    {
+      "code": 6017,
+      "name": "CommitteeConfigAddressMissing",
+      "msg": "Committee Config Address Missing"
+    },
+    {
+      "code": 6018,
+      "name": "BridgeCommitteeSerializationError",
+      "msg": "Bridge Committee Serialization Error"
     }
   ]
 };
@@ -443,6 +458,11 @@ export const IDL: Bridge = {
       "value": "\"TOKEN_CONFIG\""
     },
     {
+      "name": "BRIDGE_COMMITTEE_CONFIG",
+      "type": "string",
+      "value": "\"BRIDGE_COMMITTEE_CONFIG\""
+    },
+    {
       "name": "SUPPORTED_CHAINS_CONFIG",
       "type": "string",
       "value": "\"SUPPORTED_CHAINS_CONFIG\""
@@ -854,6 +874,16 @@ export const IDL: Bridge = {
       "code": 6016,
       "name": "InsufficientTotalStake",
       "msg": "Insufficient Total Stake"
+    },
+    {
+      "code": 6017,
+      "name": "CommitteeConfigAddressMissing",
+      "msg": "Committee Config Address Missing"
+    },
+    {
+      "code": 6018,
+      "name": "BridgeCommitteeSerializationError",
+      "msg": "Bridge Committee Serialization Error"
     }
   ]
 };

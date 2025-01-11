@@ -98,7 +98,7 @@ pub fn deserialize_whitelist_message(data: &Vec<u8>) -> Result<WhitelistMessage>
     }
 }
 
-pub fn create_or_allocate_account<'a>(
+pub fn create_account<'a>(
     program_id: &Pubkey,
     payer: AccountInfo<'a>,
     system_program: AccountInfo<'a>,

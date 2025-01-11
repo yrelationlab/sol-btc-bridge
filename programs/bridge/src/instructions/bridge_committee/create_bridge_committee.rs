@@ -1,21 +1,24 @@
 use crate::{
     constants::{
-        DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG
-    }, create_or_allocate_account, errors::BridgeError, BridgeConfig, SupportedChainConfig, TokenConfig
+        BRIDGE_COMMITTEE_CONFIG, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY,
+        SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
+    },
+    create_account,
+    errors::BridgeError,
+    BridgeCommittee, BridgeConfig, SupportedChainConfig, TokenConfig,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
 
-
 pub fn create_bridge_committee<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
-    committee: Vec<Pubkey>,      
-    stake: Vec<u16>,             
-    min_stake_required: u16,     
-    submitter: Pubkey,       
+    committee: Vec<Pubkey>,
+    stake: Vec<u16>,
+    min_stake_required: u16,
+    submitter: Pubkey,
 ) -> Result<()> {
     let committee_length = committee.len();
-    
+
     require!(
         committee_length < 256,
         BridgeError::CommitteeLengthExceedsLimit
@@ -25,14 +28,50 @@ pub fn create_bridge_committee<'info>(
         committee_length == stake.len(),
         BridgeError::CommitteeAndStakeLengthMismatch
     );
-
+    let find_ata_in_accounts = |ata_pubkey: &Pubkey| {
+        ctx.remaining_accounts
+            .iter()
+            .find(|ac: &&AccountInfo<'info>| ac.key.eq(ata_pubkey))
+    };
     let mut total_stake: u16 = 0;
-    for (i, member) in committee.iter().enumerate() {
-
+    for (i, committee_address) in committee.iter().enumerate() {
         total_stake += stake[i];
+
+        let seeds = &[BRIDGE_COMMITTEE_CONFIG.as_ref(), committee_address.as_ref()];
+        let (pda_of_committee_config_address, bump) =
+            Pubkey::find_program_address(seeds, ctx.program_id);
+        let pda_of_committee_config = find_ata_in_accounts(&pda_of_committee_config_address)
+            .ok_or(BridgeError::CommitteeConfigAddressMissing)?;
+        create_account(
+            &ctx.program_id,
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+            pda_of_committee_config.clone(),
+            &[
+                BRIDGE_COMMITTEE_CONFIG.as_ref(),
+                committee_address.as_ref(),
+                &[bump],
+            ],
+            BridgeCommittee::LEN,
+        )?;
+        let bridge_committee = BridgeCommittee {
+            index: i as u8,
+            stake_amount: stake[i],
+            is_blocklisted: false,
+            padding: [0u64; BridgeCommittee::LEN_OF_PADDING],
+        };
+        let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
+        account_data[..8].copy_from_slice(&BridgeCommittee::discriminator());
+        bridge_committee
+            .serialize(&mut &mut account_data[8..]) 
+            .map_err(|error| {
+                msg!("BridgeCommitteeSerializationError: error={}", error);
+                BridgeError::BridgeCommitteeSerializationError
+            })?;
     }
 
-    // 检查总权益是否满足最低要求
+    // submitter
+
     require!(
         total_stake >= min_stake_required,
         BridgeError::InsufficientTotalStake
@@ -43,8 +82,7 @@ pub fn create_bridge_committee<'info>(
 
 #[derive(Accounts)]
 pub struct CreateBridgeCommittee<'info> {
-   
     #[account(mut)]
-    pub user: Signer<'info>,
+    pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
