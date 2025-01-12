@@ -1,9 +1,10 @@
-
 use anchor_lang::prelude::*;
 
 #[account]
 #[derive(Default)]
 pub struct BridgeConfig {
+    pub id: Pubkey,
+    pub is_initialized: bool, // 1 byte
     pub chain_id: u8,
     pub admin: Pubkey,
     pub fee_recipient: Pubkey,
@@ -12,17 +13,21 @@ pub struct BridgeConfig {
 }
 impl BridgeConfig {
     pub const LEN: usize = 8
+        + 32 // id
+        + 1 // isInitialized
         + 1 // chain_id
         + 32 // admin
         + 32 // fee_recipient
         + BridgeConfig::LEN_OF_PADDING * 8 // padding
         ;
     pub const LEN_OF_PADDING: usize = 16; //128 bytes padding
-
 }
 #[account]
 #[derive(Default)]
 pub struct TokenConfig {
+    /// The config guid
+    pub id: Pubkey,
+    pub is_initialized: bool, // 1 byte
     pub chain_id: u8,
     pub token_address: Pubkey,
     pub decimal: u8,
@@ -35,6 +40,8 @@ pub struct TokenConfig {
 }
 impl TokenConfig {
     pub const LEN: usize = 8
+    + 32 // id
+    + 1 // isInitialized
     + 1 // chain_id
     + 32 // token_address
     + 1 // decimal
@@ -50,6 +57,8 @@ impl TokenConfig {
 #[account]
 #[derive(Default)]
 pub struct SupportedChainConfig {
+    pub id: Pubkey,
+    pub is_initialized: bool, // 1 byte
     pub chain_id: u8,
     pub supported: bool,
     /// padding
@@ -57,6 +66,8 @@ pub struct SupportedChainConfig {
 }
 impl SupportedChainConfig {
     pub const LEN: usize = 8
+    + 32 // id
+    + 1 // isInitialized
     + 1 // chain_id
     + 1 // supported
     + SupportedChainConfig::LEN_OF_PADDING * 8 // padding

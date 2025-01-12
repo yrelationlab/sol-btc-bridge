@@ -13,19 +13,19 @@
       "value": "\"TOKEN_CONFIG\""
     },
     {
-      "name": "BRIDGE_COMMITTEE_CONFIG",
+      "name": "COMMITTEE_CONFIG",
       "type": "string",
-      "value": "\"BRIDGE_COMMITTEE_CONFIG\""
+      "value": "\"COMMITTEE_CONFIG\""
+    },
+    {
+      "name": "COMMITTEE_SUBMITTER_CONFIG",
+      "type": "string",
+      "value": "\"COMMITTEE_SUBMITTER_CONFIG\""
     },
     {
       "name": "SUPPORTED_CHAINS_CONFIG",
       "type": "string",
       "value": "\"SUPPORTED_CHAINS_CONFIG\""
-    },
-    {
-      "name": "AUTHORITY_SEED",
-      "type": "string",
-      "value": "\"authority\""
     },
     {
       "name": "DECIMALS9",
@@ -106,11 +106,58 @@
           }
         }
       ]
+    },
+    {
+      "name": "createBridgeCommittee",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "submitterPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "submitter",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "committee",
+          "type": {
+            "vec": "publicKey"
+          }
+        },
+        {
+          "name": "stake",
+          "type": {
+            "vec": "u16"
+          }
+        },
+        {
+          "name": "minStakeRequired",
+          "type": "u16"
+        },
+        {
+          "name": "submitter",
+          "type": "publicKey"
+        }
+      ]
     }
   ],
   "accounts": [
     {
-      "name": "BridgeCommittee",
+      "name": "Committee",
       "type": {
         "kind": "struct",
         "fields": [
@@ -147,7 +194,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "member",
+            "name": "admin",
             "type": "publicKey"
           },
           {
@@ -439,6 +486,14 @@
       "code": 6018,
       "name": "BridgeCommitteeSerializationError",
       "msg": "Bridge Committee Serialization Error"
+    },
+    {
+      "code": 6019,
+      "name": "SubmitterConfigAddressMissing",
+      "msg": "Submitter Config Address Missing"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
+  }
 }

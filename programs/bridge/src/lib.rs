@@ -1,4 +1,3 @@
-
 #![allow(clippy::result_large_err)]
 use anchor_lang::prelude::*;
 mod constants;
@@ -24,6 +23,25 @@ pub mod bridge {
         token_fee_percentages: Vec<u64>,
         token_min_amount: Vec<u64>,
     ) -> Result<()> {
-        instructions::create_bridge_config(ctx,chain_id,fee_recipient,supported_tokens,token_prices,supported_chains,token_fee_percentages,token_min_amount)
+        instructions::create_bridge_config(
+            ctx,
+            chain_id,
+            fee_recipient,
+            supported_tokens,
+            token_prices,
+            supported_chains,
+            token_fee_percentages,
+            token_min_amount,
+        )
+    }
+
+    pub fn create_bridge_committee<'info>(
+        ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
+        committee: Vec<Pubkey>,
+        stake: Vec<u16>,
+        min_stake_required: u16,
+        submitter: Pubkey,
+    ) -> Result<()> {
+        instructions::create_bridge_committee(ctx, committee, stake, min_stake_required, submitter)
     }
 }

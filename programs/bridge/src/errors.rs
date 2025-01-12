@@ -5,6 +5,8 @@ pub enum BridgeError {
     InvalidSupportedTokenAddresses,
     #[msg("Invalid token fee percentage")]
     InvalidTokenFeePercentage,
+    #[msg("Invalid Ids Length")]
+    InvalidIdsLength,
     #[msg("Invalid token minimum amount")]
     InvalidTokenMinimumAmount,
     #[msg("Invalid token prices")]
@@ -39,5 +41,7 @@ pub enum BridgeError {
     #[msg("Committee Config Address Missing")]
     CommitteeConfigAddressMissing,
     #[msg("Bridge Committee Serialization Error")]
-    BridgeCommitteeSerializationError
+    BridgeCommitteeSerializationError,
+    #[msg("Submitter Config Address Missing")]
+    SubmitterConfigAddressMissing
 }

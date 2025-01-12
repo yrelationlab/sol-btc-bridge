@@ -175,6 +175,7 @@ pub fn create_associated_token_account_ifn_init<'info>(
     }
     Ok(())
 }
+
 #[cfg(test)]
 mod tests {
     use anchor_lang::{prelude::Pubkey, AnchorDeserialize, AnchorSerialize};

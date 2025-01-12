@@ -10,28 +10,15 @@ import {
 } from "@raydium-io/raydium-sdk";
 import fs from "fs";
 import path from "path";
-import secret from '../cli/.config/admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV.json';
+import secret from '../cli/.config/secret.json';
+import cm1 from '../cli/.config/cm1.json';
+import cm2 from '../cli/.config/cm2.json';
+import cm3 from '../cli/.config/cm3.json';
 import { assert, expect } from "chai";
 import { Bridge } from "../target/types/bridge";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { BN } from "@coral-xyz/anchor";
-export interface TestValues {
-  payerAdmin: Keypair;
-  feeRecipient: PublicKey;
-  chainId: anchor.BN;
-  supportedTokensKeypairs: Keypair[];
-  prices: anchor.BN[];
-  supportedChainsBuffer: Buffer;
-  tokenFeePercentages: anchor.BN[];
-  decimals: anchor.BN[];
-  tokenMinAmounts: anchor.BN[];
-  bridgeConfigPDA: PublicKey;
-  tokenConfigPdas: PublicKey[];
-  supportedChainsPdas: PublicKey[];
-
-}
-export const DECIMALS9 = new anchor.BN(1_000_000_000);
-export const FeeDenominator = new anchor.BN(1000000);
+import { TestValues, TestValuesDefaults } from "./types";
+import { BRIDGE_COMMITTEE_CONFIG, BRIDGE_COMMITTEE_SUBMITTER_CONFIG, DECIMALS9, getCommitteePda, getSubmitterPda, getSupportChainPda, getTokenConfigPda, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG } from "./constants";
 
 export async function sleep(seconds: number) {
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -52,7 +39,7 @@ export const expectRevert = async (promise: Promise<any>) => {
     return;
   }
 };
-function keypairsToUint8Arrays(keypairs): PublicKey[] {
+function keypairsToPublicArrays(keypairs): PublicKey[] {
   if (!Array.isArray(keypairs)) {
     throw new Error("Input must be an array");
   }
@@ -66,9 +53,6 @@ function keypairsToUint8Arrays(keypairs): PublicKey[] {
 }
 
 
-type TestValuesDefaults = {
-  [K in keyof TestValues]+?: TestValues[K];
-};
 export function createValues(defaults?: TestValuesDefaults): TestValues {
   const payerAdmin = Keypair.fromSecretKey(new Uint8Array(secret));
   const feeRecipient = Keypair.generate().publicKey;
@@ -81,25 +65,27 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   const tokenMinAmounts = [new anchor.BN(100).mul(decimals[0]), new anchor.BN(2000).mul(decimals[1])];
   const curChainId = new anchor.BN(1);
   const bridgeConfigPDA = PublicKey.findProgramAddressSync(
-    [Buffer.from("GLOBAL_CONFIG"), curChainId.toBuffer()],
+    [GLOBAL_CONFIG, curChainId.toBuffer()],
     anchor.workspace.bridge.programId
   )[0];
   console.log(`programId : ${anchor.workspace.bridge.programId}`);
 
   const tokenConfigPdas = supportedTokensKeypairs.map((keypair, index) =>
-    PublicKey.findProgramAddressSync(
-      [Buffer.from("TOKEN_CONFIG"), keypair.publicKey.toBuffer(), curChainId.toBuffer()],
-      anchor.workspace.bridge.programId
-    )[0]
+    getTokenConfigPda(keypair, curChainId)
   );
 
   const supportedChainsPdas = supportedChains.map((chainId) => {
-    return PublicKey.findProgramAddressSync(
-      [Buffer.from("SUPPORTED_CHAINS_CONFIG"), new anchor.BN(chainId).toBuffer()],
-      anchor.workspace.bridge.programId
-    )[0];
+    return getSupportChainPda(chainId);
   });
 
+  const committeeKeypairs = [Keypair.fromSecretKey(new Uint8Array(cm1)), Keypair.fromSecretKey(new Uint8Array(cm2)), Keypair.fromSecretKey(new Uint8Array(cm3))];
+  const committeePdas = committeeKeypairs.map((committeeAddress) => {
+    return getCommitteePda(committeeAddress);
+  });
+  const stakes = [1000, 2000, 3000];
+  const minStake = 1000;
+  const submitter = committeeKeypairs[0];
+  const submitterPda = getSubmitterPda(submitter);
   return {
     chainId: curChainId,
     payerAdmin,
@@ -112,15 +98,37 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     tokenMinAmounts,
     bridgeConfigPDA,
     tokenConfigPdas,
-    supportedChainsPdas
+    supportedChainsPdas,
+    committeeKeypairs,
+    stakes,
+    minStake,
+    submitter,
+    submitterPda,
+    committeePdas,
   };
 }
+
+export async function createCommitteeConfig(program: anchor.Program<Bridge>, values: TestValues) {
+  return await program.methods
+    .createBridgeCommittee(
+      keypairsToPublicArrays(values.committeeKeypairs),
+      values.stakes,
+      values.minStake,
+      values.submitter.publicKey
+    )
+    .accounts({ submitterPda: values.submitterPda, submitter: values.submitter.publicKey })
+    .remainingAccounts([
+      ...values.committeePdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
+    ])
+    .rpc({ skipPreflight: false });
+}
+
 export async function createBridgeConfig(program: anchor.Program<Bridge>, values: TestValues) {
   return await program.methods
     .createBridgeConfig(
       values.chainId.toNumber(),
       values.feeRecipient,
-      keypairsToUint8Arrays(values.supportedTokensKeypairs),
+      keypairsToPublicArrays(values.supportedTokensKeypairs),
       values.prices,
       values.supportedChainsBuffer,
       values.tokenFeePercentages,
@@ -129,10 +137,10 @@ export async function createBridgeConfig(program: anchor.Program<Bridge>, values
     .accounts({ bridgeConfig: values.bridgeConfigPDA })
     .remainingAccounts([
       ...values.tokenConfigPdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
-      ,...values.supportedChainsPdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
-      
+      , ...values.supportedChainsPdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
+
     ])
-    .rpc({skipPreflight: false});
+    .rpc({ skipPreflight: false });
 }
 export async function createLookupTable(authority: PublicKey, payer: Keypair, connection: Connection) {
   // Step 1 - Get a lookup table address and create lookup table instruction
@@ -233,3 +241,5 @@ export async function checkAssociatedTokenAccount(connection, mintAddress, owner
     return false;
   }
 }
+export { TestValues };
+
