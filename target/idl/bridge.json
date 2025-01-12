@@ -147,10 +147,6 @@
         {
           "name": "minStakeRequired",
           "type": "u16"
-        },
-        {
-          "name": "submitter",
-          "type": "publicKey"
         }
       ]
     }
@@ -161,6 +157,10 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "isInitialized",
+            "type": "bool"
+          },
           {
             "name": "index",
             "type": "u8"
@@ -194,6 +194,10 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
             "name": "admin",
             "type": "publicKey"
           },
@@ -221,6 +225,10 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "isInitialized",
+            "type": "bool"
+          },
           {
             "name": "chainId",
             "type": "u8"
@@ -253,6 +261,10 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "isInitialized",
+            "type": "bool"
+          },
           {
             "name": "chainId",
             "type": "u8"
@@ -301,6 +313,10 @@
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "isInitialized",
+            "type": "bool"
+          },
           {
             "name": "chainId",
             "type": "u8"
@@ -404,91 +420,96 @@
     },
     {
       "code": 6002,
+      "name": "InvalidIdsLength",
+      "msg": "Invalid Ids Length"
+    },
+    {
+      "code": 6003,
       "name": "InvalidTokenMinimumAmount",
       "msg": "Invalid token minimum amount"
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "InvalidTokenPrices",
       "msg": "Invalid token prices"
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "InvalidAdminAddress",
       "msg": "Invalid admin address"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidFeeRecipientAddress",
       "msg": "Invalid fee recipient address"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "CannotSupportSelf",
       "msg": "Cannot support self"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "TokenConfigAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "SupportedChainAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "DeserializeAirdropMessageError",
       "msg": "Deserialize Airdrop Message Error"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "DeserializeWhitelistMessageError",
       "msg": "Deserialize Whitelist Message Error"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "DeserializationError",
       "msg": "Deserialization Error"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "BridgeConfigSerializationError",
       "msg": "Bridge Config Serialization Error"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "SupportedChainSerializationError",
       "msg": "Supported Chain Serialization Error"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "CommitteeLengthExceedsLimit",
       "msg": "Committee Length Exceeds Limit"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "CommitteeAndStakeLengthMismatch",
       "msg": "Committee And Stake Length Mismatch"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "InsufficientTotalStake",
       "msg": "Insufficient Total Stake"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "CommitteeConfigAddressMissing",
       "msg": "Committee Config Address Missing"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "BridgeCommitteeSerializationError",
       "msg": "Bridge Committee Serialization Error"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "SubmitterConfigAddressMissing",
       "msg": "Submitter Config Address Missing"
     }

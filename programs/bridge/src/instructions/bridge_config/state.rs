@@ -3,7 +3,6 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(Default)]
 pub struct BridgeConfig {
-    pub id: Pubkey,
     pub is_initialized: bool, // 1 byte
     pub chain_id: u8,
     pub admin: Pubkey,
@@ -13,7 +12,6 @@ pub struct BridgeConfig {
 }
 impl BridgeConfig {
     pub const LEN: usize = 8
-        + 32 // id
         + 1 // isInitialized
         + 1 // chain_id
         + 32 // admin
@@ -25,8 +23,6 @@ impl BridgeConfig {
 #[account]
 #[derive(Default)]
 pub struct TokenConfig {
-    /// The config guid
-    pub id: Pubkey,
     pub is_initialized: bool, // 1 byte
     pub chain_id: u8,
     pub token_address: Pubkey,
@@ -40,7 +36,6 @@ pub struct TokenConfig {
 }
 impl TokenConfig {
     pub const LEN: usize = 8
-    + 32 // id
     + 1 // isInitialized
     + 1 // chain_id
     + 32 // token_address
@@ -57,7 +52,6 @@ impl TokenConfig {
 #[account]
 #[derive(Default)]
 pub struct SupportedChainConfig {
-    pub id: Pubkey,
     pub is_initialized: bool, // 1 byte
     pub chain_id: u8,
     pub supported: bool,
@@ -66,7 +60,6 @@ pub struct SupportedChainConfig {
 }
 impl SupportedChainConfig {
     pub const LEN: usize = 8
-    + 32 // id
     + 1 // isInitialized
     + 1 // chain_id
     + 1 // supported

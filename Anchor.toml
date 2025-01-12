@@ -13,18 +13,22 @@ bridge = "9q7cek9TaaRvExbAfKdAgUTzu92RvNTzCxVutXV1nDRC"
 bridge = "9q7cek9TaaRvExbAfKdAgUTzu92RvNTzCxVutXV1nDRC"
 
 [programs.localnet]
-bridge = "9q7cek9TaaRvExbAfKdAgUTzu92RvNTzCxVutXV1nDRC"
+bridge = "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
 
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "https://broken-twilight-paper.solana-devnet.quiknode.pro/e0bcf0275d294a569bd60a39c2a3f99d678b14d4"
+cluster = "localnet"
+# cluster = "https://broken-twilight-paper.solana-devnet.quiknode.pro/e0bcf0275d294a569bd60a39c2a3f99d678b14d4"
 wallet = "./cli/.config/secret.json"
 
+[provider.localnet]
+rpc_url = "http://127.0.0.1:8900"
+
 [scripts]
-test = "vitest --test-timeout=500000 2."
+test = "vitest --test-timeout=500000 1."
 
 # use localnet for test
 [test]

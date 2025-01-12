@@ -3,7 +3,6 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(Default)]
 pub struct Committee {
-    pub id: Pubkey,
     pub is_initialized: bool, // 1 byte
     pub index: u8,
     pub stake_amount: u16,
@@ -13,7 +12,6 @@ pub struct Committee {
 }
 impl Committee {
     pub const LEN: usize = 8
-        + 32 // id
         + 1 // isInitialized
         + 1 // index
         + 2 // stakeAmount
@@ -25,7 +23,6 @@ impl Committee {
 #[account]
 #[derive(Default)]
 pub struct Submitter {
-    pub id: Pubkey,
     pub is_initialized: bool, // 1 byte
     pub admin: Pubkey,
     pub is_submitter: bool,
@@ -34,7 +31,6 @@ pub struct Submitter {
 }
 impl Submitter {
     pub const LEN: usize = 8
-    + 32 // id
     + 1 // isInitialized
     + 32 // member
     + 1 // isSubmitter

@@ -1,22 +1,19 @@
 use crate::{
     constants::{
-        ANCHOR_HEADER_LEN, COMMITTEE_CONFIG, COMMITTEE_SUBMITTER_CONFIG, DECIMALS9, GLOBAL_CONFIG,
-        HARDCODED_PUBKEY, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
+        ANCHOR_HEADER_LEN, COMMITTEE_CONFIG, COMMITTEE_SUBMITTER_CONFIG,
     },
     create_account,
     errors::BridgeError,
-    BridgeConfig, Committee, Submitter, SupportedChainConfig, TokenConfig,
+    Committee, Submitter,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
 
 pub fn create_bridge_committee<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
-    committee_ids: Vec<Pubkey>,
     committee: Vec<Pubkey>,
     stake: Vec<u16>,
     min_stake_required: u16,
-    _submitter_id: Pubkey,
 ) -> Result<()> {
     let committee_length = committee.len();
 
@@ -40,7 +37,6 @@ pub fn create_bridge_committee<'info>(
 
         let seeds = &[
             COMMITTEE_CONFIG.as_ref(),
-            committee_ids[i].as_ref(),
             committee_address.as_ref(),
         ];
         let (pda_of_committee_config_address, bump) =
@@ -54,14 +50,12 @@ pub fn create_bridge_committee<'info>(
             pda_of_committee_config.clone(),
             &[
                 COMMITTEE_CONFIG.as_ref(),
-                committee_ids[i].as_ref(),
                 committee_address.as_ref(),
                 &[bump],
             ],
             Committee::LEN,
         )?;
         let bridge_committee = Committee {
-            id: committee_ids[i],
             is_initialized: true,
             index: i as u8,
             stake_amount: stake[i],
@@ -94,8 +88,6 @@ pub fn create_bridge_committee<'info>(
 }
 
 #[derive(Accounts)]
-#[instruction(_submitter_id: Pubkey)]
-
 pub struct CreateBridgeCommittee<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -106,7 +98,6 @@ pub struct CreateBridgeCommittee<'info> {
         space = Submitter::LEN,
         seeds = [
             COMMITTEE_SUBMITTER_CONFIG.as_ref(),
-            _submitter_id.key().as_ref(),
             submitter.key().as_ref(),
         ],
         bump

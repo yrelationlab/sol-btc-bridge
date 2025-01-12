@@ -40,8 +40,7 @@ pub mod bridge {
         committee: Vec<Pubkey>,
         stake: Vec<u16>,
         min_stake_required: u16,
-        submitter: Pubkey,
     ) -> Result<()> {
-        instructions::create_bridge_committee(ctx, committee, stake, min_stake_required, submitter)
+        instructions::create_bridge_committee(ctx, committee, stake, min_stake_required)
     }
 }

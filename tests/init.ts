@@ -114,7 +114,6 @@ export async function createCommitteeConfig(program: anchor.Program<Bridge>, val
       keypairsToPublicArrays(values.committeeKeypairs),
       values.stakes,
       values.minStake,
-      values.submitter.publicKey
     )
     .accounts({ submitterPda: values.submitterPda, submitter: values.submitter.publicKey })
     .remainingAccounts([

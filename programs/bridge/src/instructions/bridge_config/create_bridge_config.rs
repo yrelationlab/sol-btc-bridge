@@ -11,13 +11,10 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
-    id: Pubkey,
     chain_id: u8,
     fee_recipient: Pubkey,
-    supported_tokens_ids: Vec<Pubkey>,
     supported_tokens: Vec<Pubkey>,
     token_prices: Vec<u64>,
-    supported_chains_ids: Vec<Pubkey>,
     supported_chains: Vec<u8>,
     token_fee_percentages: Vec<u64>,
     token_min_amount: Vec<u64>,
@@ -27,18 +24,12 @@ pub fn create_bridge_config<'info>(
         supported_tokens.len() == token_fee_percentages.len(),
         BridgeError::InvalidTokenFeePercentage
     );
-    require!(
-        supported_tokens.len() == supported_tokens_ids.len(),
-        BridgeError::InvalidIdsLength
-    );
+   
     require!(
         supported_tokens.len() == token_min_amount.len(),
         BridgeError::InvalidTokenMinimumAmount
     );
-    require!(
-        supported_chains.len() == supported_chains_ids.len(),
-        BridgeError::InvalidIdsLength
-    );
+    
     require!(
         supported_tokens.len() == token_prices.len(),
         BridgeError::InvalidTokenPrices
@@ -47,7 +38,6 @@ pub fn create_bridge_config<'info>(
         fee_recipient != Pubkey::default(),
         BridgeError::InvalidFeeRecipientAddress
     );
-    bridge_config.id = id;
     bridge_config.chain_id = chain_id;
     bridge_config.admin = ctx.accounts.payer.key();
     bridge_config.fee_recipient = fee_recipient;
@@ -67,7 +57,6 @@ pub fn create_bridge_config<'info>(
         let chain_id_bytes = bridge_config.chain_id.to_be_bytes();
         let seeds = &[
             TOKEN_CONFIG.as_ref(),
-            supported_tokens_ids[i].as_ref(),
             token_address.as_ref(),
             chain_id_bytes.as_ref(),
         ];
@@ -91,7 +80,6 @@ pub fn create_bridge_config<'info>(
         let account_data = &mut *pda_of_token_config.try_borrow_mut_data()?;
         account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&discriminator);
         let bridge_config_of_token = TokenConfig {
-            id: supported_tokens_ids[i],
             is_initialized: true,
             chain_id: supported_chains[i],
             token_address: *token_address,
@@ -109,7 +97,7 @@ pub fn create_bridge_config<'info>(
                 BridgeError::BridgeConfigSerializationError
             })?;
     }
-    for (i, chain_id) in supported_chains.iter().enumerate() {
+    for (_i, chain_id) in supported_chains.iter().enumerate() {
         require!(
             *chain_id != bridge_config.chain_id,
             BridgeError::CannotSupportSelf
@@ -117,7 +105,6 @@ pub fn create_bridge_config<'info>(
 
         let seeds = &[
             SUPPORTED_CHAINS_CONFIG.as_bytes(),
-            supported_chains_ids[i].as_ref(),
             &chain_id.to_be_bytes(),
         ];
         let (pda_of_supported_chains_config_addr, bump) =
@@ -143,7 +130,6 @@ pub fn create_bridge_config<'info>(
         let account_data = &mut *pda_of_supported_chains_config.try_borrow_mut_data()?;
         account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&discriminator);
         let supported_chain = SupportedChainConfig {
-            id: supported_chains_ids[i],
             is_initialized: true,
             chain_id: *chain_id,
             supported: true,
@@ -161,7 +147,7 @@ pub fn create_bridge_config<'info>(
 }
 
 #[derive(Accounts)]
-#[instruction(chain_id: u8,id: Pubkey)]
+#[instruction(chain_id: u8)]
 pub struct CreateBridgeConfig<'info> {
     #[account(
         init,
@@ -169,7 +155,6 @@ pub struct CreateBridgeConfig<'info> {
         space = BridgeConfig::LEN,
         seeds = [
             GLOBAL_CONFIG.as_bytes(),
-            &id.to_bytes(),
             &chain_id.to_be_bytes()
         ],
         bump
