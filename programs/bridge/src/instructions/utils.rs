@@ -99,6 +99,18 @@ pub fn deserialize_message(data: &Vec<u8>) -> Result<Message> {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
+pub struct UpdateSupportedChainMessage {
+    pub chain_id: u8,
+    pub supported: bool,
+}
+pub fn deserialize_update_supported_chain_message(data: &Vec<u8>) -> Result<UpdateSupportedChainMessage> {
+    match UpdateSupportedChainMessage::try_from_slice(data) {
+        Ok(order) => Ok(order),
+        Err(_) => err!(BridgeError::DeserializeMessageError),
+    }
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
 pub struct TokenTransferPayload {
     pub sender_address_length: u8,
     pub sender_address: Vec<u8>,

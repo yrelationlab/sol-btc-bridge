@@ -395,6 +395,22 @@
       }
     },
     {
+      "name": "UpdateSupportedChainMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "supported",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "TokenTransferPayload",
       "type": {
         "kind": "struct",
@@ -611,9 +627,11 @@
       "code": 6026,
       "name": "MessageMismatch",
       "msg": "Message Mismatch"
+    },
+    {
+      "code": 6027,
+      "name": "SupportedChainNotInitialized",
+      "msg": "Supported Chain Not Initialized"
     }
-  ],
-  "metadata": {
-    "address": "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
-  }
+  ]
 }

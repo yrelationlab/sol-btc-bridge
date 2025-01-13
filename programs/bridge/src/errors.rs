@@ -56,6 +56,9 @@ pub enum BridgeError {
     #[msg("Deserialize Message Error")]
     DeserializeMessageError,
     #[msg("Message Mismatch")]
-    MessageMismatch
+    MessageMismatch,
+
+    #[msg("Supported Chain Not Initialized")]
+    SupportedChainNotInitialized
 
 }

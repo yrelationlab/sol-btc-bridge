@@ -395,6 +395,22 @@ export type Bridge = {
       }
     },
     {
+      "name": "UpdateSupportedChainMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "supported",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "TokenTransferPayload",
       "type": {
         "kind": "struct",
@@ -611,6 +627,11 @@ export type Bridge = {
       "code": 6026,
       "name": "MessageMismatch",
       "msg": "Message Mismatch"
+    },
+    {
+      "code": 6027,
+      "name": "SupportedChainNotInitialized",
+      "msg": "Supported Chain Not Initialized"
     }
   ]
 };
@@ -1012,6 +1033,22 @@ export const IDL: Bridge = {
       }
     },
     {
+      "name": "UpdateSupportedChainMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "supported",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "TokenTransferPayload",
       "type": {
         "kind": "struct",
@@ -1228,6 +1265,11 @@ export const IDL: Bridge = {
       "code": 6026,
       "name": "MessageMismatch",
       "msg": "Message Mismatch"
+    },
+    {
+      "code": 6027,
+      "name": "SupportedChainNotInitialized",
+      "msg": "Supported Chain Not Initialized"
     }
   ]
 };
