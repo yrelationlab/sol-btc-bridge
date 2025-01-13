@@ -1,7 +1,7 @@
-pub mod bridge_config;
-pub mod bridge_committee;
+pub mod config;
+pub mod committee;
 pub mod utils;
 
-pub use bridge_config::*;
-pub use bridge_committee::*;
+pub use config::*;
+pub use committee::*;
 pub use utils::*;

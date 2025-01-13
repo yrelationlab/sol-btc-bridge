@@ -513,8 +513,5 @@
       "name": "SubmitterConfigAddressMissing",
       "msg": "Submitter Config Address Missing"
     }
-  ],
-  "metadata": {
-    "address": "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
-  }
+  ]
 }
