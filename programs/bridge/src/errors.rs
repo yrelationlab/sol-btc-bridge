@@ -43,5 +43,19 @@ pub enum BridgeError {
     #[msg("Bridge Committee Serialization Error")]
     BridgeCommitteeSerializationError,
     #[msg("Submitter Config Address Missing")]
-    SubmitterConfigAddressMissing
+    SubmitterConfigAddressMissing,
+
+    #[msg("Expired")]
+    Expired,
+    #[msg("InvalidPay load Length")]
+    InvalidPayloadLength,
+    #[msg("Failed To  Parse Token Price")]
+    FailedToParseTokenPrice,
+    #[msg("Insufficient Signatures")]
+    InsufficientSignatures,
+    #[msg("Deserialize Message Error")]
+    DeserializeMessageError,
+    #[msg("Message Mismatch")]
+    MessageMismatch
+
 }

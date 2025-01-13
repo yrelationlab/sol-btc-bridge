@@ -5,6 +5,7 @@ use crate::{
     },
     create_account,
     errors::BridgeError,
+    find_ata_in_accounts, get_support_chains_pda_bump_seeds, get_token_pda_bump_seeds,
     BridgeConfig, SupportedChainConfig, TokenConfig,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
@@ -24,12 +25,12 @@ pub fn create_bridge_config<'info>(
         supported_tokens.len() == token_fee_percentages.len(),
         BridgeError::InvalidTokenFeePercentage
     );
-   
+
     require!(
         supported_tokens.len() == token_min_amount.len(),
         BridgeError::InvalidTokenMinimumAmount
     );
-    
+
     require!(
         supported_tokens.len() == token_prices.len(),
         BridgeError::InvalidTokenPrices
@@ -42,28 +43,20 @@ pub fn create_bridge_config<'info>(
     bridge_config.admin = ctx.accounts.payer.key();
     bridge_config.fee_recipient = fee_recipient;
 
-    let generate_new_seeds_with_bump = |seeds: &[&[u8]], bump: u8| -> Vec<Vec<u8>> {
-        let mut new_seeds_vec: Vec<Vec<u8>> = seeds.iter().map(|s| s.to_vec()).collect();
-        new_seeds_vec.push(vec![bump]);
-        new_seeds_vec
-    };
-
-    let find_ata_in_accounts = |ata_pubkey: &Pubkey| {
-        ctx.remaining_accounts
-            .iter()
-            .find(|ac: &&AccountInfo<'info>| ac.key.eq(ata_pubkey))
-    };
+    // let find_ata_in_accounts = |ata_pubkey: &Pubkey| {
+    //     ctx.remaining_accounts
+    //         .iter()
+    //         .find(|ac: &&AccountInfo<'info>| ac.key.eq(ata_pubkey))
+    // };
     for (i, token_address) in supported_tokens.iter().enumerate() {
-        let chain_id_bytes = bridge_config.chain_id.to_be_bytes();
-        let seeds = &[
-            TOKEN_CONFIG.as_ref(),
-            token_address.as_ref(),
-            chain_id_bytes.as_ref(),
-        ];
-        let (pda_of_token_config_addr, bump) = Pubkey::find_program_address(seeds, ctx.program_id);
-        let pda_of_token_config = find_ata_in_accounts(&pda_of_token_config_addr)
-            .ok_or(BridgeError::TokenConfigAddressMissing)?;
-        let signer_seeds = generate_new_seeds_with_bump(seeds, bump);
+        let (pda_of_token_config_addr, _, _, signer_seeds) = get_token_pda_bump_seeds(
+            ctx.program_id,
+            token_address,
+            bridge_config.chain_id.to_be_bytes(),
+        );
+        let pda_of_token_config =
+            find_ata_in_accounts(ctx.remaining_accounts.to_vec(), &pda_of_token_config_addr)
+                .ok_or(BridgeError::TokenConfigAddressMissing)?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
@@ -102,17 +95,13 @@ pub fn create_bridge_config<'info>(
             *chain_id != bridge_config.chain_id,
             BridgeError::CannotSupportSelf
         );
-
-        let seeds = &[
-            SUPPORTED_CHAINS_CONFIG.as_bytes(),
-            &chain_id.to_be_bytes(),
-        ];
-        let (pda_of_supported_chains_config_addr, bump) =
-            Pubkey::find_program_address(seeds, ctx.program_id);
-        let pda_of_supported_chains_config =
-            find_ata_in_accounts(&pda_of_supported_chains_config_addr)
-                .ok_or(BridgeError::SupportedChainAddressMissing)?;
-        let signer_seeds = generate_new_seeds_with_bump(seeds, bump);
+        let (pda_of_supported_chains_config_addr, _, _, signer_seeds) =
+            get_support_chains_pda_bump_seeds(ctx.program_id, chain_id.to_be_bytes());
+        let pda_of_supported_chains_config = find_ata_in_accounts(
+            ctx.remaining_accounts.to_vec(),
+            &pda_of_supported_chains_config_addr,
+        )
+        .ok_or(BridgeError::SupportedChainAddressMissing)?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),

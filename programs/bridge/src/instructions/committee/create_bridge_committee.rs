@@ -1,10 +1,8 @@
 use crate::{
-    constants::{
-        ANCHOR_HEADER_LEN, COMMITTEE_CONFIG, COMMITTEE_SUBMITTER_CONFIG,
-    },
+    constants::{ANCHOR_HEADER_LEN, COMMITTEE_CONFIG, COMMITTEE_SUBMITTER_CONFIG},
     create_account,
     errors::BridgeError,
-    Committee, Submitter,
+    find_ata_in_accounts, get_committee_config_pda_bump_seeds, Committee, Submitter,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
@@ -26,33 +24,27 @@ pub fn create_bridge_committee<'info>(
         committee_length == stake.len(),
         BridgeError::CommitteeAndStakeLengthMismatch
     );
-    let find_ata_in_accounts = |ata_pubkey: &Pubkey| {
-        ctx.remaining_accounts
-            .iter()
-            .find(|ac: &&AccountInfo<'info>| ac.key.eq(ata_pubkey))
-    };
+
     let mut total_stake: u16 = 0;
     for (i, committee_address) in committee.iter().enumerate() {
         total_stake += stake[i];
-
-        let seeds = &[
-            COMMITTEE_CONFIG.as_ref(),
-            committee_address.as_ref(),
-        ];
-        let (pda_of_committee_config_address, bump) =
-            Pubkey::find_program_address(seeds, ctx.program_id);
-        let pda_of_committee_config = find_ata_in_accounts(&pda_of_committee_config_address)
-            .ok_or(BridgeError::CommitteeConfigAddressMissing)?;
+        let (pda_of_committee_config_address, _, _, signer_seeds) =
+            get_committee_config_pda_bump_seeds(ctx.program_id, committee_address);
+        let pda_of_committee_config = find_ata_in_accounts(
+            ctx.remaining_accounts.to_vec(),
+            &pda_of_committee_config_address,
+        )
+        .ok_or(BridgeError::CommitteeConfigAddressMissing)?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
             pda_of_committee_config.clone(),
-            &[
-                COMMITTEE_CONFIG.as_ref(),
-                committee_address.as_ref(),
-                &[bump],
-            ],
+            &signer_seeds
+                .iter()
+                .map(|v| v.as_slice())
+                .collect::<Vec<&[u8]>>()
+                .as_slice(),
             Committee::LEN,
         )?;
         let bridge_committee = Committee {

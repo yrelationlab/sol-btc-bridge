@@ -367,6 +367,75 @@ export type Bridge = {
       }
     },
     {
+      "name": "Message",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "payload",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenTransferPayload",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "senderAddressLength",
+            "type": "u8"
+          },
+          {
+            "name": "senderAddress",
+            "type": "bytes"
+          },
+          {
+            "name": "targetChain",
+            "type": "u8"
+          },
+          {
+            "name": "recipientAddressLength",
+            "type": "u8"
+          },
+          {
+            "name": "recipientAddress",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "WhitelistPair",
       "type": {
         "kind": "struct",
@@ -512,6 +581,36 @@ export type Bridge = {
       "code": 6020,
       "name": "SubmitterConfigAddressMissing",
       "msg": "Submitter Config Address Missing"
+    },
+    {
+      "code": 6021,
+      "name": "Expired",
+      "msg": "Expired"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidPayloadLength",
+      "msg": "InvalidPay load Length"
+    },
+    {
+      "code": 6023,
+      "name": "FailedToParseTokenPrice",
+      "msg": "Failed To  Parse Token Price"
+    },
+    {
+      "code": 6024,
+      "name": "InsufficientSignatures",
+      "msg": "Insufficient Signatures"
+    },
+    {
+      "code": 6025,
+      "name": "DeserializeMessageError",
+      "msg": "Deserialize Message Error"
+    },
+    {
+      "code": 6026,
+      "name": "MessageMismatch",
+      "msg": "Message Mismatch"
     }
   ]
 };
@@ -885,6 +984,75 @@ export const IDL: Bridge = {
       }
     },
     {
+      "name": "Message",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "payload",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenTransferPayload",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "senderAddressLength",
+            "type": "u8"
+          },
+          {
+            "name": "senderAddress",
+            "type": "bytes"
+          },
+          {
+            "name": "targetChain",
+            "type": "u8"
+          },
+          {
+            "name": "recipientAddressLength",
+            "type": "u8"
+          },
+          {
+            "name": "recipientAddress",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "WhitelistPair",
       "type": {
         "kind": "struct",
@@ -1030,6 +1198,36 @@ export const IDL: Bridge = {
       "code": 6020,
       "name": "SubmitterConfigAddressMissing",
       "msg": "Submitter Config Address Missing"
+    },
+    {
+      "code": 6021,
+      "name": "Expired",
+      "msg": "Expired"
+    },
+    {
+      "code": 6022,
+      "name": "InvalidPayloadLength",
+      "msg": "InvalidPay load Length"
+    },
+    {
+      "code": 6023,
+      "name": "FailedToParseTokenPrice",
+      "msg": "Failed To  Parse Token Price"
+    },
+    {
+      "code": 6024,
+      "name": "InsufficientSignatures",
+      "msg": "Insufficient Signatures"
+    },
+    {
+      "code": 6025,
+      "name": "DeserializeMessageError",
+      "msg": "Deserialize Message Error"
+    },
+    {
+      "code": 6026,
+      "name": "MessageMismatch",
+      "msg": "Message Mismatch"
     }
   ]
 };
