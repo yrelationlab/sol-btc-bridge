@@ -42,7 +42,7 @@ export function getCommitteePda(committeeAddress: anchor.web3.Keypair): anchor.w
 
 export function getSupportChainPda(chainId: number): anchor.web3.PublicKey {
     return PublicKey.findProgramAddressSync(
-        [SUPPORTED_CHAINS_CONFIG, new anchor.BN(chainId).toBuffer()],
+        [SUPPORTED_CHAINS_CONFIG, toU8Bytes(chainId)],
         anchor.workspace.bridge.programId
     )[0];
 }
