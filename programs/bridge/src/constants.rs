@@ -4,6 +4,8 @@ use solana_program::pubkey;
 #[constant]
 pub const GLOBAL_CONFIG: &str = "GLOBAL_CONFIG";
 #[constant]
+pub const NONCE_CONFIG: &str = "NONCE_CONFIG";
+#[constant]
 pub const TOKEN_CONFIG: &str = "TOKEN_CONFIG";
 #[constant]
 pub const COMMITTEE_CONFIG: &str = "COMMITTEE_CONFIG";

@@ -4,7 +4,7 @@ use crate::{
         TOKEN_CONFIG,
     },
     create_account,
-    errors::BridgeError,
+    errors::ErrorCode,
     find_ata_in_accounts, get_support_chains_pda_bump_seeds, get_token_pda_bump_seeds,
     BridgeConfig, SupportedChainConfig, TokenConfig,
 };
@@ -23,40 +23,34 @@ pub fn create_bridge_config<'info>(
     let bridge_config = &mut ctx.accounts.bridge_config;
     require!(
         supported_tokens.len() == token_fee_percentages.len(),
-        BridgeError::InvalidTokenFeePercentage
+        ErrorCode::InvalidTokenFeePercentage
     );
 
     require!(
         supported_tokens.len() == token_min_amount.len(),
-        BridgeError::InvalidTokenMinimumAmount
+        ErrorCode::InvalidTokenMinimumAmount
     );
 
     require!(
         supported_tokens.len() == token_prices.len(),
-        BridgeError::InvalidTokenPrices
+        ErrorCode::InvalidTokenPrices
     );
     require!(
         fee_recipient != Pubkey::default(),
-        BridgeError::InvalidFeeRecipientAddress
+        ErrorCode::InvalidFeeRecipientAddress
     );
     bridge_config.chain_id = chain_id;
     bridge_config.admin = ctx.accounts.payer.key();
     bridge_config.fee_recipient = fee_recipient;
 
-    // let find_ata_in_accounts = |ata_pubkey: &Pubkey| {
-    //     ctx.remaining_accounts
-    //         .iter()
-    //         .find(|ac: &&AccountInfo<'info>| ac.key.eq(ata_pubkey))
-    // };
     for (i, token_address) in supported_tokens.iter().enumerate() {
         let (pda_of_token_config_addr, _, _, signer_seeds) = get_token_pda_bump_seeds(
             ctx.program_id,
-            token_address,
-            bridge_config.chain_id.to_be_bytes(),
+           (i as u8).to_be_bytes(),
         );
         let pda_of_token_config =
             find_ata_in_accounts(ctx.remaining_accounts.to_vec(), &pda_of_token_config_addr)
-                .ok_or(BridgeError::TokenConfigAddressMissing)?;
+                .ok_or(ErrorCode::TokenConfigAddressMissing)?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
@@ -87,13 +81,13 @@ pub fn create_bridge_config<'info>(
             .serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..]) // 从第 9 字节开始写入
             .map_err(|error| {
                 msg!("BridgeConfigSerializationError: error={}", error);
-                BridgeError::BridgeConfigSerializationError
+                ErrorCode::BridgeConfigSerializationError
             })?;
     }
     for (_i, chain_id) in supported_chains.iter().enumerate() {
         require!(
             *chain_id != bridge_config.chain_id,
-            BridgeError::CannotSupportSelf
+            ErrorCode::CannotSupportSelf
         );
         let (pda_of_supported_chains_config_addr, _, _, signer_seeds) =
             get_support_chains_pda_bump_seeds(ctx.program_id, chain_id.to_be_bytes());
@@ -101,7 +95,7 @@ pub fn create_bridge_config<'info>(
             ctx.remaining_accounts.to_vec(),
             &pda_of_supported_chains_config_addr,
         )
-        .ok_or(BridgeError::SupportedChainAddressMissing)?;
+        .ok_or(ErrorCode::SupportedChainAddressMissing)?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
@@ -129,7 +123,7 @@ pub fn create_bridge_config<'info>(
             .serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..]) //
             .map_err(|error| {
                 msg!("SupportedChainSerializationError: error={}", error);
-                BridgeError::SupportedChainSerializationError
+                ErrorCode::SupportedChainSerializationError
             })?;
     }
     Ok(())
@@ -152,7 +146,7 @@ pub struct CreateBridgeConfig<'info> {
     /// The account paying for all rents
     #[account(
         mut,
-        address = HARDCODED_PUBKEY @ BridgeError::InvalidAdminAddress
+        address = HARDCODED_PUBKEY @ ErrorCode::InvalidAdminAddress
     )]
     pub payer: Signer<'info>,
     pub system_program: Program<'info, System>,

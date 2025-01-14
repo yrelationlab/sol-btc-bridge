@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_module;
 
 use crate::{
-    errors::BridgeError,
+    errors::ErrorCode,
     utils,
     SupportedChainConfig,
     UpdateSupportedChainMessage, // 反序列化后的结构, 包含 chain_id, new_supported 等
@@ -16,20 +16,20 @@ pub fn update_supported_chain_with_signatures<'info>(
 ) -> Result<()> {
     // 1) 检查签名数量
     if number_of_signatures < 1 {
-        return err!(BridgeError::InsufficientSignatures);
+        return err!(ErrorCode::InsufficientSignatures);
     }
 
     // 2) 遍历签名
     for i in 0..number_of_signatures {
         // (signer_pubkey, data) = 读取第 i 条验证指令
         let (_signer_pubkey, data) =
-            utils::resolve_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
+            utils::resolve_secp256k1_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
         // 反序列化出一份 message
         let message_of_signer = utils::deserialize_update_supported_chain_message(&data)?;
 
         // 如果签名消息与本次提交的 msg 不一致，则报错
         if message_of_signer != msg {
-            return err!(BridgeError::MessageMismatch);
+            return err!(ErrorCode::MessageMismatch);
         }
     }
 
@@ -62,14 +62,14 @@ pub struct UpdateSupportedChain<'info> {
             &msg.chain_id.to_be_bytes()
         ],
         bump,
-        constraint = chain_config.is_initialized == true @ BridgeError::SupportedChainNotInitialized
+        constraint = chain_config.is_initialized == true @ ErrorCode::SupportedChainNotInitialized
     )]
     pub chain_config: Account<'info, SupportedChainConfig>,
 
     /// 由某个管理员或硬编码地址来操作
     #[account(
         mut,
-        address = crate::constants::HARDCODED_PUBKEY @ BridgeError::InvalidAdminAddress
+        address = crate::constants::HARDCODED_PUBKEY @ ErrorCode::InvalidAdminAddress
     )]
     pub payer: Signer<'info>,
 

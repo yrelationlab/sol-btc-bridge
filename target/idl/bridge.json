@@ -8,6 +8,11 @@
       "value": "\"GLOBAL_CONFIG\""
     },
     {
+      "name": "NONCE_CONFIG",
+      "type": "string",
+      "value": "\"NONCE_CONFIG\""
+    },
+    {
       "name": "TOKEN_CONFIG",
       "type": "string",
       "value": "\"TOKEN_CONFIG\""
@@ -339,33 +344,37 @@
           }
         ]
       }
-    }
-  ],
-  "types": [
+    },
     {
-      "name": "AirdropMessage",
+      "name": "Nonces",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "address",
-            "type": "publicKey"
+            "name": "isInitialized",
+            "type": "bool"
           },
           {
-            "name": "meme",
-            "type": "publicKey"
-          },
-          {
-            "name": "count",
+            "name": "nonce",
             "type": "u64"
           },
           {
-            "name": "expiry",
-            "type": "i64"
+            "name": "padding",
+            "docs": [
+              "padding"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
           }
         ]
       }
-    },
+    }
+  ],
+  "types": [
     {
       "name": "Message",
       "type": {
@@ -490,148 +499,235 @@
           }
         ]
       }
+    },
+    {
+      "name": "Operation",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "TokenTransfer"
+          },
+          {
+            "name": "Blocklist"
+          },
+          {
+            "name": "EmergencyOp"
+          },
+          {
+            "name": "UpdateBridgeLimit"
+          },
+          {
+            "name": "UpdateTokenPrice"
+          },
+          {
+            "name": "Upgrade"
+          },
+          {
+            "name": "AddEvmTokens"
+          },
+          {
+            "name": "UpdateChainId"
+          }
+        ]
+      }
     }
   ],
   "errors": [
     {
       "code": 6000,
+      "name": "InsufficientStake",
+      "msg": "Insufficient Stake"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidMessageType",
+      "msg": "Invalid Message Type"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidOpCode",
+      "msg": "Invalid Op Code"
+    },
+    {
+      "code": 6003,
       "name": "InvalidSupportedTokenAddresses",
       "msg": "Invalid supported token addresses"
     },
     {
-      "code": 6001,
+      "code": 6004,
       "name": "InvalidTokenFeePercentage",
       "msg": "Invalid token fee percentage"
     },
     {
-      "code": 6002,
+      "code": 6005,
       "name": "InvalidIdsLength",
       "msg": "Invalid Ids Length"
     },
     {
-      "code": 6003,
+      "code": 6006,
       "name": "InvalidTokenMinimumAmount",
       "msg": "Invalid token minimum amount"
     },
     {
-      "code": 6004,
+      "code": 6007,
       "name": "InvalidTokenPrices",
       "msg": "Invalid token prices"
     },
     {
-      "code": 6005,
+      "code": 6008,
       "name": "InvalidAdminAddress",
       "msg": "Invalid admin address"
     },
     {
-      "code": 6006,
+      "code": 6009,
       "name": "InvalidFeeRecipientAddress",
       "msg": "Invalid fee recipient address"
     },
     {
-      "code": 6007,
+      "code": 6010,
       "name": "CannotSupportSelf",
       "msg": "Cannot support self"
     },
     {
-      "code": 6008,
+      "code": 6011,
       "name": "TokenConfigAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6009,
+      "code": 6012,
       "name": "SupportedChainAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6010,
+      "code": 6013,
       "name": "DeserializeAirdropMessageError",
       "msg": "Deserialize Airdrop Message Error"
     },
     {
-      "code": 6011,
+      "code": 6014,
       "name": "DeserializeWhitelistMessageError",
       "msg": "Deserialize Whitelist Message Error"
     },
     {
-      "code": 6012,
+      "code": 6015,
       "name": "DeserializationError",
       "msg": "Deserialization Error"
     },
     {
-      "code": 6013,
+      "code": 6016,
       "name": "BridgeConfigSerializationError",
       "msg": "Bridge Config Serialization Error"
     },
     {
-      "code": 6014,
+      "code": 6017,
       "name": "SupportedChainSerializationError",
       "msg": "Supported Chain Serialization Error"
     },
     {
-      "code": 6015,
+      "code": 6018,
       "name": "CommitteeLengthExceedsLimit",
       "msg": "Committee Length Exceeds Limit"
     },
     {
-      "code": 6016,
+      "code": 6019,
       "name": "CommitteeAndStakeLengthMismatch",
       "msg": "Committee And Stake Length Mismatch"
     },
     {
-      "code": 6017,
+      "code": 6020,
       "name": "InsufficientTotalStake",
       "msg": "Insufficient Total Stake"
     },
     {
-      "code": 6018,
+      "code": 6021,
       "name": "CommitteeConfigAddressMissing",
       "msg": "Committee Config Address Missing"
     },
     {
-      "code": 6019,
+      "code": 6022,
       "name": "BridgeCommitteeSerializationError",
       "msg": "Bridge Committee Serialization Error"
     },
     {
-      "code": 6020,
+      "code": 6023,
       "name": "SubmitterConfigAddressMissing",
       "msg": "Submitter Config Address Missing"
     },
     {
-      "code": 6021,
+      "code": 6024,
       "name": "Expired",
       "msg": "Expired"
     },
     {
-      "code": 6022,
+      "code": 6025,
       "name": "InvalidPayloadLength",
       "msg": "InvalidPay load Length"
     },
     {
-      "code": 6023,
+      "code": 6026,
       "name": "FailedToParseTokenPrice",
       "msg": "Failed To  Parse Token Price"
     },
     {
-      "code": 6024,
+      "code": 6027,
       "name": "InsufficientSignatures",
       "msg": "Insufficient Signatures"
     },
     {
-      "code": 6025,
+      "code": 6028,
       "name": "DeserializeMessageError",
       "msg": "Deserialize Message Error"
     },
     {
-      "code": 6026,
+      "code": 6029,
       "name": "MessageMismatch",
       "msg": "Message Mismatch"
     },
     {
-      "code": 6027,
+      "code": 6030,
       "name": "SupportedChainNotInitialized",
       "msg": "Supported Chain Not Initialized"
+    },
+    {
+      "code": 6031,
+      "name": "MessageOpTypeMismatch",
+      "msg": "Message Op Type Mismatch"
+    },
+    {
+      "code": 6032,
+      "name": "BridgeConfigNotInitialized",
+      "msg": "Bridge Config Not Initialized"
+    },
+    {
+      "code": 6033,
+      "name": "ChainIdMismatch",
+      "msg": "Chain Id Mismatch"
+    },
+    {
+      "code": 6034,
+      "name": "DuplicateSignature",
+      "msg": "Duplicate Signature"
+    },
+    {
+      "code": 6035,
+      "name": "SubmitterNotInitialized",
+      "msg": "Submitter Not Initialized"
+    },
+    {
+      "code": 6036,
+      "name": "NotSubmitter",
+      "msg": "Not A Submitter"
+    },
+    {
+      "code": 6037,
+      "name": "SigVerificationFailed",
+      "msg": "Signature verification failed"
+    },
+    {
+      "code": 6038,
+      "name": "InstructionMissing",
+      "msg": "InstructionMissing"
     }
   ]
 }

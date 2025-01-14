@@ -1,6 +1,12 @@
 use anchor_lang::prelude::*;
 #[error_code]
-pub enum BridgeError {
+pub enum ErrorCode {
+    #[msg("Insufficient Stake")]
+    InsufficientStake,
+    #[msg("Invalid Message Type")]
+    InvalidMessageType,
+    #[msg("Invalid Op Code")]
+    InvalidOpCode,
     #[msg("Invalid supported token addresses")]
     InvalidSupportedTokenAddresses,
     #[msg("Invalid token fee percentage")]
@@ -57,8 +63,22 @@ pub enum BridgeError {
     DeserializeMessageError,
     #[msg("Message Mismatch")]
     MessageMismatch,
-
     #[msg("Supported Chain Not Initialized")]
-    SupportedChainNotInitialized
-
+    SupportedChainNotInitialized,
+    #[msg("Message Op Type Mismatch")]
+    MessageOpTypeMismatch,
+    #[msg("Bridge Config Not Initialized")]
+    BridgeConfigNotInitialized,
+    #[msg("Chain Id Mismatch")]
+    ChainIdMismatch,
+    #[msg("Duplicate Signature")]
+    DuplicateSignature,
+    #[msg("Submitter Not Initialized")]
+    SubmitterNotInitialized,
+    #[msg("Not A Submitter")]
+    NotSubmitter,
+    #[msg("Signature verification failed")]
+    SigVerificationFailed,
+    #[msg("InstructionMissing")]
+    InstructionMissing
 }

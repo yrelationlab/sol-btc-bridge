@@ -5,7 +5,7 @@ import { Bridge } from "../target/types/bridge";
 import { TestValues, createBridgeConfig, createValues, expectRevert } from "./init";
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
-describe("Create Bridge Config", () => {
+describe("Update Token Price", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace.Bridge as Program<Bridge>;

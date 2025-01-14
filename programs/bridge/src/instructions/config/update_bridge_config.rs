@@ -1,39 +1,142 @@
-use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::solana_program::sysvar::{
     clock::Clock, instructions as instructions_sysvar_module,
 };
+use anchor_lang::{prelude::*, Discriminator};
 
-use crate::errors::BridgeError;
-use crate::{utils, Message};
+use crate::constants::{
+    ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, NONCE_CONFIG,
+};
+use crate::errors::ErrorCode;
+use crate::{
+    decode_update_token_price_payload, find_ata_in_accounts, get_commitee_account,
+    get_token_pda_bump_seeds, required_stake, resolve_secp256k1_with_index, utils, Committee,
+    Message, Nonces, Operation, Submitter,
+};
+
+use super::{BridgeConfig, TokenConfig};
 pub fn update_token_price_with_signatures<'info>(
     ctx: Context<'_, '_, 'info, 'info, UpdateTokenPrice<'info>>,
     msg: Message,
     number_of_signatures: u8,
+    _chain_id: u8,
 ) -> Result<()> {
+    let bridge_config = &mut ctx.accounts.bridge_config;
+    let nonce_config = &mut ctx.accounts.nonce;
+    let submitter = &mut ctx.accounts.submitter;
 
     if number_of_signatures < 1 {
-        return err!(BridgeError::InsufficientSignatures);
+        return err!(ErrorCode::InsufficientSignatures);
     }
 
+    let mut bitmap: u128 = 0;
+    let mut approval_stake: u16 = 0;
+
     for i in 0..number_of_signatures {
-        let (signer_pubkey, data) = utils::resolve_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
+        let (signer_pubkey, data) =
+            resolve_secp256k1_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
+
         let message_of_signer = utils::deserialize_message(&data)?;
         // check signer_pubkey is allowed
         if message_of_signer != msg {
-            return err!(BridgeError::MessageMismatch);
+            return err!(ErrorCode::MessageMismatch);
         }
+
+        if Operation::try_from(msg.message_type) != Ok(Operation::UpdateTokenPrice) {
+            return err!(ErrorCode::MessageOpTypeMismatch);
+        }
+
+        if bridge_config.chain_id != message_of_signer.chain_id {
+            return err!(ErrorCode::ChainIdMismatch);
+        }
+
+        nonce_config.nonce += 1;
+
+        // TODO: verify no duplicated signatures
+        let (_, pda_of_committee_config) = get_commitee_account(
+            &ctx.program_id,
+            ctx.remaining_accounts.to_vec(),
+            &signer_pubkey,
+        )?;
+        let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
+        let commite_config = Committee::try_from_slice(&account_data[ANCHOR_HEADER_LEN..])
+            .map_err(|_| ProgramError::InvalidAccountData)?;
+
+        let mask = 1u128 << commite_config.index;
+        if bitmap & mask != 0 {
+            return err!(ErrorCode::DuplicateSignature);
+        }
+        bitmap |= mask;
+
+        // TODO: verify approvalStake
+        approval_stake += commite_config.stake_amount;
+    }
+    // Ensure the total approval stake meets the required stake
+    if approval_stake < required_stake(&msg)? {
+        return err!(ErrorCode::InsufficientStake);
     }
 
-    
+    let (token_id, price) = decode_update_token_price_payload(msg.payload.as_slice())?;
+    let (pda_of_token_config_addr, _, _, _) =
+        get_token_pda_bump_seeds(ctx.program_id, token_id.to_be_bytes());
+    let pda_of_token_config =
+        find_ata_in_accounts(ctx.remaining_accounts.to_vec(), &pda_of_token_config_addr)
+            .ok_or(ErrorCode::TokenConfigAddressMissing)?;
+
+    let discriminator = TokenConfig::discriminator();
+    let account_data = &mut *pda_of_token_config.try_borrow_mut_data()?;
+    let mut token_config = TokenConfig::try_from_slice(&account_data[ANCHOR_HEADER_LEN..])
+        .map_err(|_| ProgramError::InvalidAccountData)?;
+    account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&discriminator);
+    token_config.token_price = price;
+    token_config
+        .serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..])
+        .map_err(|error| {
+            msg!("BridgeConfigSerializationError: error={}", error);
+            ErrorCode::BridgeConfigSerializationError
+        })?;
     Ok(())
 }
 
 #[derive(Accounts)]
-#[instruction(chain_id: u8)]
+#[instruction(_chain_id: u8)]
 pub struct UpdateTokenPrice<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
+
+    #[account(
+        constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
+        seeds = [
+            GLOBAL_CONFIG.as_bytes(),
+            &_chain_id.to_be_bytes()
+        ],
+        bump
+    )]
+    pub bridge_config: Box<Account<'info, BridgeConfig>>,
+
+    #[account(
+        init_if_needed,
+        payer = payer,
+        space = Nonces::LEN,
+        seeds = [
+            NONCE_CONFIG.as_ref(),
+            Operation::UpdateTokenPrice.to_bytes().as_slice(),
+        ],
+        bump
+    )]
+    pub nonce: Box<Account<'info, Nonces>>,
+
+    #[account(
+        constraint = submitter.is_initialized @ ErrorCode::SubmitterNotInitialized,
+        constraint = submitter.is_submitter @ ErrorCode::NotSubmitter,
+        seeds = [
+            COMMITTEE_SUBMITTER_CONFIG.as_ref(),
+            payer.key().as_ref(),
+        ],
+        bump
+    )]
+    pub submitter: Box<Account<'info, Submitter>>,
+
     /// CHECK: This is not dangerous because we explicitly check the id
     #[account(address = instructions_sysvar_module::ID)]
     pub instructions_sysvar: AccountInfo<'info>,

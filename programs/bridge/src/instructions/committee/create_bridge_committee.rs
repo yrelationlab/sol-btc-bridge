@@ -1,8 +1,9 @@
 use crate::{
     constants::{ANCHOR_HEADER_LEN, COMMITTEE_CONFIG, COMMITTEE_SUBMITTER_CONFIG},
     create_account,
-    errors::BridgeError,
-    find_ata_in_accounts, get_committee_config_pda_bump_seeds, Committee, Submitter,
+    errors::ErrorCode,
+    find_ata_in_accounts, get_commitee_account, get_committee_config_pda_bump_seeds, Committee,
+    Submitter,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
@@ -17,24 +18,22 @@ pub fn create_bridge_committee<'info>(
 
     require!(
         committee_length < 256,
-        BridgeError::CommitteeLengthExceedsLimit
+        ErrorCode::CommitteeLengthExceedsLimit
     );
 
     require!(
         committee_length == stake.len(),
-        BridgeError::CommitteeAndStakeLengthMismatch
+        ErrorCode::CommitteeAndStakeLengthMismatch
     );
 
     let mut total_stake: u16 = 0;
     for (i, committee_address) in committee.iter().enumerate() {
         total_stake += stake[i];
-        let (pda_of_committee_config_address, _, _, signer_seeds) =
-            get_committee_config_pda_bump_seeds(ctx.program_id, committee_address);
-        let pda_of_committee_config = find_ata_in_accounts(
+        let (signer_seeds, pda_of_committee_config) = get_commitee_account(
+            &ctx.program_id,
             ctx.remaining_accounts.to_vec(),
-            &pda_of_committee_config_address,
-        )
-        .ok_or(BridgeError::CommitteeConfigAddressMissing)?;
+            committee_address,
+        )?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
@@ -60,13 +59,13 @@ pub fn create_bridge_committee<'info>(
             .serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..])
             .map_err(|error| {
                 msg!("BridgeCommitteeSerializationError: error={}", error);
-                BridgeError::BridgeCommitteeSerializationError
+                ErrorCode::BridgeCommitteeSerializationError
             })?;
     }
 
     require!(
         total_stake >= min_stake_required,
-        BridgeError::InsufficientTotalStake
+        ErrorCode::InsufficientTotalStake
     );
 
     // submitter

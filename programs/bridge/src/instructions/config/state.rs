@@ -67,3 +67,21 @@ impl SupportedChainConfig {
     ;
     pub const LEN_OF_PADDING: usize = 16; //128 bytes padding
 }
+
+
+#[account]
+#[derive(Default)]
+pub struct Nonces {
+    pub is_initialized: bool, // 1 byte
+    pub nonce: u64,
+    /// padding
+    pub padding: [u64; 16],
+}
+impl Nonces {
+    pub const LEN: usize = 8
+    + 1 // isInitialized
+    + 8 // nonce
+    + Nonces::LEN_OF_PADDING * 8 // padding
+    ;
+    pub const LEN_OF_PADDING: usize = 16; //128 bytes padding
+}
