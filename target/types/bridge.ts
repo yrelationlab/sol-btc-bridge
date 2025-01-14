@@ -47,7 +47,7 @@ export type Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
+      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
     }
   ],
   "instructions": [
@@ -156,6 +156,7 @@ export type Bridge = {
       ]
     },
     {
+<<<<<<< HEAD
       "name": "updateTokenPriceWithSignatures",
       "accounts": [
         {
@@ -187,6 +188,25 @@ export type Bridge = {
           "name": "instructionsSysvar",
           "isMut": false,
           "isSigner": false
+=======
+      "name": "updateSupportedChain",
+      "accounts": [
+        {
+          "name": "chainConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "要更新的 SupportedChain PDA"
+          ]
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "由硬编码的管理员来操作"
+          ]
+>>>>>>> e03d646 (add test)
         },
         {
           "name": "systemProgram",
@@ -196,6 +216,7 @@ export type Bridge = {
       ],
       "args": [
         {
+<<<<<<< HEAD
           "name": "msg",
           "type": {
             "defined": "Message"
@@ -208,6 +229,10 @@ export type Bridge = {
         {
           "name": "chainId",
           "type": "u8"
+=======
+          "name": "supported",
+          "type": "bool"
+>>>>>>> e03d646 (add test)
         }
       ]
     }
@@ -841,7 +866,7 @@ export const IDL: Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
+      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
     }
   ],
   "instructions": [
@@ -950,6 +975,7 @@ export const IDL: Bridge = {
       ]
     },
     {
+<<<<<<< HEAD
       "name": "updateTokenPriceWithSignatures",
       "accounts": [
         {
@@ -981,6 +1007,25 @@ export const IDL: Bridge = {
           "name": "instructionsSysvar",
           "isMut": false,
           "isSigner": false
+=======
+      "name": "updateSupportedChain",
+      "accounts": [
+        {
+          "name": "chainConfig",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "要更新的 SupportedChain PDA"
+          ]
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "由硬编码的管理员来操作"
+          ]
+>>>>>>> e03d646 (add test)
         },
         {
           "name": "systemProgram",
@@ -990,6 +1035,7 @@ export const IDL: Bridge = {
       ],
       "args": [
         {
+<<<<<<< HEAD
           "name": "msg",
           "type": {
             "defined": "Message"
@@ -1002,6 +1048,10 @@ export const IDL: Bridge = {
         {
           "name": "chainId",
           "type": "u8"
+=======
+          "name": "supported",
+          "type": "bool"
+>>>>>>> e03d646 (add test)
         }
       ]
     }

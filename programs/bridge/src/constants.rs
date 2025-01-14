@@ -1,4 +1,3 @@
-
 use anchor_lang::prelude::*;
 use solana_program::pubkey;
 #[constant]

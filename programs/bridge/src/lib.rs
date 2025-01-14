@@ -8,6 +8,7 @@ mod instructions;
 declare_id!("4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx");
 #[program]
 pub mod bridge {
+
     pub use super::instructions::*;
     use super::*;
     // pub fn close_memoo_config(ctx: Context<CloseMemooConfig>) -> Result<()> {
@@ -44,13 +45,10 @@ pub mod bridge {
         instructions::create_bridge_committee(ctx, committee, stake, min_stake_required)
     }
 
-
-    pub fn update_token_price_with_signatures<'info>(
-        ctx: Context<'_, '_, 'info, 'info, UpdateTokenPrice<'info>>,
-        msg: Message,
-        number_of_signatures: u8,
-        _chain_id: u8,
+    pub fn update_supported_chain<'info>(
+        ctx: Context<'_, '_, 'info, 'info, UpdateSupportedChain<'info>>,
+        supported: bool,
     ) -> Result<()> {
-        instructions::update_token_price_with_signatures(ctx, msg, number_of_signatures, _chain_id)
+        instructions::update_supported_chain(ctx, supported)
     }
 }

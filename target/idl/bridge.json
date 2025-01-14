@@ -47,7 +47,7 @@
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
+      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
     }
   ],
   "instructions": [
@@ -156,37 +156,23 @@
       ]
     },
     {
-      "name": "updateTokenPriceWithSignatures",
+      "name": "updateSupportedChain",
       "accounts": [
         {
-          "name": "payer",
+          "name": "chainConfig",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false,
+          "docs": [
+            "要更新的 SupportedChain PDA"
+          ]
         },
         {
-          "name": "submitter",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bridgeConfig",
+          "name": "admin",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "nonce",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
+          "isSigner": true,
+          "docs": [
+            "由硬编码的管理员来操作"
+          ]
         },
         {
           "name": "systemProgram",
@@ -196,18 +182,8 @@
       ],
       "args": [
         {
-          "name": "msg",
-          "type": {
-            "defined": "Message"
-          }
-        },
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
-        {
-          "name": "chainId",
-          "type": "u8"
+          "name": "supported",
+          "type": "bool"
         }
       ]
     }
