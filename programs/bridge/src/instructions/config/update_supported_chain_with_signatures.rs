@@ -23,7 +23,6 @@ pub fn update_token_price_with_signatures<'info>(
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
-    let submitter = &mut ctx.accounts.submitter;
 
     if number_of_signatures < 1 {
         return err!(ErrorCode::InsufficientSignatures);
@@ -52,7 +51,6 @@ pub fn update_token_price_with_signatures<'info>(
 
         nonce_config.nonce += 1;
 
-        // TODO: verify no duplicated signatures
         let (_, pda_of_committee_config) = get_commitee_account(
             &ctx.program_id,
             ctx.remaining_accounts.to_vec(),
@@ -67,8 +65,6 @@ pub fn update_token_price_with_signatures<'info>(
             return err!(ErrorCode::DuplicateSignature);
         }
         bitmap |= mask;
-
-        // TODO: verify approvalStake
         approval_stake += commite_config.stake_amount;
     }
     // Ensure the total approval stake meets the required stake
@@ -104,6 +100,9 @@ pub struct UpdateTokenPrice<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
+    #[account(mut)]
+    pub submitter: Signer<'info>,
+
     #[account(
         constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
         seeds = [
@@ -127,15 +126,15 @@ pub struct UpdateTokenPrice<'info> {
     pub nonce: Box<Account<'info, Nonces>>,
 
     #[account(
-        constraint = submitter.is_initialized @ ErrorCode::SubmitterNotInitialized,
-        constraint = submitter.is_submitter @ ErrorCode::NotSubmitter,
+        constraint = submitter_account.is_initialized @ ErrorCode::SubmitterNotInitialized,
+        constraint = submitter_account.is_submitter @ ErrorCode::NotSubmitter,
         seeds = [
             COMMITTEE_SUBMITTER_CONFIG.as_ref(),
-            payer.key().as_ref(),
+            submitter.key().as_ref(),
         ],
         bump
     )]
-    pub submitter: Box<Account<'info, Submitter>>,
+    pub submitter_account: Box<Account<'info, Submitter>>,
 
     /// CHECK: This is not dangerous because we explicitly check the id
     #[account(address = instructions_sysvar_module::ID)]

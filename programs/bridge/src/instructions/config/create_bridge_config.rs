@@ -48,6 +48,8 @@ pub fn create_bridge_config<'info>(
             ctx.program_id,
            (i as u8).to_be_bytes(),
         );
+        msg!("i:{}, pda_of_token_config_addr: {:?}", i, pda_of_token_config_addr);
+
         let pda_of_token_config =
             find_ata_in_accounts(ctx.remaining_accounts.to_vec(), &pda_of_token_config_addr)
                 .ok_or(ErrorCode::TokenConfigAddressMissing)?;
@@ -68,6 +70,7 @@ pub fn create_bridge_config<'info>(
         account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&discriminator);
         let bridge_config_of_token = TokenConfig {
             is_initialized: true,
+            token_id: i as u8,
             chain_id: supported_chains[i],
             token_address: *token_address,
             decimal: DECIMALS9,

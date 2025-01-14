@@ -24,6 +24,7 @@ impl BridgeConfig {
 #[derive(Default)]
 pub struct TokenConfig {
     pub is_initialized: bool, // 1 byte
+    pub token_id: u8,
     pub chain_id: u8,
     pub token_address: Pubkey,
     pub decimal: u8,
@@ -38,6 +39,7 @@ impl TokenConfig {
     pub const LEN: usize = 8
     + 1 // isInitialized
     + 1 // chain_id
+    + 1 // token_id
     + 32 // token_address
     + 1 // decimal
     + 1 // native

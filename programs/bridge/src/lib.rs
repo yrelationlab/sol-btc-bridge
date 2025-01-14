@@ -43,4 +43,14 @@ pub mod bridge {
     ) -> Result<()> {
         instructions::create_bridge_committee(ctx, committee, stake, min_stake_required)
     }
+
+
+    pub fn update_token_price_with_signatures<'info>(
+        ctx: Context<'_, '_, 'info, 'info, UpdateTokenPrice<'info>>,
+        msg: Message,
+        number_of_signatures: u8,
+        _chain_id: u8,
+    ) -> Result<()> {
+        instructions::update_token_price_with_signatures(ctx, msg, number_of_signatures, _chain_id)
+    }
 }

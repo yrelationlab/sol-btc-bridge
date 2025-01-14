@@ -17,8 +17,8 @@ import cm3 from '../cli/.config/cm3.json';
 import { assert, expect } from "chai";
 import { Bridge } from "../target/types/bridge";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { TestValues, TestValuesDefaults } from "./types";
-import { BRIDGE_COMMITTEE_CONFIG, BRIDGE_COMMITTEE_SUBMITTER_CONFIG, DECIMALS9, getCommitteePda, getSubmitterPda, getSupportChainPda, getTokenConfigPda, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG } from "./constants";
+import { Operation, TestValues, TestValuesDefaults } from "./types";
+import { BRIDGE_COMMITTEE_CONFIG, BRIDGE_COMMITTEE_SUBMITTER_CONFIG, DECIMALS9, getCommitteePda, getSubmitterPda, getSupportChainPda, getTokenConfigPda, GLOBAL_CONFIG, NONCE_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG } from "./constants";
 
 export async function sleep(seconds: number) {
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -57,6 +57,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   const payerAdmin = Keypair.fromSecretKey(new Uint8Array(secret));
   const feeRecipient = Keypair.generate().publicKey;
   const supportedTokensKeypairs = [Keypair.generate(), Keypair.generate()];
+  const supportedTokensIndex = Array.from({ length: supportedTokensKeypairs.length }, (_, i) => i);
   const decimals = [DECIMALS9, DECIMALS9]
   const prices = [new anchor.BN(9999).mul(decimals[0]), new anchor.BN(9999).mul(decimals[1])];
   const supportedChains = [2, 3, 4];
@@ -68,16 +69,13 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     [GLOBAL_CONFIG, curChainId.toBuffer()],
     anchor.workspace.bridge.programId
   )[0];
-  console.log(`programId : ${anchor.workspace.bridge.programId}`);
-
-  const tokenConfigPdas = supportedTokensKeypairs.map((keypair, index) =>
-    getTokenConfigPda(keypair, curChainId)
+  const tokenConfigPdas = supportedTokensIndex.map((tokenId, index) =>
+    getTokenConfigPda(tokenId)
   );
-
+  console.log(`tokenConfigPdas is ${JSON.stringify(tokenConfigPdas)}`)
   const supportedChainsPdas = supportedChains.map((chainId) => {
     return getSupportChainPda(chainId);
   });
-
   const committeeKeypairs = [Keypair.fromSecretKey(new Uint8Array(cm1)), Keypair.fromSecretKey(new Uint8Array(cm2)), Keypair.fromSecretKey(new Uint8Array(cm3))];
   const committeePdas = committeeKeypairs.map((committeeAddress) => {
     return getCommitteePda(committeeAddress);
@@ -86,11 +84,17 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
+  const noncePdaUpdateTokenPrice = PublicKey.findProgramAddressSync(
+    [NONCE_CONFIG, Buffer.from(Operation.UpdateTokenPrice.toString())],
+    anchor.workspace.bridge.programId
+  )[0];
+
   return {
     chainId: curChainId,
     payerAdmin,
     feeRecipient,
     supportedTokensKeypairs,
+    supportedTokensIndex,
     prices,
     supportedChainsBuffer,
     decimals,
@@ -105,6 +109,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     submitter,
     submitterPda,
     committeePdas,
+    noncePdaUpdateTokenPrice
   };
 }
 
@@ -241,4 +246,22 @@ export async function checkAssociatedTokenAccount(connection, mintAddress, owner
   }
 }
 export { TestValues };
+
+
+export function assembleUpdateTokenPricePayload(tokenId: number, tokenPrice: number): Uint8Array {
+  // Ensure the tokenId is a single byte (u8)
+  const tokenIdBytes = new Uint8Array(1);
+  tokenIdBytes[0] = tokenId;
+
+  // Convert tokenPrice (u64) to 8-byte big-endian format
+  const tokenPriceBytes = new Uint8Array(8);
+  let price = tokenPrice;
+  for (let i = 7; i >= 0; i--) {
+    tokenPriceBytes[i] = price & 0xff;  // Extract the least significant byte
+    price >>= 8;  // Shift the price by 8 bits to the right
+  }
+
+  // Concatenate tokenIdBytes and tokenPriceBytes to form the final payload
+  return new Uint8Array([...tokenIdBytes, ...tokenPriceBytes]);
+}
 

@@ -154,6 +154,62 @@ export type Bridge = {
           "type": "u16"
         }
       ]
+    },
+    {
+      "name": "updateTokenPriceWithSignatures",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "msg",
+          "type": {
+            "defined": "Message"
+          }
+        },
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "chainId",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -269,6 +325,10 @@ export type Bridge = {
           {
             "name": "isInitialized",
             "type": "bool"
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
           },
           {
             "name": "chainId",
@@ -888,6 +948,62 @@ export const IDL: Bridge = {
           "type": "u16"
         }
       ]
+    },
+    {
+      "name": "updateTokenPriceWithSignatures",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "msg",
+          "type": {
+            "defined": "Message"
+          }
+        },
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "chainId",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -1003,6 +1119,10 @@ export const IDL: Bridge = {
           {
             "name": "isInitialized",
             "type": "bool"
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
           },
           {
             "name": "chainId",

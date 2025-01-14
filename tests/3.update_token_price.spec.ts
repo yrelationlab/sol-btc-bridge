@@ -2,9 +2,10 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
 import { Bridge } from "../target/types/bridge";
-import { TestValues, createBridgeConfig, createValues, expectRevert } from "./init";
+import { TestValues, assembleUpdateTokenPricePayload, createBridgeConfig, createCommitteeConfig, createValues, expectRevert } from "./init";
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
+import { MessageType, Operation } from "./types";
 describe("Update Token Price", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -12,19 +13,46 @@ describe("Update Token Price", () => {
   let values: TestValues;
   beforeEach(async () => {
     values = createValues();
+    const createBridgeConfig_tx = await createBridgeConfig(program, values);
+    console.log(`createBridgeConfig_tx is ${createBridgeConfig_tx}`)
+    const createCommitteeConfig_tx = await createCommitteeConfig(program, values);
+    console.log(`createCommitteeConfig_tx is ${createCommitteeConfig_tx}`)
   });
   it("Creation", async () => {
-    console.log(`values.chainId is ${values.chainId}`)
-    console.log(`values.feeRecipient is ${values.feeRecipient}`)
-    const tx = await createBridgeConfig(program, values);
-    console.log(`tx is ${tx}`)
-    const configAccount = await program.account.bridgeConfig.fetch(values.bridgeConfigPDA);
-    console.log(`configAccount is ${JSON.stringify(configAccount)}`)
-    expect(configAccount.admin.toString()).to.equal(
-      values.payerAdmin.publicKey.toString()
-    );
-    expect(configAccount.chainId.toString()).to.equal(values.chainId.toString());
-    expect(configAccount.feeRecipient.toString()).to.equal(values.feeRecipient.toString());
+
+    const tokenId = values.supportedTokensIndex[0];
+    const tokenPrice = 999;
+    const payload = assembleUpdateTokenPricePayload(tokenId, tokenPrice);
+    // Create the msg object
+    const msg = {
+      messageType: 0,              // Example: 1 for some type of message
+      version: 1,                   // Example: version 1
+      nonce: new anchor.BN(1), // Example nonce value
+      chainId: values.chainId.toNumber(),            // Chain ID passed as an argument
+      payload: payload, // Example payload data
+    };
+    await program.methods
+      .updateTokenPriceWithSignatures(
+        msg as any,
+        3,
+        values.chainId.toNumber()
+      )
+      .accounts({ 
+        bridgeConfig: values.bridgeConfigPDA, 
+        nonce: values.noncePdaUpdateTokenPrice,
+        submitterAccount: values.submitterPda, 
+        submitter:values.submitter.publicKey
+      })
+      .remainingAccounts([
+        ...values.committeePdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
+        ,{
+          pubkey: values.tokenConfigPdas[0],
+          isSigner: false,
+          isWritable: true,
+      },
+
+      ]).signers([values.submitter,values.payerAdmin])
+      .rpc({ skipPreflight: false });
 
     for (const [index, tokenConfigPda] of values.tokenConfigPdas.entries()) {
       const tokenConfig = await program.account.tokenConfig.fetch(tokenConfigPda);
