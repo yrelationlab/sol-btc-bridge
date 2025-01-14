@@ -156,39 +156,6 @@ export type Bridge = {
       ]
     },
     {
-<<<<<<< HEAD
-      "name": "updateTokenPriceWithSignatures",
-      "accounts": [
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "submitter",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bridgeConfig",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "nonce",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-=======
       "name": "updateSupportedChain",
       "accounts": [
         {
@@ -206,7 +173,6 @@ export type Bridge = {
           "docs": [
             "由硬编码的管理员来操作"
           ]
->>>>>>> e03d646 (add test)
         },
         {
           "name": "systemProgram",
@@ -216,23 +182,12 @@ export type Bridge = {
       ],
       "args": [
         {
-<<<<<<< HEAD
-          "name": "msg",
-          "type": {
-            "defined": "Message"
-          }
-        },
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
-        {
           "name": "chainId",
           "type": "u8"
-=======
+        },
+        {
           "name": "supported",
           "type": "bool"
->>>>>>> e03d646 (add test)
         }
       ]
     }
@@ -975,39 +930,6 @@ export const IDL: Bridge = {
       ]
     },
     {
-<<<<<<< HEAD
-      "name": "updateTokenPriceWithSignatures",
-      "accounts": [
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "submitter",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bridgeConfig",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "nonce",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-=======
       "name": "updateSupportedChain",
       "accounts": [
         {
@@ -1025,7 +947,6 @@ export const IDL: Bridge = {
           "docs": [
             "由硬编码的管理员来操作"
           ]
->>>>>>> e03d646 (add test)
         },
         {
           "name": "systemProgram",
@@ -1035,23 +956,12 @@ export const IDL: Bridge = {
       ],
       "args": [
         {
-<<<<<<< HEAD
-          "name": "msg",
-          "type": {
-            "defined": "Message"
-          }
-        },
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
-        {
           "name": "chainId",
           "type": "u8"
-=======
+        },
+        {
           "name": "supported",
           "type": "bool"
->>>>>>> e03d646 (add test)
         }
       ]
     }

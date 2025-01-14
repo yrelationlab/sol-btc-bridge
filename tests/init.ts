@@ -109,7 +109,8 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     submitter,
     submitterPda,
     committeePdas,
-    noncePdaUpdateTokenPrice
+    noncePdaUpdateTokenPrice,
+    supportedChains
   };
 }
 

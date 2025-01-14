@@ -22,6 +22,7 @@ export interface TestValues {
     submitterPda: PublicKey;
     committeePdas: PublicKey[];
     noncePdaUpdateTokenPrice: PublicKey;
+    supportedChains: number[]
 }
 
 

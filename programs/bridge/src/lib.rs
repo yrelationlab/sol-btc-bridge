@@ -47,8 +47,9 @@ pub mod bridge {
 
     pub fn update_supported_chain<'info>(
         ctx: Context<'_, '_, 'info, 'info, UpdateSupportedChain<'info>>,
+        _chain_id: u8,
         supported: bool,
     ) -> Result<()> {
-        instructions::update_supported_chain(ctx, supported)
+        instructions::update_supported_chain(ctx, _chain_id, supported)
     }
 }

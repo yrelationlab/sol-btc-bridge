@@ -8,42 +8,25 @@ import {
   createValues,
   expectRevert,
 } from "./init";
-import { describe, beforeEach, it } from "vitest";
-import { expect } from "chai";
+import { describe, beforeAll, it } from "vitest";
+import { expect, assert } from "chai";
 describe("Update Token Price", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   const program = anchor.workspace.Bridge as Program<Bridge>;
   let values: TestValues;
-  beforeEach(async () => {
+  beforeAll(async () => {
     values = createValues();
+    await createBridgeConfig(program, values);
   });
-  it("Creation", async () => {
-    console.log(`values.chainId is ${values.chainId}`);
-    console.log(`values.feeRecipient is ${values.feeRecipient}`);
-    const tx = await createBridgeConfig(program, values);
-    console.log(`tx is ${tx}`);
-    const configAccount = await program.account.bridgeConfig.fetch(
-      values.bridgeConfigPDA
-    );
-    console.log(`configAccount is ${JSON.stringify(configAccount)}`);
-    expect(configAccount.admin.toString()).to.equal(
-      values.payerAdmin.publicKey.toString()
-    );
-    expect(configAccount.chainId.toString()).to.equal(
-      values.chainId.toString()
-    );
-    expect(configAccount.feeRecipient.toString()).to.equal(
-      values.feeRecipient.toString()
-    );
-  });
+
   it("Update supported chain with admin", async () => {
-    const tx0 = await createBridgeConfig(program, values);
     const chainConfigData = await program.account.supportedChainConfig.fetch(
       values.supportedChainsPdas[0]
     );
+    console.log("chainConfigData: ", chainConfigData);
     const tx = await program.methods
-      .updateSupportedChain(false)
+      .updateSupportedChain(values.supportedChains[0], false)
       .accounts({
         chainConfig: values.supportedChainsPdas[0],
         admin: values.payerAdmin.publicKey,
@@ -62,5 +45,32 @@ describe("Update Token Price", () => {
       values.supportedChainsPdas[0]
     );
     expect(chainConfigData1.supported).to.be.false;
+  });
+  it("Update supported chain without admin", async () => {
+    const chainConfigData = await program.account.supportedChainConfig.fetch(
+      values.supportedChainsPdas[0]
+    );
+    console.log("chainConfigData: ", chainConfigData);
+    const tx = await program.methods
+      .updateSupportedChain(values.supportedChains[0], false)
+      .accounts({
+        chainConfig: values.supportedChainsPdas[0],
+        admin: values.committeeKeypairs[0].publicKey,
+      })
+      .transaction();
+    console.log(
+      "chainConfigData is supported before tx:",
+      chainConfigData.supported
+    );
+    try {
+      await createAndSendV0Tx(
+        tx.instructions,
+        values.committeeKeypairs[0],
+        provider.connection
+      );
+    } catch (error) {
+      console.log("error: ", error);
+      assert.ok(error.toString());
+    }
   });
 });

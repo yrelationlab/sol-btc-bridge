@@ -9,6 +9,7 @@ use crate::{
 /// 由硬编码的管理员更新某个链的 supported 状态或其他字段
 pub fn update_supported_chain<'info>(
     ctx: Context<'_, '_, 'info, 'info, UpdateSupportedChain<'info>>,
+    _chain_id: u8,
     supported: bool,
 ) -> Result<()> {
     let chain_config = &mut ctx.accounts.chain_config;
@@ -25,14 +26,14 @@ pub fn update_supported_chain<'info>(
 }
 
 #[derive(Accounts)]
-#[instruction(chain_id: u8)]
+#[instruction(_chain_id: u8)]
 pub struct UpdateSupportedChain<'info> {
     /// 要更新的 SupportedChain PDA
     #[account(
         mut,
         seeds = [
             SUPPORTED_CHAINS_CONFIG.as_bytes(),
-            &chain_id.to_be_bytes()
+            &_chain_id.to_be_bytes()
         ],
         bump,
         constraint = chain_config.is_initialized == true @ ErrorCode::SupportedChainNotInitialized

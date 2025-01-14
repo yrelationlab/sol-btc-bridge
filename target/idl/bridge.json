@@ -182,6 +182,10 @@
       ],
       "args": [
         {
+          "name": "chainId",
+          "type": "u8"
+        },
+        {
           "name": "supported",
           "type": "bool"
         }
