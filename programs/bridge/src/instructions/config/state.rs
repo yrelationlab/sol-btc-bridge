@@ -57,6 +57,7 @@ pub struct SupportedChainConfig {
     pub is_initialized: bool, // 1 byte
     pub chain_id: u8,
     pub supported: bool,
+    pub mint_total: u128,
     /// padding
     pub padding: [u64; 16],
 }
@@ -65,6 +66,7 @@ impl SupportedChainConfig {
     + 1 // isInitialized
     + 1 // chain_id
     + 1 // supported
+    + 16 // mint_total
     + SupportedChainConfig::LEN_OF_PADDING * 8 // padding
     ;
     pub const LEN_OF_PADDING: usize = 16; //128 bytes padding

@@ -47,7 +47,7 @@ export type Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -369,6 +369,10 @@ export type Bridge = {
           {
             "name": "supported",
             "type": "bool"
+          },
+          {
+            "name": "mintTotal",
+            "type": "u128"
           },
           {
             "name": "padding",
@@ -821,7 +825,7 @@ export const IDL: Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -1143,6 +1147,10 @@ export const IDL: Bridge = {
           {
             "name": "supported",
             "type": "bool"
+          },
+          {
+            "name": "mintTotal",
+            "type": "u128"
           },
           {
             "name": "padding",

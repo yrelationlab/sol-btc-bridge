@@ -47,7 +47,7 @@
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -369,6 +369,10 @@
           {
             "name": "supported",
             "type": "bool"
+          },
+          {
+            "name": "mintTotal",
+            "type": "u128"
           },
           {
             "name": "padding",
@@ -769,8 +773,5 @@
       "name": "InstructionMissing",
       "msg": "InstructionMissing"
     }
-  ],
-  "metadata": {
-    "address": "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
-  }
+  ]
 }

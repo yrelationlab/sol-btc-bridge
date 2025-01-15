@@ -119,6 +119,7 @@ pub fn create_bridge_config<'info>(
             is_initialized: true,
             chain_id: *chain_id,
             supported: true,
+            mint_total: 0 as u128,
             padding: [0u64; SupportedChainConfig::LEN_OF_PADDING],
         };
 
