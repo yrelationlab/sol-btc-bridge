@@ -23,13 +23,33 @@ pub fn deserialize_message(data: &Vec<u8>) -> Result<Message> {
         Err(_) => err!(ErrorCode::DeserializeMessageError),
     }
 }
+#[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
+pub struct MintSbtcMessage {
+    pub message_type: u8,
+    pub version: u8,
+    pub nonce: u64,
+    pub source_chain_id: u8,
+    pub source_token_id: u8,
+    pub from_address: Vec<u8>,
+    pub to_address: [u8; 32],
+    pub amount: u64,
+}
+
+pub fn deserialize_mint_sbtc_message(data: &Vec<u8>) -> Result<MintSbtcMessage> {
+    match MintSbtcMessage::try_from_slice(data) {
+        Ok(order) => Ok(order),
+        Err(_) => err!(ErrorCode::DeserializeMessageError),
+    }
+}
 
 #[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
 pub struct UpdateSupportedChainMessage {
     pub chain_id: u8,
     pub supported: bool,
 }
-pub fn deserialize_update_supported_chain_message(data: &Vec<u8>) -> Result<UpdateSupportedChainMessage> {
+pub fn deserialize_update_supported_chain_message(
+    data: &Vec<u8>,
+) -> Result<UpdateSupportedChainMessage> {
     match UpdateSupportedChainMessage::try_from_slice(data) {
         Ok(order) => Ok(order),
         Err(_) => err!(ErrorCode::DeserializeMessageError),
@@ -97,11 +117,12 @@ pub const TRANSFER_STAKE_REQUIRED: u16 = 6666;
 pub const FREEZING_STAKE_REQUIRED: u16 = 450;
 pub const UNFREEZING_STAKE_REQUIRED: u16 = 5001;
 pub const UPGRADE_STAKE_REQUIRED: u16 = 5001;
-pub const BLOCKLIST_STAKE_REQUIRED: u16 = 5001; 
+pub const BLOCKLIST_STAKE_REQUIRED: u16 = 5001;
 pub const BRIDGE_LIMIT_STAKE_REQUIRED: u16 = 5001;
 pub const UPDATE_TOKEN_PRICE_STAKE_REQUIRED: u16 = 5001;
 pub const ADD_EVM_TOKENS_STAKE_REQUIRED: u16 = 5001;
 pub const UPDATE_CHAINID_STAKE_REQUIRED: u16 = 5001;
+pub const MINT_SBTC_STAKE_REQUIRED: u16 = 5001;
 
 pub fn decode_emergency_op_payload(payload: &[u8]) -> Result<bool> {
     if payload.len() != 1 {
@@ -113,7 +134,6 @@ pub fn decode_emergency_op_payload(payload: &[u8]) -> Result<bool> {
     }
     Ok(emergency_op_code == 0) // 返回 `true` 表示冻结操作
 }
-
 
 pub fn required_stake(message: &Message) -> Result<u16> {
     match Operation::try_from(message.message_type).map_err(|_| ErrorCode::InvalidMessageType)? {
@@ -132,19 +152,15 @@ pub fn required_stake(message: &Message) -> Result<u16> {
         Operation::Upgrade => Ok(UPGRADE_STAKE_REQUIRED),
         Operation::AddEvmTokens => Ok(ADD_EVM_TOKENS_STAKE_REQUIRED),
         Operation::UpdateChainId => Ok(UPDATE_CHAINID_STAKE_REQUIRED),
-        _ =>  err!(ErrorCode::InvalidMessageType) ,
+        _ => err!(ErrorCode::InvalidMessageType),
     }
 }
-
 
 pub fn get_token_pda_bump_seeds(
     program_id: &Pubkey,
     token_id_bytes: [u8; 1],
 ) -> (Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>) {
-    let seeds = &[
-        TOKEN_CONFIG.as_ref(),
-        token_id_bytes.as_ref(),
-    ];
+    let seeds = &[TOKEN_CONFIG.as_ref(), token_id_bytes.as_ref()];
     let (pda, bump) = Pubkey::find_program_address(seeds, program_id);
     let mut signer_seeds_vec: Vec<Vec<u8>> = seeds.iter().map(|s| s.to_vec()).collect();
     let seeds_vec = signer_seeds_vec.clone();
@@ -164,7 +180,11 @@ pub fn get_support_chains_pda_bump_seeds(
     (pda, bump, seeds_vec, signer_seeds_vec)
 }
 
-pub fn get_commitee_account<'info>(program_id: &Pubkey, remaining_accounts: Vec<AccountInfo<'info>>, committee_address: &Pubkey) -> Result<(Vec<Vec<u8>>, AccountInfo<'info>)> {
+pub fn get_commitee_account<'info>(
+    program_id: &Pubkey,
+    remaining_accounts: Vec<AccountInfo<'info>>,
+    committee_address: &Pubkey,
+) -> Result<(Vec<Vec<u8>>, AccountInfo<'info>)> {
     let (pda_of_committee_config_address, _, _, signer_seeds) =
         get_committee_config_pda_bump_seeds(program_id, committee_address);
     let pda_of_committee_config = find_ata_in_accounts(
@@ -177,7 +197,7 @@ pub fn get_commitee_account<'info>(program_id: &Pubkey, remaining_accounts: Vec<
 
 pub fn get_committee_config_pda_bump_seeds(
     program_id: &Pubkey,
-    committee_address:  &Pubkey,
+    committee_address: &Pubkey,
 ) -> (Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>) {
     let seeds = &[COMMITTEE_CONFIG.as_ref(), committee_address.as_ref()];
     let (pda, bump) = Pubkey::find_program_address(seeds, program_id);
@@ -249,6 +269,7 @@ pub enum Operation {
     Upgrade = 5,
     AddEvmTokens = 7,
     UpdateChainId = 8,
+    MintSBTC = 9,
 }
 impl Operation {
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -268,11 +289,11 @@ impl TryFrom<u8> for Operation {
             5 => Ok(Operation::Upgrade),
             7 => Ok(Operation::AddEvmTokens),
             8 => Ok(Operation::UpdateChainId),
+            9 => Ok(Operation::MintSBTC),
             _ => Err(()),
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

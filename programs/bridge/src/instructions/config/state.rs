@@ -7,6 +7,7 @@ pub struct BridgeConfig {
     pub chain_id: u8,
     pub admin: Pubkey,
     pub fee_recipient: Pubkey,
+    pub sbtc_mint: Pubkey,
     /// padding
     pub padding: [u64; 16],
 }
@@ -16,6 +17,7 @@ impl BridgeConfig {
         + 1 // chain_id
         + 32 // admin
         + 32 // fee_recipient
+        + 32 // sbtc_mint
         + BridgeConfig::LEN_OF_PADDING * 8 // padding
         ;
     pub const LEN_OF_PADDING: usize = 16; //128 bytes padding

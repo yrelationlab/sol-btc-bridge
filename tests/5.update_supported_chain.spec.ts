@@ -24,7 +24,7 @@ describe("Update Token Price", () => {
     const chainConfigData = await program.account.supportedChainConfig.fetch(
       values.supportedChainsPdas[0]
     );
-    console.log("chainConfigData: ", chainConfigData);
+    // console.log("chainConfigData: ", chainConfigData);
     const tx = await program.methods
       .updateSupportedChain(values.supportedChains[0], false)
       .accounts({

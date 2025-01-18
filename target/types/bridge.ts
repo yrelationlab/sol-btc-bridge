@@ -8,6 +8,16 @@ export type Bridge = {
       "value": "\"GLOBAL_CONFIG\""
     },
     {
+      "name": "SBTC_MINT",
+      "type": "string",
+      "value": "\"SBTC_MINT\""
+    },
+    {
+      "name": "BRIDGE_PDA",
+      "type": "string",
+      "value": "\"BRIDGE_PDA\""
+    },
+    {
       "name": "NONCE_CONFIG",
       "type": "string",
       "value": "\"NONCE_CONFIG\""
@@ -47,7 +57,7 @@ export type Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
+      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
     }
   ],
   "instructions": [
@@ -66,6 +76,25 @@ export type Bridge = {
           "docs": [
             "The account paying for all rents"
           ]
+        },
+        {
+          "name": "bridgePda",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "bridge_pda, init no need",
+            "use as sBTC mint's authority"
+          ]
+        },
+        {
+          "name": "sbtcMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "systemProgram",
@@ -190,6 +219,153 @@ export type Bridge = {
           "type": "bool"
         }
       ]
+    },
+    {
+      "name": "updateTokenPriceWithSignatures",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "msg",
+          "type": {
+            "defined": "Message"
+          }
+        },
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "chainId",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "mintSbtcWithSignatures",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The submitter calls it"
+          ]
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "1. load BridgeConfig"
+          ]
+        },
+        {
+          "name": "bridgePda",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "2. The same PDA used as Mint authority"
+          ]
+        },
+        {
+          "name": "sbtcMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userSbtcAta",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "the user's sBTC Token Account"
+          ]
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "the user to receive minted sBTC"
+          ]
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "msg",
+          "type": {
+            "defined": "MintSbtcMessage"
+          }
+        },
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "chainId",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -280,6 +456,10 @@ export type Bridge = {
           },
           {
             "name": "feeRecipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "sbtcMint",
             "type": "publicKey"
           },
           {
@@ -448,6 +628,51 @@ export type Bridge = {
       }
     },
     {
+      "name": "MintSbtcMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "sourceChainId",
+            "type": "u8"
+          },
+          {
+            "name": "sourceTokenId",
+            "type": "u8"
+          },
+          {
+            "name": "fromAddress",
+            "type": "bytes"
+          },
+          {
+            "name": "toAddress",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateSupportedChainMessage",
       "type": {
         "kind": "struct",
@@ -572,6 +797,9 @@ export type Bridge = {
           },
           {
             "name": "UpdateChainId"
+          },
+          {
+            "name": "MintSBTC"
           }
         ]
       }
@@ -786,6 +1014,16 @@ export const IDL: Bridge = {
       "value": "\"GLOBAL_CONFIG\""
     },
     {
+      "name": "SBTC_MINT",
+      "type": "string",
+      "value": "\"SBTC_MINT\""
+    },
+    {
+      "name": "BRIDGE_PDA",
+      "type": "string",
+      "value": "\"BRIDGE_PDA\""
+    },
+    {
       "name": "NONCE_CONFIG",
       "type": "string",
       "value": "\"NONCE_CONFIG\""
@@ -825,7 +1063,7 @@ export const IDL: Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
+      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
     }
   ],
   "instructions": [
@@ -844,6 +1082,25 @@ export const IDL: Bridge = {
           "docs": [
             "The account paying for all rents"
           ]
+        },
+        {
+          "name": "bridgePda",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "bridge_pda, init no need",
+            "use as sBTC mint's authority"
+          ]
+        },
+        {
+          "name": "sbtcMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "systemProgram",
@@ -968,6 +1225,153 @@ export const IDL: Bridge = {
           "type": "bool"
         }
       ]
+    },
+    {
+      "name": "updateTokenPriceWithSignatures",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "msg",
+          "type": {
+            "defined": "Message"
+          }
+        },
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "chainId",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "mintSbtcWithSignatures",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The submitter calls it"
+          ]
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "1. load BridgeConfig"
+          ]
+        },
+        {
+          "name": "bridgePda",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "2. The same PDA used as Mint authority"
+          ]
+        },
+        {
+          "name": "sbtcMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userSbtcAta",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "the user's sBTC Token Account"
+          ]
+        },
+        {
+          "name": "user",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "the user to receive minted sBTC"
+          ]
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "msg",
+          "type": {
+            "defined": "MintSbtcMessage"
+          }
+        },
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "chainId",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -1058,6 +1462,10 @@ export const IDL: Bridge = {
           },
           {
             "name": "feeRecipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "sbtcMint",
             "type": "publicKey"
           },
           {
@@ -1226,6 +1634,51 @@ export const IDL: Bridge = {
       }
     },
     {
+      "name": "MintSbtcMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "sourceChainId",
+            "type": "u8"
+          },
+          {
+            "name": "sourceTokenId",
+            "type": "u8"
+          },
+          {
+            "name": "fromAddress",
+            "type": "bytes"
+          },
+          {
+            "name": "toAddress",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateSupportedChainMessage",
       "type": {
         "kind": "struct",
@@ -1350,6 +1803,9 @@ export const IDL: Bridge = {
           },
           {
             "name": "UpdateChainId"
+          },
+          {
+            "name": "MintSBTC"
           }
         ]
       }

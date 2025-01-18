@@ -13,6 +13,8 @@ export interface TestValues {
     decimals: anchor.BN[];
     tokenMinAmounts: anchor.BN[];
     bridgeConfigPDA: PublicKey;
+    bridgePDA: PublicKey;
+    sbtcMint: PublicKey;
     tokenConfigPdas: PublicKey[];
     supportedChainsPdas: PublicKey[];
     committeeKeypairs: Keypair[];
@@ -22,6 +24,7 @@ export interface TestValues {
     submitterPda: PublicKey;
     committeePdas: PublicKey[];
     noncePdaUpdateTokenPrice: PublicKey;
+    nonceMintSbtc: PublicKey;
     supportedChains: number[]
 }
 
@@ -48,5 +51,6 @@ export interface MessageType {
     Upgrade = 5,
     AddEvmTokens = 7,
     UpdateChainId = 8,
+    MintSbtc = 9
   }
   

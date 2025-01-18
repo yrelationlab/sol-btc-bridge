@@ -1,7 +1,7 @@
 use crate::{
     constants::{
-        ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SUPPORTED_CHAINS_CONFIG,
-        TOKEN_CONFIG,
+        ANCHOR_HEADER_LEN, BRIDGE_PDA, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SBTC_MINT,
+        SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
     },
     create_account,
     errors::ErrorCode,
@@ -10,6 +10,8 @@ use crate::{
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
+use anchor_spl::token::{Mint, Token};
+
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
@@ -42,13 +44,17 @@ pub fn create_bridge_config<'info>(
     bridge_config.chain_id = chain_id;
     bridge_config.admin = ctx.accounts.payer.key();
     bridge_config.fee_recipient = fee_recipient;
+    bridge_config.sbtc_mint = ctx.accounts.sbtc_mint.key();
+    bridge_config.is_initialized = true;
 
     for (i, token_address) in supported_tokens.iter().enumerate() {
-        let (pda_of_token_config_addr, _, _, signer_seeds) = get_token_pda_bump_seeds(
-            ctx.program_id,
-           (i as u8).to_be_bytes(),
+        let (pda_of_token_config_addr, _, _, signer_seeds) =
+            get_token_pda_bump_seeds(ctx.program_id, (i as u8).to_be_bytes());
+        msg!(
+            "i:{}, pda_of_token_config_addr: {:?}",
+            i,
+            pda_of_token_config_addr
         );
-        msg!("i:{}, pda_of_token_config_addr: {:?}", i, pda_of_token_config_addr);
 
         let pda_of_token_config =
             find_ata_in_accounts(ctx.remaining_accounts.to_vec(), &pda_of_token_config_addr)
@@ -153,5 +159,32 @@ pub struct CreateBridgeConfig<'info> {
         address = HARDCODED_PUBKEY @ ErrorCode::InvalidAdminAddress
     )]
     pub payer: Signer<'info>,
+
+    /// bridge_pda, init no need
+    /// use as sBTC mint's authority
+    #[account(
+        seeds = [
+            BRIDGE_PDA.as_bytes(),
+            &chain_id.to_be_bytes()
+        ],
+        bump
+    )]
+    /// CHECK: 只需要key
+    pub bridge_pda: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        payer = payer,
+        seeds = [
+            SBTC_MINT.as_bytes(),
+            &chain_id.to_be_bytes()
+        ],
+        bump,
+        mint::decimals = 10, // DECIMALS10
+        mint::authority = bridge_pda,
+        mint::freeze_authority = bridge_pda,
+    )]
+    pub sbtc_mint: Account<'info, Mint>,
+    pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }

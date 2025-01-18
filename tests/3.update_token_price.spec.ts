@@ -6,6 +6,8 @@ import { TestValues, assembleUpdateTokenPricePayload, createBridgeConfig, create
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
 import { MessageType, Operation } from "./types";
+import {SYSVAR_INSTRUCTIONS_PUBKEY} from '@solana/web3.js'
+
 describe("Update Token Price", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -41,7 +43,9 @@ describe("Update Token Price", () => {
         bridgeConfig: values.bridgeConfigPDA, 
         nonce: values.noncePdaUpdateTokenPrice,
         submitterAccount: values.submitterPda, 
-        submitter:values.submitter.publicKey
+        submitter:values.submitter.publicKey,
+        instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
+        
       })
       .remainingAccounts([
         ...values.committeePdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))

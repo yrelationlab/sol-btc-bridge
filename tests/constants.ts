@@ -4,6 +4,9 @@ import { PublicKey } from "@solana/web3.js";
 export const DECIMALS9 = new anchor.BN(1_000_000_000);
 export const FEE_DENOMINATOR = new anchor.BN(1000000);
 export const GLOBAL_CONFIG = Buffer.from("GLOBAL_CONFIG");
+export const BRIDGE_PDA  = Buffer.from("BRIDGE_PDA");
+export const SBTC_MINT  = Buffer.from("SBTC_MINT");
+
 export const NONCE_CONFIG = Buffer.from("NONCE_CONFIG");
 export const TOKEN_CONFIG = Buffer.from("TOKEN_CONFIG");
 export const SUPPORTED_CHAINS_CONFIG = Buffer.from("SUPPORTED_CHAINS_CONFIG");

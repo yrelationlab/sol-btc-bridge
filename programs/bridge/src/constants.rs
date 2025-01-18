@@ -3,6 +3,10 @@ use solana_program::pubkey;
 #[constant]
 pub const GLOBAL_CONFIG: &str = "GLOBAL_CONFIG";
 #[constant]
+pub const SBTC_MINT: &str = "SBTC_MINT";
+#[constant]
+pub const BRIDGE_PDA: &str = "BRIDGE_PDA";
+#[constant]
 pub const NONCE_CONFIG: &str = "NONCE_CONFIG";
 #[constant]
 pub const TOKEN_CONFIG: &str = "TOKEN_CONFIG";
@@ -21,6 +25,4 @@ pub const ANCHOR_HEADER_LEN: usize = 8;
 
 #[constant]
 // Hardcoded pubkey for create memoo config
-pub const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
-
-
+pub const HARDCODED_PUBKEY: Pubkey = pubkey!("ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh");
