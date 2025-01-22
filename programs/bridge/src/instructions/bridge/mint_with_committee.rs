@@ -33,43 +33,49 @@ pub fn mint_sbtc_with_signatures(
     let mut bitmap: u128 = 0;
     let mut approval_stake: u16 = 0;
 
-    for i in 0..number_of_signatures {
-        let (signer_pubkey, data) =
-            resolve_secp256k1_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
+    // for i in 0..number_of_signatures {
+    //     let (signer_pubkey, data) =
+    //         resolve_secp256k1_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
 
-        // verify the message_of_signer == msg
-        // verify Operation::MintSbtc
-        // get Committee stake
-        let (_, committee_acct) = get_commitee_account(
-            &ctx.program_id,
-            ctx.remaining_accounts.to_vec(),
-            &signer_pubkey,
-        )?;
-        let acct_data = committee_acct.try_borrow_data()?;
-        let comm = Committee::try_from_slice(&acct_data[crate::constants::ANCHOR_HEADER_LEN..])?;
+    //     // verify the message_of_signer == msg
+    //     // verify Operation::MintSbtc
+    //     // get Committee stake
+    //     let (_, committee_acct) = get_commitee_account(
+    //         &ctx.program_id,
+    //         ctx.remaining_accounts.to_vec(),
+    //         &signer_pubkey,
+    //     )?;
+    //     let acct_data = committee_acct.try_borrow_data()?;
+    //     let comm = Committee::try_from_slice(&acct_data[crate::constants::ANCHOR_HEADER_LEN..])?;
 
-        let mask = 1u128 << comm.index;
-        require!((bitmap & mask) == 0, ErrorCode::DuplicateSignature);
-        bitmap |= mask;
-        approval_stake += comm.stake_amount;
-    }
-    require!(approval_stake >= MINT_SBTC_STAKE_REQUIRED, ErrorCode::InsufficientStake);
+    //     let mask = 1u128 << comm.index;
+    //     require!((bitmap & mask) == 0, ErrorCode::DuplicateSignature);
+    //     bitmap |= mask;
+    //     approval_stake += comm.stake_amount;
+    // }
+    // require!(approval_stake >= MINT_SBTC_STAKE_REQUIRED, ErrorCode::InsufficientStake);
 
     // nonce_config.nonce += 1;
 
     // 2) parse msg.payload => (amount, user, ...)
     let amount = msg.amount;
 
+    msg!("msg data:: amount={}  source_chain_id={} nounce={} ", msg.amount, msg.source_chain_id, msg.nonce);
     // 3) anchor_spl::token::mint_to
     // authority = "bridge_pda", so we must do .with_signer
     // seeds = [ "bridge", &msg.chain_id.to_be_bytes(), bump ]
-    let seeds: &[&[u8]] = &[
+
+    let bump = ctx.bumps.bridge_pda;
+
+    let seeds = [
         BRIDGE_PDA.as_bytes(),
-        &msg.source_chain_id.to_be_bytes(),
-        // the last byte is the bump, from anchor
-        // you can read from the "bridge_pda" bump maybe
-        // or do custom getPda bump
+        &_chain_id.to_be_bytes(),
+        &[bump],
     ];
+
+
+
+    // Prepare signer with the bump included
     let signer = &[&seeds[..]];
 
     let mint_to_ctx = CpiContext::new_with_signer(
