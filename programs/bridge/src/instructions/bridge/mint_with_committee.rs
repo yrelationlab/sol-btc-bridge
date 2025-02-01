@@ -10,7 +10,7 @@ use crate::constants::{
 use crate::errors::ErrorCode;
 use crate::{
     decode_update_token_price_payload, find_ata_in_accounts, get_commitee_account,
-    get_token_pda_bump_seeds, required_stake, resolve_secp256k1_with_index, utils, Committee,
+    get_token_pda_bump_seeds, required_stake, utils, Committee,
     MintSbtcMessage, Nonces, Operation, Submitter, MINT_SBTC_STAKE_REQUIRED,
 };
 

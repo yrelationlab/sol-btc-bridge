@@ -10,7 +10,7 @@ use crate::constants::{
 use crate::errors::ErrorCode;
 use crate::{
     decode_update_token_price_payload, find_ata_in_accounts, get_commitee_account,
-    get_token_pda_bump_seeds, required_stake, resolve_secp256k1_with_index, utils, Committee,
+    get_token_pda_bump_seeds, required_stake, resolve_ed25519_with_index, utils, Committee,
     Message, Nonces, Operation, Submitter,
 };
 
@@ -33,7 +33,7 @@ pub fn update_token_price_with_signatures<'info>(
 
     for i in 0..number_of_signatures {
         let (signer_pubkey, data) =
-            resolve_secp256k1_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
+        resolve_ed25519_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
 
         let message_of_signer = utils::deserialize_message(&data)?;
         // check signer_pubkey is allowed
@@ -141,3 +141,4 @@ pub struct UpdateTokenPrice<'info> {
     pub instructions_sysvar: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
 }
+

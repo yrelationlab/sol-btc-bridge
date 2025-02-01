@@ -61,3 +61,20 @@ pub fn resolve_ed25519_with_index<'a>(
     let order = &ix.data[112..];
     return Ok((pub_key, order.to_vec()));
 }
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use anchor_lang::prelude::Pubkey;
+
+    use super::*; // 引入测试目标
+
+    #[test]
+    fn test_pda() {
+        let address_sol = Pubkey::from_str("5VJ31bg7HveNKBnkNBSkZmJUR9GSJyMgenWS3thrLnmL").unwrap();
+        println!("sol {:?}", address_sol);
+        // let address_eth = Pubkey::from_str("0x388C818CA8B9251b393131C08a736A67ccB19297").unwrap();
+        // println!("eth {:?}", address_eth);
+     
+    }
+}
