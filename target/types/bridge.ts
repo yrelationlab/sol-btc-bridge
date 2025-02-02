@@ -8,14 +8,9 @@ export type Bridge = {
       "value": "\"GLOBAL_CONFIG\""
     },
     {
-      "name": "SBTC_MINT",
+      "name": "BRIDGE_SBTC_AUTH",
       "type": "string",
-      "value": "\"SBTC_MINT\""
-    },
-    {
-      "name": "BRIDGE_PDA",
-      "type": "string",
-      "value": "\"BRIDGE_PDA\""
+      "value": "\"BRIDGE_SBTC_AUTH\""
     },
     {
       "name": "NONCE_CONFIG",
@@ -57,7 +52,7 @@ export type Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -78,18 +73,14 @@ export type Bridge = {
           ]
         },
         {
-          "name": "bridgePda",
+          "name": "bridgeSbtcAuthority",
           "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "bridge_pda, init no need",
-            "use as sBTC mint's authority"
-          ]
+          "isSigner": false
         },
         {
           "name": "sbtcMint",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "tokenProgram",
@@ -306,7 +297,7 @@ export type Bridge = {
           ]
         },
         {
-          "name": "bridgePda",
+          "name": "bridgeSbtcAuth",
           "isMut": false,
           "isSigner": false,
           "docs": [
@@ -1000,6 +991,11 @@ export type Bridge = {
       "code": 6038,
       "name": "InstructionMissing",
       "msg": "InstructionMissing"
+    },
+    {
+      "code": 6039,
+      "name": "InvalidSigner",
+      "msg": "Invalid Signer"
     }
   ]
 };
@@ -1014,14 +1010,9 @@ export const IDL: Bridge = {
       "value": "\"GLOBAL_CONFIG\""
     },
     {
-      "name": "SBTC_MINT",
+      "name": "BRIDGE_SBTC_AUTH",
       "type": "string",
-      "value": "\"SBTC_MINT\""
-    },
-    {
-      "name": "BRIDGE_PDA",
-      "type": "string",
-      "value": "\"BRIDGE_PDA\""
+      "value": "\"BRIDGE_SBTC_AUTH\""
     },
     {
       "name": "NONCE_CONFIG",
@@ -1063,7 +1054,7 @@ export const IDL: Bridge = {
     {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
-      "value": "pubkey ! (\"ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh\")"
+      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -1084,18 +1075,14 @@ export const IDL: Bridge = {
           ]
         },
         {
-          "name": "bridgePda",
+          "name": "bridgeSbtcAuthority",
           "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "bridge_pda, init no need",
-            "use as sBTC mint's authority"
-          ]
+          "isSigner": false
         },
         {
           "name": "sbtcMint",
           "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "tokenProgram",
@@ -1312,7 +1299,7 @@ export const IDL: Bridge = {
           ]
         },
         {
-          "name": "bridgePda",
+          "name": "bridgeSbtcAuth",
           "isMut": false,
           "isSigner": false,
           "docs": [
@@ -2006,6 +1993,11 @@ export const IDL: Bridge = {
       "code": 6038,
       "name": "InstructionMissing",
       "msg": "InstructionMissing"
+    },
+    {
+      "code": 6039,
+      "name": "InvalidSigner",
+      "msg": "Invalid Signer"
     }
   ]
 };

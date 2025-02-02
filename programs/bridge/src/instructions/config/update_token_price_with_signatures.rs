@@ -1,11 +1,11 @@
 use anchor_lang::solana_program::pubkey::Pubkey;
-use anchor_lang::solana_program::sysvar::{
-    clock::Clock, instructions as instructions_sysvar_module,
-};
+use anchor_lang::solana_program::sysvar::
+    instructions as instructions_sysvar_module
+;
 use anchor_lang::{prelude::*, Discriminator};
 
 use crate::constants::{
-    ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, NONCE_CONFIG,
+    ANCHOR_HEADER_LEN, BRIDGE_SBTC_AUTH, COMMITTEE_SUBMITTER_CONFIG, NONCE_CONFIG
 };
 use crate::errors::ErrorCode;
 use crate::{
@@ -58,7 +58,7 @@ pub fn update_token_price_with_signatures<'info>(
         )?;
         let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
         let commite_config = Committee::try_from_slice(&account_data[ANCHOR_HEADER_LEN..])
-            .map_err(|_| ProgramError::InvalidAccountData)?;
+            .map_err(|_| ErrorCode::InvalidSigner)?;
 
         let mask = 1u128 << commite_config.index;
         if bitmap & mask != 0 {
@@ -106,7 +106,7 @@ pub struct UpdateTokenPrice<'info> {
     #[account(
         constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
         seeds = [
-            GLOBAL_CONFIG.as_bytes(),
+            BRIDGE_SBTC_AUTH.as_bytes(),
             &_chain_id.to_be_bytes()
         ],
         bump

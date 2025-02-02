@@ -1,7 +1,6 @@
 use crate::{
     constants::{
-        ANCHOR_HEADER_LEN, BRIDGE_PDA, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SBTC_MINT,
-        SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG,
+        ANCHOR_HEADER_LEN, BRIDGE_SBTC_AUTH, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY,
     },
     create_account,
     errors::ErrorCode,
@@ -160,29 +159,22 @@ pub struct CreateBridgeConfig<'info> {
     )]
     pub payer: Signer<'info>,
 
-    /// bridge_pda, init no need
-    /// use as sBTC mint's authority
+    /// CHECK:` Validate address by deriving pda, use as sBTC mint's authority
     #[account(
         seeds = [
-            BRIDGE_PDA.as_bytes(),
+            BRIDGE_SBTC_AUTH.as_bytes(),
             &chain_id.to_be_bytes()
         ],
         bump
     )]
-    /// CHECK: 只需要key
-    pub bridge_pda: UncheckedAccount<'info>,
-
+    pub bridge_sbtc_authority: UncheckedAccount<'info>,
+    
     #[account(
         init,
         payer = payer,
-        seeds = [
-            SBTC_MINT.as_bytes(),
-            &chain_id.to_be_bytes()
-        ],
-        bump,
         mint::decimals = 10, // DECIMALS10
-        mint::authority = bridge_pda,
-        mint::freeze_authority = bridge_pda,
+        mint::authority = bridge_sbtc_authority,
+        mint::freeze_authority = bridge_sbtc_authority,
     )]
     pub sbtc_mint: Account<'info, Mint>,
     pub token_program: Program<'info, Token>,

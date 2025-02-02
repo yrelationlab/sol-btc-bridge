@@ -2,11 +2,17 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
 import { Bridge } from "../target/types/bridge";
-import { TestValues, assembleUpdateTokenPricePayload, createBridgeConfig, createCommitteeConfig, createValues, expectRevert } from "./init";
+import { TestValues, airdrop, assembleUpdateTokenPricePayload, createAndSendV0Tx, createBridgeConfig, createCommitteeConfig, createValues, expectRevert } from "./init";
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
-import { MessageType, Operation } from "./types";
-import {SYSVAR_INSTRUCTIONS_PUBKEY} from '@solana/web3.js'
+import { MessageType, MessageIds } from "./types";
+import { Keypair, SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js'
+import { UpdateTokenPriceMsg, UpdateTokenPriceMsgTxn } from "./txns/updateTokenPrice";
+import { MSG_VERSION } from "./constants";
+
+
+
+
 
 describe("Update Token Price", () => {
   const provider = anchor.AnchorProvider.env();
@@ -20,43 +26,45 @@ describe("Update Token Price", () => {
     const createCommitteeConfig_tx = await createCommitteeConfig(program, values);
     console.log(`createCommitteeConfig_tx is ${createCommitteeConfig_tx}`)
   });
-  it("Creation", async () => {
+  it("1. update Token Price with only submitter", async () => {
 
-    const tokenId = values.supportedTokensIndex[0];
-    const tokenPrice = 999;
-    const payload = assembleUpdateTokenPricePayload(tokenId, tokenPrice);
+    await airdrop(provider.connection, values.submitter.publicKey);
     // Create the msg object
-    const msg = {
-      messageType: 0,              // Example: 1 for some type of message
-      version: 1,                   // Example: version 1
-      nonce: new anchor.BN(1), // Example nonce value
-      chainId: values.chainId.toNumber(),            // Chain ID passed as an argument
-      payload: payload, // Example payload data
-    };
-    await program.methods
-      .updateTokenPriceWithSignatures(
-        msg as any,
-        3,
-        values.chainId.toNumber()
-      )
-      .accounts({ 
-        bridgeConfig: values.bridgeConfigPDA, 
-        nonce: values.noncePdaUpdateTokenPrice,
-        submitterAccount: values.submitterPda, 
-        submitter:values.submitter.publicKey,
-        instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
-        
-      })
-      .remainingAccounts([
-        ...values.committeePdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
-        ,{
-          pubkey: values.tokenConfigPdas[0],
-          isSigner: false,
-          isWritable: true,
-      },
+    const msg = new UpdateTokenPriceMsg({
+      messageType: new BN(MessageIds.UpdateTokenPrice),
+      version: MSG_VERSION,
+      nonce: new anchor.BN(1), // todo: should get nonce from chian
+      chainId: values.chainId,
+      tokenId: values.supportedTokensIndex[0],
+      tokenPrice: new anchor.BN(999)
+    });
 
-      ]).signers([values.submitter,values.payerAdmin])
-      .rpc({ skipPreflight: false });
+    const { encoded, signature } = msg.createSignature(values.submitter);
+    const numberOfSignatures = new anchor.BN(1)
+    let tx = await new UpdateTokenPriceMsgTxn(program).createTx({
+      serialized: encoded,
+      signature,
+      signerPublicKey: values.submitter.publicKey,
+      payer: values.submitter.publicKey,
+      addixEd25519Program: true,
+      msg,
+      chainID: values.chainId,
+      numberOfSignatures,
+      bridgeConfigPDA: values.bridgeConfigPDA,
+      noncePdaUpdateTokenPrice: values.noncePdaUpdateTokenPrice,
+      submitterPda: values.submitterPda,
+      submitter: values.submitter.publicKey,
+      committeePdas: values.committeePdas,
+      tokenConfigPdas: values.tokenConfigPdas[0]
+    });
+    // tx.feePayer = values.idoBuyer.publicKey;
+    console.log(`tx.instructions[0] is ${JSON.stringify(tx.instructions[0].programId, null, 2)}`);
+    console.log(`tx.instructions[1] is ${JSON.stringify(tx.instructions[1].programId, null, 2)}`);
+    // try {
+
+    console.log(`claimLpRewards...start...`)
+    await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
+    console.log(`claimLpRewards....end...`)
 
     for (const [index, tokenConfigPda] of values.tokenConfigPdas.entries()) {
       const tokenConfig = await program.account.tokenConfig.fetch(tokenConfigPda);

@@ -10,6 +10,7 @@ declare_id!("4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx");
 pub mod bridge {
 
     pub use super::instructions::*;
+    
     use super::*;
     // pub fn close_memoo_config(ctx: Context<CloseMemooConfig>) -> Result<()> {
     //     instructions::close_memoo_config(ctx)

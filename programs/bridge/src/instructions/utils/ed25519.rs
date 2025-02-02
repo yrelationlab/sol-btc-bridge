@@ -1,20 +1,13 @@
-use crate::{
-    constants::{COMMITTEE_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG},
-    errors::ErrorCode,
-};
+use crate::
+    errors::ErrorCode
+;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::ed25519_program::ID as ED25519_PROGRAM_ID;
 use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_module;
-use anchor_lang::system_program;
-use anchor_spl::associated_token::{
-    create as create_associated_token, Create as CreateAssociatedToken,
-};
-use std::convert::TryInto;
 
 const EXPECTED_PUBLIC_KEY_OFFSET: usize = 16;
 const EXPECTED_PUBLIC_KEY_RANGE: std::ops::Range<usize> =
     EXPECTED_PUBLIC_KEY_OFFSET..(EXPECTED_PUBLIC_KEY_OFFSET + 32);
-const EXPTECED_IX_SYSVAR_INDEX: usize = 0;
 // based on https://github.com/GuidoDipietro/solana-ed25519-secp256k1-sig-verification/blob/master/programs/solana-ed25519-sig-verification/src/lib.rs
 fn validate_ed25519_ix(ix: &anchor_lang::solana_program::instruction::Instruction) -> bool {
     if ix.program_id != ED25519_PROGRAM_ID || ix.accounts.len() != 0 {

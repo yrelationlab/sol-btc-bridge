@@ -1,12 +1,13 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
 import * as anchor from "@coral-xyz/anchor";
+import {Schema, serialize, deserialize} from "borsh";
 
 export interface TestValues {
     payerAdmin: Keypair;
     feeRecipient: PublicKey;
     chainId: anchor.BN;
     supportedTokensKeypairs: Keypair[];
-    supportedTokensIndex: number[];
+    supportedTokensIndex: anchor.BN[];
     prices: anchor.BN[];
     supportedChainsBuffer: Buffer;
     tokenFeePercentages: anchor.BN[];
@@ -18,14 +19,14 @@ export interface TestValues {
     tokenConfigPdas: PublicKey[];
     supportedChainsPdas: PublicKey[];
     committeeKeypairs: Keypair[];
-    stakes: number[];
-    minStake: number;
+    stakes: anchor.BN[];
+    minStake: anchor.BN;
     submitter: Keypair;
     submitterPda: PublicKey;
     committeePdas: PublicKey[];
     noncePdaUpdateTokenPrice: PublicKey;
     nonceMintSbtc: PublicKey;
-    supportedChains: number[]
+    supportedChains: anchor.BN[]
 }
 
 
@@ -42,7 +43,7 @@ export interface MessageType {
     payload: Uint8Array;  // Corresponds to Vec<u8> in Rust
   }
 
-  export enum Operation {
+  export enum MessageIds {
     TokenTransfer = 0,
     Blocklist = 1,
     EmergencyOp = 2,
@@ -53,4 +54,4 @@ export interface MessageType {
     UpdateChainId = 8,
     MintSbtc = 9
   }
-  
+

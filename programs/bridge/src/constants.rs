@@ -2,10 +2,10 @@ use anchor_lang::prelude::*;
 use solana_program::pubkey;
 #[constant]
 pub const GLOBAL_CONFIG: &str = "GLOBAL_CONFIG";
+// #[constant]
+// pub const SBTC_MINT: &str = "SBTC_MINT";
 #[constant]
-pub const SBTC_MINT: &str = "SBTC_MINT";
-#[constant]
-pub const BRIDGE_PDA: &str = "BRIDGE_PDA";
+pub const BRIDGE_SBTC_AUTH: &str = "BRIDGE_SBTC_AUTH";
 #[constant]
 pub const NONCE_CONFIG: &str = "NONCE_CONFIG";
 #[constant]
@@ -24,5 +24,5 @@ pub const DECIMALS9: u8 = 9;
 pub const ANCHOR_HEADER_LEN: usize = 8;
 
 #[constant]
-// Hardcoded pubkey for create memoo config
-pub const HARDCODED_PUBKEY: Pubkey = pubkey!("ASUMPXacWb6rMNUGHJWevNPYAXctoSjHmipqzUBJnpBh");
+// Hardcoded pubkey for create config
+pub const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");

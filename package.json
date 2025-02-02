@@ -5,7 +5,7 @@
     "build": "anchor build -- --tools-version v1.41",
     "test-in-remote-node": "anchor run test",
     "test-in-local": "anchor test -- --tools-version v1.41  ",
-    "test-in-local-validator": "anchor test --skip-local-validator -- --tools-version v1.41  ",
+    "test-in-local-validator": "anchor test --skip-local-validator -- --tools-version v1.41",
     "network": "solana config get",
     "url:local": "solana config set --url localhost",
     "url:dev": "env-cmd -f .env.devnet -x solana config set --url \\$RPC_URL",

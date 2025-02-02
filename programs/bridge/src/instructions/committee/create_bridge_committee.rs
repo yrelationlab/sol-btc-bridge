@@ -1,8 +1,8 @@
 use crate::{
-    constants::{ANCHOR_HEADER_LEN, COMMITTEE_CONFIG, COMMITTEE_SUBMITTER_CONFIG},
+    constants::{ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG},
     create_account,
     errors::ErrorCode,
-    find_ata_in_accounts, get_commitee_account, get_committee_config_pda_bump_seeds, Committee,
+    get_commitee_account, Committee,
     Submitter,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;

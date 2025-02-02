@@ -45,11 +45,11 @@ import cm3 from "../cli/.config/cm3.json";
 import { assert, expect } from "chai";
 import { Bridge } from "../target/types/bridge";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { Operation, TestValues, TestValuesDefaults } from "./types";
+import { MessageIds, TestValues, TestValuesDefaults } from "./types";
 import {
   BRIDGE_COMMITTEE_CONFIG,
   BRIDGE_COMMITTEE_SUBMITTER_CONFIG,
-  BRIDGE_PDA,
+  BRIDGE_SBTC_AUTH,
   SBTC_MINT,
   DECIMALS9,
   getCommitteePda,
@@ -91,14 +91,26 @@ function keypairsToPublicArrays(keypairs): PublicKey[] {
     return keypair.publicKey;
   });
 }
+export async function airdrop(connection: Connection, key: PublicKey, amount: number = 1) {
+  const airdropSignature = await connection.requestAirdrop(key, amount * LAMPORTS_PER_SOL);
+  await connection.confirmTransaction(airdropSignature);
+}
 
 export function createValues(defaults?: TestValuesDefaults): TestValues {
   const payerAdmin = Keypair.fromSecretKey(new Uint8Array(secret));
+  console.log(`payerAdmin is ${JSON.stringify(payerAdmin.publicKey)}`);
+
   const feeRecipient = Keypair.generate().publicKey;
+  console.log(`feeRecipient is ${JSON.stringify(feeRecipient)}`);
+
   const supportedTokensKeypairs = [Keypair.generate(), Keypair.generate()];
+  supportedTokensKeypairs.forEach((keypair, index) => {
+    console.log(`PublicKey of supportedTokensKeypairs ${index} is ${keypair.publicKey.toBase58()}`);
+  });
+  
   const supportedTokensIndex = Array.from(
     { length: supportedTokensKeypairs.length },
-    (_, i) => i
+    (_, i) => new anchor.BN(i)
   );
   const decimals = [DECIMALS9, DECIMALS9];
   const prices = [
@@ -114,45 +126,60 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   ];
   const curChainId = new anchor.BN(1);
   const bridgeConfigPDA = PublicKey.findProgramAddressSync(
-    [GLOBAL_CONFIG, curChainId.toBuffer()],
+    [GLOBAL_CONFIG, curChainId.toArrayLike(Buffer, 'be', 1)],
     anchor.workspace.bridge.programId
   )[0];
+  console.log(`curChainId is ${curChainId.toArrayLike(Buffer, 'be', 1)}`);
+  console.log(`bridgeConfigPDA is ${JSON.stringify(bridgeConfigPDA)}`);
+
   const bridgePDA = PublicKey.findProgramAddressSync(
-    [BRIDGE_PDA, curChainId.toBuffer()],
+    [BRIDGE_SBTC_AUTH, curChainId.toBuffer()],
     anchor.workspace.bridge.programId
   )[0];
+  console.log(`bridgePDA is ${JSON.stringify(bridgePDA)}`);
+
   const sbtcMint = PublicKey.findProgramAddressSync(
     [SBTC_MINT, curChainId.toBuffer()],
     anchor.workspace.bridge.programId
   )[0]
+  console.log(`sbtcMint is ${JSON.stringify(sbtcMint)}`);
+
   const tokenConfigPdas = supportedTokensIndex.map((tokenId, index) =>
     getTokenConfigPda(tokenId)
   );
   console.log(`tokenConfigPdas is ${JSON.stringify(tokenConfigPdas)}`);
   const supportedChainsPdas = supportedChains.map((chainId) => {
-    return getSupportChainPda(chainId);
+    return getSupportChainPda(new anchor.BN(chainId));
   });
   const committeeKeypairs = [
     Keypair.fromSecretKey(new Uint8Array(cm1)),
     Keypair.fromSecretKey(new Uint8Array(cm2)),
     Keypair.fromSecretKey(new Uint8Array(cm3)),
   ];
+  committeeKeypairs.forEach((keypair, index) => {
+    console.log(`PublicKey of committeeKeypair ${index} is ${keypair.publicKey.toBase58()}`);
+  });
+
   const committeePdas = committeeKeypairs.map((committeeAddress) => {
     return getCommitteePda(committeeAddress);
   });
+  console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
+
   const stakes = [1000, 2000, 3000];
   const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
   const noncePdaUpdateTokenPrice = PublicKey.findProgramAddressSync(
-    [NONCE_CONFIG, Buffer.from(Operation.UpdateTokenPrice.toString())],
+    [NONCE_CONFIG, new anchor.BN(MessageIds.UpdateTokenPrice.toString()).toBuffer()],
     anchor.workspace.bridge.programId
   )[0];
+  console.log(`noncePdaUpdateTokenPrice is ${JSON.stringify(noncePdaUpdateTokenPrice)}`);
 
   const nonceMintSbtc = PublicKey.findProgramAddressSync(
-    [NONCE_CONFIG, Buffer.from(Operation.MintSbtc.toString())],
+    [NONCE_CONFIG, Buffer.from(MessageIds.MintSbtc.toString())],
     anchor.workspace.bridge.programId
   )[0];
+  console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
 
   return {
     chainId: curChainId,
@@ -282,51 +309,41 @@ export async function createLookupTable(
   // Step 2 - Log Lookup Table Address
   console.log("Lookup Table Address:", lookupTableAddress.toBase58());
   // Step 3 - Generate a transaction and send it to the network
-  createAndSendV0Tx([lookupTableInst], payer, connection);
+  createAndSendV0Tx([lookupTableInst], [payer], connection);
   return lookupTableAddress;
 }
-export async function createAndSendV0Tx(
-  txInstructions: TransactionInstruction[],
-  payer: Keypair,
-  connection: Connection,
-  lookupTable?: AddressLookupTableAccount[],
-  skipPreflight: boolean = false
-) {
+
+export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false) {
   // Step 1 - Fetch Latest Blockhash
-  let latestBlockhash = await connection.getLatestBlockhash("finalized");
-  console.log(
-    "   ✅ - Fetched latest blockhash. Last valid height:",
-    latestBlockhash.lastValidBlockHeight
-  );
+  let latestBlockhash = await connection.getLatestBlockhash('finalized');
+  console.log("   ✅ - Fetched latest blockhash. Last valid height:", latestBlockhash.lastValidBlockHeight);
+
   // Step 2 - Generate Transaction Message
   const messageV0 = new TransactionMessage({
-    payerKey: payer.publicKey,
+    payerKey: signers[0].publicKey,
     recentBlockhash: latestBlockhash.blockhash,
-    instructions: txInstructions,
+    instructions: txInstructions
   }).compileToV0Message(lookupTable);
   console.log("   ✅ - Compiled transaction message");
   const transaction = new VersionedTransaction(messageV0);
+  console.log("   ✅ - Transaction Size < 1232:", transaction.serialize().length);
   // Step 3 - Sign your transaction with the required `Signers`
-  transaction.sign([payer]);
+  transaction.sign(signers);
   console.log("   ✅ - Transaction Signed");
+
   // Step 4 - Send our v0 transaction to the cluster
-  const txid = await connection.sendTransaction(transaction, {
-    skipPreflight: skipPreflight,
-    maxRetries: 5,
-  });
+  const txid = await connection.sendTransaction(transaction, { skipPreflight: skipPreflight, maxRetries: 5 });
   console.log(`   ✅ - Transaction ${txid} sent to network`);
-  // Step 5 - Confirm Transaction
+
+  // Step 5 - Confirm Transaction 
   const confirmation = await confirmTransaction(connection, txid);
   if (confirmation.err) {
-    console.log("   ❌ - Transaction not confirmed.");
-    throw confirmation.err;
+    console.log("   ❌ - Transaction not confirmed.")
+    throw confirmation.err
   }
-  console.log(
-    "🎉 Transaction succesfully confirmed!",
-    "\n",
-    `https://explorer.solana.com/tx/${txid}?cluster=devnet`
-  );
+  console.log('🎉 Transaction succesfully confirmed!', '\n', `https://explorer.solana.com/tx/${txid}?cluster=devnet`);
 }
+
 export async function confirmTransaction(
   connection: Connection,
   signature: TransactionSignature,

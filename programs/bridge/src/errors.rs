@@ -80,5 +80,7 @@ pub enum ErrorCode {
     #[msg("Signature verification failed")]
     SigVerificationFailed,
     #[msg("InstructionMissing")]
-    InstructionMissing
+    InstructionMissing,
+    #[msg("Invalid Signer")]
+    InvalidSigner
 }

@@ -39,7 +39,7 @@ import {
 } from "@solana/spl-token";
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
-import { BRIDGE_PDA } from "./constants";
+import { BRIDGE_SBTC_AUTH } from "./constants";
 
 describe("Mint sbtc", () => {
   const provider = anchor.AnchorProvider.env();
@@ -68,7 +68,7 @@ describe("Mint sbtc", () => {
       values.bridgeConfigPDA
     );
     const bridgePDA = PublicKey.findProgramAddressSync(
-      [BRIDGE_PDA, values.chainId.toBuffer()],
+      [BRIDGE_SBTC_AUTH, values.chainId.toBuffer()],
       anchor.workspace.bridge.programId
     )[0];
     const accountExists = await checkAssociatedTokenAccount(
