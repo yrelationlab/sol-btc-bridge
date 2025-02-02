@@ -184,7 +184,7 @@ pub struct CreateBridgeConfig<'info> {
             &chain_id.to_be_bytes()
         ],
         bump,
-        mint::decimals = 10, // DECIMALS10
+        mint::decimals = 9,
         mint::authority = sbtc_mint,
         mint::freeze_authority = sbtc_mint,
     )]
