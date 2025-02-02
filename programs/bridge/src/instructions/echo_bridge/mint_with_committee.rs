@@ -1,26 +1,19 @@
 use anchor_lang::solana_program::pubkey::Pubkey;
-use anchor_lang::solana_program::sysvar::
-    instructions as instructions_sysvar_module
-;
+use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_module;
 use anchor_lang::prelude::*;
 
-use crate::constants::{
-    BRIDGE_SBTC_AUTH, COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG,
-};
+use crate::constants::{ COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, SBTC_MINT };
 use crate::errors::ErrorCode;
-use crate::{
-    MintSbtcMessage, Submitter,
-};
+use crate::{ MintSbtcMessage, Submitter };
 
 use anchor_spl::token::Mint;
-
 
 use crate::BridgeConfig;
 pub fn mint_sbtc_with_signatures(
     ctx: Context<MintSbtcWithSignatures>,
     msg: MintSbtcMessage,
     number_of_signatures: u8,
-    _chain_id: u8,
+    _chain_id: u8
 ) -> Result<()> {
     let bridge_config = &ctx.accounts.bridge_config;
     // let nonce_config = &mut ctx.accounts.nonce;
@@ -58,20 +51,19 @@ pub fn mint_sbtc_with_signatures(
     // 2) parse msg.payload => (amount, user, ...)
     let amount = msg.amount;
 
-    msg!("msg data:: amount={}  source_chain_id={} nounce={} ", msg.amount, msg.source_chain_id, msg.nonce);
+    msg!(
+        "msg data:: amount={}  source_chain_id={} nounce={} ",
+        msg.amount,
+        msg.source_chain_id,
+        msg.nonce
+    );
     // 3) anchor_spl::token::mint_to
     // authority = "BRIDGE_SBTC_AUTH", so we must do .with_signer
     // seeds = [ "bridge", &msg.chain_id.to_be_bytes(), bump ]
 
-    let bump = ctx.bumps.bridge_sbtc_auth;
+    let bump = ctx.bumps.sbtc_mint;
 
-    let seeds = [
-        BRIDGE_SBTC_AUTH.as_bytes(),
-        &_chain_id.to_be_bytes(),
-        &[bump],
-    ];
-
-
+    let seeds = [SBTC_MINT.as_bytes(), &_chain_id.to_be_bytes(), &[bump]];
 
     // Prepare signer with the bump included
     let signer = &[&seeds[..]];
@@ -81,9 +73,9 @@ pub fn mint_sbtc_with_signatures(
         anchor_spl::token::MintTo {
             mint: ctx.accounts.sbtc_mint.to_account_info(),
             to: ctx.accounts.user_sbtc_ata.to_account_info(),
-            authority: ctx.accounts.bridge_sbtc_auth.to_account_info(),
+            authority: ctx.accounts.sbtc_mint.to_account_info(),
         },
-        signer,
+        signer
     );
     anchor_spl::token::mint_to(mint_to_ctx, amount)?;
 
@@ -130,20 +122,24 @@ pub struct MintSbtcWithSignatures<'info> {
     )]
     pub bridge_config: Box<Account<'info, BridgeConfig>>,
 
-    /// 2. The same PDA used as Mint authority
-    #[account(
-        seeds = [
-            BRIDGE_SBTC_AUTH.as_bytes(),
-            &_chain_id.to_be_bytes()
-        ],
-        bump
-    )]
-    /// CHECK: Just a PDA for authority
-    pub bridge_sbtc_auth: UncheckedAccount<'info>,
+    // /// 2. The same PDA used as Mint authority
+    // #[account(
+    //     seeds = [
+    //         BRIDGE_SBTC_AUTH.as_bytes(),
+    //         &_chain_id.to_be_bytes()
+    //     ],
+    //     bump
+    // )]
+    // /// CHECK: Just a PDA for authority
+    // pub bridge_sbtc_auth: UncheckedAccount<'info>,
 
     #[account(
         mut,
-        address = bridge_config.sbtc_mint,  
+        seeds = [
+                    SBTC_MINT.as_bytes(),
+                    &_chain_id.to_be_bytes()
+                ],
+                bump,
     )]
     pub sbtc_mint: Account<'info, Mint>,
 
@@ -159,7 +155,6 @@ pub struct MintSbtcWithSignatures<'info> {
     /// CHECK: only need .key()
     pub user: UncheckedAccount<'info>,
 
-
     // #[account(
     //     init_if_needed,
     //     payer = payer,
@@ -171,7 +166,6 @@ pub struct MintSbtcWithSignatures<'info> {
     //     bump
     // )]
     // pub nonce: Box<Account<'info, Nonces>>,
-
 
     /// CHECK: This is not dangerous because we explicitly check the id
     #[account(address = instructions_sysvar_module::ID)]

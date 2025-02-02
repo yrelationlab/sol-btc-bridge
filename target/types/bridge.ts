@@ -8,9 +8,9 @@ export type Bridge = {
       "value": "\"GLOBAL_CONFIG\""
     },
     {
-      "name": "BRIDGE_SBTC_AUTH",
+      "name": "SBTC_MINT",
       "type": "string",
-      "value": "\"BRIDGE_SBTC_AUTH\""
+      "value": "\"SBTC_MINT\""
     },
     {
       "name": "NONCE_CONFIG",
@@ -73,14 +73,9 @@ export type Bridge = {
           ]
         },
         {
-          "name": "bridgeSbtcAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "sbtcMint",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "tokenProgram",
@@ -294,14 +289,6 @@ export type Bridge = {
           "isSigner": false,
           "docs": [
             "1. load BridgeConfig"
-          ]
-        },
-        {
-          "name": "bridgeSbtcAuth",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "2. The same PDA used as Mint authority"
           ]
         },
         {
@@ -1010,9 +997,9 @@ export const IDL: Bridge = {
       "value": "\"GLOBAL_CONFIG\""
     },
     {
-      "name": "BRIDGE_SBTC_AUTH",
+      "name": "SBTC_MINT",
       "type": "string",
-      "value": "\"BRIDGE_SBTC_AUTH\""
+      "value": "\"SBTC_MINT\""
     },
     {
       "name": "NONCE_CONFIG",
@@ -1075,14 +1062,9 @@ export const IDL: Bridge = {
           ]
         },
         {
-          "name": "bridgeSbtcAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "sbtcMint",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "tokenProgram",
@@ -1296,14 +1278,6 @@ export const IDL: Bridge = {
           "isSigner": false,
           "docs": [
             "1. load BridgeConfig"
-          ]
-        },
-        {
-          "name": "bridgeSbtcAuth",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "2. The same PDA used as Mint authority"
           ]
         },
         {

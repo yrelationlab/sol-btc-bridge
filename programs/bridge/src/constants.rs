@@ -2,10 +2,10 @@ use anchor_lang::prelude::*;
 use solana_program::pubkey;
 #[constant]
 pub const GLOBAL_CONFIG: &str = "GLOBAL_CONFIG";
-// #[constant]
-// pub const SBTC_MINT: &str = "SBTC_MINT";
 #[constant]
-pub const BRIDGE_SBTC_AUTH: &str = "BRIDGE_SBTC_AUTH";
+pub const SBTC_MINT: &str = "SBTC_MINT";
+// #[constant]
+// pub const BRIDGE_SBTC_AUTH: &str = "BRIDGE_SBTC_AUTH";
 #[constant]
 pub const NONCE_CONFIG: &str = "NONCE_CONFIG";
 #[constant]

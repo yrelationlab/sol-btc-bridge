@@ -9,6 +9,7 @@ import {
   expectRevert,
   createCommitteeConfig,
   checkAssociatedTokenAccount,
+  airdrop,
 } from "./init";
 import {
   clusterApiUrl,
@@ -67,7 +68,7 @@ describe("Mint sbtc", () => {
     const configAccount = await program.account.bridgeConfig.fetch(
       values.bridgeConfigPDA
     );
-    const bridgePDA = PublicKey.findProgramAddressSync(
+    const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
       [BRIDGE_SBTC_AUTH, values.chainId.toBuffer()],
       anchor.workspace.bridge.programId
     )[0];
@@ -112,14 +113,17 @@ describe("Mint sbtc", () => {
     }
     console.log(`User sBTC balance before mint: ${beforeBalance}`);
 
+    await airdrop(provider.connection, values.submitter.publicKey, 1)
+    await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
+
     const transaction = await program.methods
       .mintSbtcWithSignatures(msg as any, 3, values.chainId.toNumber())
       .accounts({
+        payer: values.payerAdmin.publicKey,
         bridgeConfig: values.bridgeConfigPDA,
         //   nonce: values.nonceMintSbtc,
         submitterAccount: values.submitterPda,
         submitter: values.submitter.publicKey,
-        bridgePda: bridgePDA,
         userSbtcAta: associatedTokenAddress,
         user: values.submitter.publicKey,
         sbtcMint: values.sbtcMint,
@@ -133,7 +137,7 @@ describe("Mint sbtc", () => {
         })),
       ])
       .preInstructions([...associatedInx])
-      .signers([values.submitter, values.payerAdmin])
+      .signers([values.payerAdmin, values.submitter])
       .rpc();
     console.log("txSig: ", transaction);
 

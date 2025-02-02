@@ -1,15 +1,18 @@
 use crate::{
     constants::{
-        ANCHOR_HEADER_LEN, BRIDGE_SBTC_AUTH, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY,
+        ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SBTC_MINT,
     },
     create_account,
     errors::ErrorCode,
     find_ata_in_accounts, get_support_chains_pda_bump_seeds, get_token_pda_bump_seeds,
     BridgeConfig, SupportedChainConfig, TokenConfig,
+    
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{prelude::*, Discriminator};
-use anchor_spl::token::{Mint, Token};
+
+use anchor_spl::
+        token::{Mint, Token};
 
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
@@ -135,6 +138,7 @@ pub fn create_bridge_config<'info>(
                 ErrorCode::SupportedChainSerializationError
             })?;
     }
+
     Ok(())
 }
 
@@ -152,6 +156,7 @@ pub struct CreateBridgeConfig<'info> {
         bump
     )]
     pub bridge_config: Account<'info, BridgeConfig>,
+
     /// The account paying for all rents
     #[account(
         mut,
@@ -159,24 +164,32 @@ pub struct CreateBridgeConfig<'info> {
     )]
     pub payer: Signer<'info>,
 
-    /// CHECK:` Validate address by deriving pda, use as sBTC mint's authority
-    #[account(
-        seeds = [
-            BRIDGE_SBTC_AUTH.as_bytes(),
-            &chain_id.to_be_bytes()
-        ],
-        bump
-    )]
-    pub bridge_sbtc_authority: UncheckedAccount<'info>,
     
+    /// CHECK:` Validate address by deriving pda, use as sBTC mint's authority
+    // #[account(
+    //     seeds = [
+    //         BRIDGE_SBTC_AUTH.as_bytes(),
+    //         &chain_id.to_be_bytes()
+    //     ],
+    //     bump
+    // )]
+    // pub sbtc_authority: AccountInfo<'info>,
+    
+    /// CHECK: `https://solana.stackexchange.com/questions/454/how-to-create-a-program-that-has-the-authority-to-mint-tokens`
     #[account(
         init,
         payer = payer,
+        seeds = [
+            SBTC_MINT.as_bytes(),
+            &chain_id.to_be_bytes()
+        ],
+        bump,
         mint::decimals = 10, // DECIMALS10
-        mint::authority = bridge_sbtc_authority,
-        mint::freeze_authority = bridge_sbtc_authority,
+        mint::authority = sbtc_mint,
+        mint::freeze_authority = sbtc_mint,
     )]
     pub sbtc_mint: Account<'info, Mint>,
+
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }

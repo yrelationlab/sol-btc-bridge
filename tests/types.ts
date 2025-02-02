@@ -14,7 +14,7 @@ export interface TestValues {
     decimals: anchor.BN[];
     tokenMinAmounts: anchor.BN[];
     bridgeConfigPDA: PublicKey;
-    bridgePDA: PublicKey;
+    bridgeSbtcAuth: PublicKey;
     sbtcMint: PublicKey;
     tokenConfigPdas: PublicKey[];
     supportedChainsPdas: PublicKey[];

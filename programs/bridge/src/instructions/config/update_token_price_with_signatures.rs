@@ -5,7 +5,7 @@ use anchor_lang::solana_program::sysvar::
 use anchor_lang::{prelude::*, Discriminator};
 
 use crate::constants::{
-    ANCHOR_HEADER_LEN, BRIDGE_SBTC_AUTH, COMMITTEE_SUBMITTER_CONFIG, NONCE_CONFIG
+    ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, NONCE_CONFIG
 };
 use crate::errors::ErrorCode;
 use crate::{
@@ -106,7 +106,7 @@ pub struct UpdateTokenPrice<'info> {
     #[account(
         constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
         seeds = [
-            BRIDGE_SBTC_AUTH.as_bytes(),
+            GLOBAL_CONFIG.as_bytes(),
             &_chain_id.to_be_bytes()
         ],
         bump

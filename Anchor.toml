@@ -28,7 +28,7 @@ wallet = "./cli/.config/secret.json"
 rpc_url = "http://127.0.0.1:8900"
 
 [scripts]
-test = "vitest --test-timeout=500000 3"
+test = "vitest --test-timeout=500000 4"
 
 # use localnet for test
 [test]

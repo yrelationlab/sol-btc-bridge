@@ -107,7 +107,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   supportedTokensKeypairs.forEach((keypair, index) => {
     console.log(`PublicKey of supportedTokensKeypairs ${index} is ${keypair.publicKey.toBase58()}`);
   });
-  
+
   const supportedTokensIndex = Array.from(
     { length: supportedTokensKeypairs.length },
     (_, i) => new anchor.BN(i)
@@ -132,11 +132,11 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   console.log(`curChainId is ${curChainId.toArrayLike(Buffer, 'be', 1)}`);
   console.log(`bridgeConfigPDA is ${JSON.stringify(bridgeConfigPDA)}`);
 
-  const bridgePDA = PublicKey.findProgramAddressSync(
+  const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
     [BRIDGE_SBTC_AUTH, curChainId.toBuffer()],
     anchor.workspace.bridge.programId
   )[0];
-  console.log(`bridgePDA is ${JSON.stringify(bridgePDA)}`);
+  console.log(`bridgeSbtcAuth is ${JSON.stringify(bridgeSbtcAuth)}`);
 
   const sbtcMint = PublicKey.findProgramAddressSync(
     [SBTC_MINT, curChainId.toBuffer()],
@@ -165,7 +165,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   });
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
-  const stakes = [1000, 2000, 3000];
+  const stakes = [new anchor.BN(1000), new anchor.BN(2000), new anchor.BN(3000)];
   const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
@@ -203,7 +203,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     committeePdas,
     noncePdaUpdateTokenPrice,
     supportedChains,
-    bridgePDA,
+    bridgeSbtcAuth: bridgeSbtcAuth,
     sbtcMint,
     nonceMintSbtc
   };
@@ -279,7 +279,9 @@ export async function createBridgeConfig(
       values.tokenFeePercentages,
       values.tokenMinAmounts
     )
-    .accounts({ bridgeConfig: values.bridgeConfigPDA, bridgePda: values.bridgePDA, sbtcMint: values.sbtcMint })
+    .accounts({
+      payer: values.payerAdmin.publicKey, bridgeConfig: values.bridgeConfigPDA, sbtcMint: values.sbtcMint,
+    })
     .remainingAccounts([
       ...values.tokenConfigPdas.map((pubkey) => ({
         pubkey,
