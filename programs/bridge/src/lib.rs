@@ -8,9 +8,8 @@ mod instructions;
 declare_id!("4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx");
 #[program]
 pub mod bridge {
-
     pub use super::instructions::*;
-    
+
     use super::*;
     // pub fn close_memoo_config(ctx: Context<CloseMemooConfig>) -> Result<()> {
     //     instructions::close_memoo_config(ctx)
@@ -23,7 +22,7 @@ pub mod bridge {
         token_prices: Vec<u64>,
         supported_chains: Vec<u8>,
         token_fee_percentages: Vec<u64>,
-        token_min_amount: Vec<u64>,
+        token_min_amount: Vec<u64>
     ) -> Result<()> {
         instructions::create_bridge_config(
             ctx,
@@ -33,7 +32,7 @@ pub mod bridge {
             token_prices,
             supported_chains,
             token_fee_percentages,
-            token_min_amount,
+            token_min_amount
         )
     }
 
@@ -41,7 +40,7 @@ pub mod bridge {
         ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
         committee: Vec<Pubkey>,
         stake: Vec<u16>,
-        min_stake_required: u16,
+        min_stake_required: u16
     ) -> Result<()> {
         instructions::create_bridge_committee(ctx, committee, stake, min_stake_required)
     }
@@ -49,25 +48,25 @@ pub mod bridge {
     pub fn update_supported_chain<'info>(
         ctx: Context<'_, '_, 'info, 'info, UpdateSupportedChain<'info>>,
         _chain_id: u8,
-        supported: bool,
+        supported: bool
     ) -> Result<()> {
         instructions::update_supported_chain(ctx, _chain_id, supported)
     }
 
     pub fn update_token_price_with_signatures<'info>(
         ctx: Context<'_, '_, 'info, 'info, UpdateTokenPrice<'info>>,
-        msg: Message,
-        number_of_signatures: u8,
         _chain_id: u8,
+        number_of_signatures: u8,
+        msg: UpdateTokenPriceMsg,
     ) -> Result<()> {
-        instructions::update_token_price_with_signatures(ctx, msg, number_of_signatures, _chain_id)
+        instructions::update_token_price_with_signatures(ctx, _chain_id, number_of_signatures, msg)
     }
 
     pub fn mint_sbtc_with_signatures<'info>(
         ctx: Context<'_, '_, 'info, 'info, MintSbtcWithSignatures<'info>>,
         msg: MintSbtcMessage,
         number_of_signatures: u8,
-        _chain_id: u8,
+        _chain_id: u8
     ) -> Result<()> {
         instructions::mint_sbtc_with_signatures(ctx, msg, number_of_signatures, _chain_id)
     }

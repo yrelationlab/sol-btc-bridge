@@ -1,12 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 
-export const MSG_VERSION = new anchor.BN(1);
+export const MSG_VERSION = 1;
 export const DECIMALS9 = new anchor.BN(1_000_000_000);
 export const FEE_DENOMINATOR = new anchor.BN(1000000);
 export const GLOBAL_CONFIG = Buffer.from("GLOBAL_CONFIG");
-export const BRIDGE_SBTC_AUTH  = Buffer.from("BRIDGE_SBTC_AUTH");
-export const SBTC_MINT  = Buffer.from("SBTC_MINT");
+export const BRIDGE_SBTC_AUTH = Buffer.from("BRIDGE_SBTC_AUTH");
+export const SBTC_MINT = Buffer.from("SBTC_MINT");
 
 export const NONCE_CONFIG = Buffer.from("NONCE_CONFIG");
 export const TOKEN_CONFIG = Buffer.from("TOKEN_CONFIG");
@@ -22,9 +22,9 @@ export const BRIDGE_COMMITTEE_CONFIG = Buffer.from("COMMITTEE_CONFIG");
 //     return Buffer.from([tokenId]); // Create a single-byte buffer
 // }
 
-export function getTokenConfigPda(tokenId: anchor.BN): anchor.web3.PublicKey {
+export function getTokenConfigPda(tokenId: number): anchor.web3.PublicKey {
     return PublicKey.findProgramAddressSync(
-        [TOKEN_CONFIG, tokenId.toBuffer()],
+        [TOKEN_CONFIG, new anchor.BN(tokenId).toArrayLike(Buffer, 'be', 1)],
         anchor.workspace.bridge.programId
     )[0];
 }
@@ -47,7 +47,7 @@ export function getCommitteePda(committeeAddress: anchor.web3.Keypair): anchor.w
 
 export function getSupportChainPda(chainId: anchor.BN): anchor.web3.PublicKey {
     return PublicKey.findProgramAddressSync(
-        [SUPPORTED_CHAINS_CONFIG, chainId.toBuffer()],
+        [SUPPORTED_CHAINS_CONFIG, chainId.toArrayLike(Buffer, 'be', 1)],
         anchor.workspace.bridge.programId
     )[0];
 }

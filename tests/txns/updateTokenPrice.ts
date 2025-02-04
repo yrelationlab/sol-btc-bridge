@@ -12,11 +12,11 @@ import { Bridge } from "../../target/types/bridge";
 import { BaseMsg } from "./baseMsg";
 
 export class UpdateTokenPriceMsg extends BaseMsg {
-    messageType: anchor.BN;
-    version: anchor.BN;
+    messageType: number;
+    version: number;
     nonce: anchor.BN;
-    chainId: anchor.BN;
-    tokenId: anchor.BN;
+    chainId: number;
+    tokenId: number;
     tokenPrice: anchor.BN;
 
     static schema: Schema = new Map([
@@ -34,7 +34,7 @@ export class UpdateTokenPriceMsg extends BaseMsg {
             }],
     ]);
 
-    constructor(obj: { messageType: anchor.BN, version: anchor.BN, nonce: anchor.BN, chainId: anchor.BN, tokenId: anchor.BN, tokenPrice: anchor.BN }) {
+    constructor(obj: { messageType: number, version: number, nonce: anchor.BN, chainId: number, tokenId:number, tokenPrice: anchor.BN }) {
         super();
         this.messageType = obj.messageType;
         this.version = obj.version;
@@ -51,8 +51,8 @@ type UpdateTokenPriceMsgTxnDetails = {
     signature: Uint8Array;
     signerPublicKey: PublicKey;
     msg: UpdateTokenPriceMsg;
-    chainID: anchor.BN;
-    numberOfSignatures: anchor.BN;
+    chainID: number;
+    numberOfSignatures: number;
     payer: PublicKey;
     bridgeConfigPDA: PublicKey;
     noncePdaUpdateTokenPrice: PublicKey;
@@ -82,7 +82,7 @@ export class UpdateTokenPriceMsgTxn {
         tokenConfigPdas,
         addixEd25519Program,
     }: UpdateTokenPriceMsgTxnDetails) {
-        console.log(`signature is ${signature.length}`)
+        console.log(`signature is ${signature.length}, bridgeConfigPDA is ${bridgeConfigPDA}, chainID is ${chainID}`)
         let ixEd25519Program = Ed25519Program.createInstructionWithPublicKey({
             publicKey: signerPublicKey.toBytes(),
             signature,
@@ -93,9 +93,9 @@ export class UpdateTokenPriceMsgTxn {
         }
         return this.programAPI.methods
             .updateTokenPriceWithSignatures(
-                msg as UpdateTokenPriceMsg,
-                numberOfSignatures,
                 chainID,
+                numberOfSignatures,
+                msg as any,
             )
             .accounts({
                 payer: payer,

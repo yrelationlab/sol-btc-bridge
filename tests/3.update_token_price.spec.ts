@@ -31,7 +31,7 @@ describe("Update Token Price", () => {
     await airdrop(provider.connection, values.submitter.publicKey);
     // Create the msg object
     const msg = new UpdateTokenPriceMsg({
-      messageType: new BN(MessageIds.UpdateTokenPrice),
+      messageType: MessageIds.UpdateTokenPrice,
       version: MSG_VERSION,
       nonce: new anchor.BN(1), // todo: should get nonce from chian
       chainId: values.chainId,
@@ -40,27 +40,28 @@ describe("Update Token Price", () => {
     });
 
     const { encoded, signature } = msg.createSignature(values.submitter);
-    const numberOfSignatures = new anchor.BN(1)
+    const numberOfSignatures = 1
+
     let tx = await new UpdateTokenPriceMsgTxn(program).createTx({
       serialized: encoded,
       signature,
       signerPublicKey: values.submitter.publicKey,
-      payer: values.submitter.publicKey,
-      addixEd25519Program: true,
       msg,
       chainID: values.chainId,
       numberOfSignatures,
+      payer: values.submitter.publicKey,
       bridgeConfigPDA: values.bridgeConfigPDA,
       noncePdaUpdateTokenPrice: values.noncePdaUpdateTokenPrice,
       submitterPda: values.submitterPda,
       submitter: values.submitter.publicKey,
       committeePdas: values.committeePdas,
-      tokenConfigPdas: values.tokenConfigPdas[0]
+      tokenConfigPdas: values.tokenConfigPdas[0],
+      addixEd25519Program: true,
     });
     // tx.feePayer = values.idoBuyer.publicKey;
     console.log(`tx.instructions[0] is ${JSON.stringify(tx.instructions[0].programId, null, 2)}`);
     console.log(`tx.instructions[1] is ${JSON.stringify(tx.instructions[1].programId, null, 2)}`);
-    // try {
+
 
     console.log(`claimLpRewards...start...`)
     await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);

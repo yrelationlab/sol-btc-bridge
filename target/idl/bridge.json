@@ -247,18 +247,18 @@
       ],
       "args": [
         {
-          "name": "msg",
-          "type": {
-            "defined": "Message"
-          }
+          "name": "chainId",
+          "type": "u8"
         },
         {
           "name": "numberOfSignatures",
           "type": "u8"
         },
         {
-          "name": "chainId",
-          "type": "u8"
+          "name": "msg",
+          "type": {
+            "defined": "UpdateTokenPriceMsg"
+          }
         }
       ]
     },
@@ -578,7 +578,7 @@
   ],
   "types": [
     {
-      "name": "Message",
+      "name": "UpdateTokenPriceMsg",
       "type": {
         "kind": "struct",
         "fields": [
@@ -599,8 +599,12 @@
             "type": "u8"
           },
           {
-            "name": "payload",
-            "type": "bytes"
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenPrice",
+            "type": "u64"
           }
         ]
       }

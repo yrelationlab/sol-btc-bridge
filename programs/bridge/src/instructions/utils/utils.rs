@@ -1,28 +1,19 @@
 use crate::{
-    constants::{COMMITTEE_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG},
+    constants::{ COMMITTEE_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG },
     errors::ErrorCode,
 };
 use anchor_lang::prelude::*;
 use anchor_lang::system_program;
 use anchor_spl::associated_token::{
-    create as create_associated_token, Create as CreateAssociatedToken,
+    create as create_associated_token,
+    Create as CreateAssociatedToken,
 };
-use std::convert::TryInto;
 
-#[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
-pub struct Message {
-    pub message_type: u8,
-    pub version: u8,
-    pub nonce: u64,
-    pub chain_id: u8,
-    pub payload: Vec<u8>,
+pub trait Message: AnchorSerialize + AnchorDeserialize + std::fmt::Debug {
+    fn deserialize_message(data: &Vec<u8>) -> Result<Self>;
 }
-pub fn deserialize_message(data: &Vec<u8>) -> Result<Message> {
-    match Message::try_from_slice(data) {
-        Ok(order) => Ok(order),
-        Err(_) => err!(ErrorCode::DeserializeMessageError),
-    }
-}
+
+
 #[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
 pub struct MintSbtcMessage {
     pub message_type: u8,
@@ -48,7 +39,7 @@ pub struct UpdateSupportedChainMessage {
     pub supported: bool,
 }
 pub fn deserialize_update_supported_chain_message(
-    data: &Vec<u8>,
+    data: &Vec<u8>
 ) -> Result<UpdateSupportedChainMessage> {
     match UpdateSupportedChainMessage::try_from_slice(data) {
         Ok(order) => Ok(order),
@@ -91,7 +82,7 @@ pub fn create_account<'a>(
     system_program: AccountInfo<'a>,
     target_account: AccountInfo<'a>,
     siger_seed: &[&[u8]],
-    space: usize,
+    space: usize
 ) -> Result<()> {
     let rent = Rent::get()?;
     let current_lamports = target_account.lamports();
@@ -106,7 +97,7 @@ pub fn create_account<'a>(
             cpi_context.with_signer(&[siger_seed]),
             lamports,
             u64::try_from(space).unwrap(),
-            program_id,
+            program_id
         )?;
     }
     Ok(())
@@ -134,13 +125,19 @@ pub fn decode_emergency_op_payload(payload: &[u8]) -> Result<bool> {
     }
     Ok(emergency_op_code == 0) // 返回 `true` 表示冻结操作
 }
+// 1. Define a trait for messages that have a message_type
+pub trait HasMessageType {
+    fn message_type(&self) -> u8;
+}
 
-pub fn required_stake(message: &Message) -> Result<u16> {
-    match Operation::try_from(message.message_type).map_err(|_| ErrorCode::InvalidMessageType)? {
+
+pub fn required_stake<T: HasMessageType>(message: &T) -> Result<u16>{
+    match Operation::try_from(message.message_type()).map_err(|_| ErrorCode::InvalidMessageType)? {
         Operation::TokenTransfer => Ok(TRANSFER_STAKE_REQUIRED),
         Operation::Blocklist => Ok(BLOCKLIST_STAKE_REQUIRED),
         Operation::EmergencyOp => {
-            let is_freezing = decode_emergency_op_payload(&message.payload)?;
+            let is_freezing = true;
+            // decode_emergency_op_payload(&message.payload)?;
             if is_freezing {
                 Ok(FREEZING_STAKE_REQUIRED)
             } else {
@@ -158,11 +155,14 @@ pub fn required_stake(message: &Message) -> Result<u16> {
 
 pub fn get_token_pda_bump_seeds(
     program_id: &Pubkey,
-    token_id_bytes: [u8; 1],
+    token_id_bytes: [u8; 1]
 ) -> (Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>) {
     let seeds = &[TOKEN_CONFIG.as_ref(), token_id_bytes.as_ref()];
     let (pda, bump) = Pubkey::find_program_address(seeds, program_id);
-    let mut signer_seeds_vec: Vec<Vec<u8>> = seeds.iter().map(|s| s.to_vec()).collect();
+    let mut signer_seeds_vec: Vec<Vec<u8>> = seeds
+        .iter()
+        .map(|s| s.to_vec())
+        .collect();
     let seeds_vec = signer_seeds_vec.clone();
     signer_seeds_vec.push(vec![bump]);
     (pda, bump, seeds_vec, signer_seeds_vec)
@@ -170,11 +170,14 @@ pub fn get_token_pda_bump_seeds(
 
 pub fn get_support_chains_pda_bump_seeds(
     program_id: &Pubkey,
-    chain_id_bytes: [u8; 1],
+    chain_id_bytes: [u8; 1]
 ) -> (Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>) {
     let seeds = &[SUPPORTED_CHAINS_CONFIG.as_ref(), chain_id_bytes.as_ref()];
     let (pda, bump) = Pubkey::find_program_address(seeds, program_id);
-    let mut signer_seeds_vec: Vec<Vec<u8>> = seeds.iter().map(|s| s.to_vec()).collect();
+    let mut signer_seeds_vec: Vec<Vec<u8>> = seeds
+        .iter()
+        .map(|s| s.to_vec())
+        .collect();
     let seeds_vec = signer_seeds_vec.clone();
     signer_seeds_vec.push(vec![bump]);
     (pda, bump, seeds_vec, signer_seeds_vec)
@@ -183,25 +186,29 @@ pub fn get_support_chains_pda_bump_seeds(
 pub fn get_commitee_account<'info>(
     program_id: &Pubkey,
     remaining_accounts: Vec<AccountInfo<'info>>,
-    committee_address: &Pubkey,
+    committee_address: &Pubkey
 ) -> Result<(Vec<Vec<u8>>, AccountInfo<'info>)> {
-    let (pda_of_committee_config_address, _, _, signer_seeds) =
-        get_committee_config_pda_bump_seeds(program_id, committee_address);
+    let (pda_of_committee_config_address, _, _, signer_seeds) = get_committee_config_pda_bump_seeds(
+        program_id,
+        committee_address
+    );
     let pda_of_committee_config = find_ata_in_accounts(
         remaining_accounts.to_vec(),
-        &pda_of_committee_config_address,
-    )
-    .ok_or(ErrorCode::CommitteeConfigAddressMissing)?;
+        &pda_of_committee_config_address
+    ).ok_or(ErrorCode::CommitteeConfigAddressMissing)?;
     Ok((signer_seeds, pda_of_committee_config))
 }
 
 pub fn get_committee_config_pda_bump_seeds(
     program_id: &Pubkey,
-    committee_address: &Pubkey,
+    committee_address: &Pubkey
 ) -> (Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>) {
     let seeds = &[COMMITTEE_CONFIG.as_ref(), committee_address.as_ref()];
     let (pda, bump) = Pubkey::find_program_address(seeds, program_id);
-    let mut signer_seeds_vec: Vec<Vec<u8>> = seeds.iter().map(|s| s.to_vec()).collect();
+    let mut signer_seeds_vec: Vec<Vec<u8>> = seeds
+        .iter()
+        .map(|s| s.to_vec())
+        .collect();
     let seeds_vec = signer_seeds_vec.clone();
     signer_seeds_vec.push(vec![bump]);
     (pda, bump, seeds_vec, signer_seeds_vec)
@@ -209,7 +216,7 @@ pub fn get_committee_config_pda_bump_seeds(
 
 pub fn find_ata_in_accounts<'info>(
     remaining_accounts: Vec<AccountInfo<'info>>,
-    ata_pubkey: &Pubkey,
+    ata_pubkey: &Pubkey
 ) -> Option<AccountInfo<'info>> {
     remaining_accounts
         .iter()
@@ -224,38 +231,21 @@ pub fn create_associated_token_account_ifn_init<'info>(
     associated_token_account: AccountInfo<'info>,
     associated_token_program: AccountInfo<'info>,
     token_program: AccountInfo<'info>,
-    system_program: AccountInfo<'info>,
+    system_program: AccountInfo<'info>
 ) -> Result<()> {
     if associated_token_account.data_is_empty() {
-        create_associated_token(CpiContext::new(
-            associated_token_program,
-            CreateAssociatedToken {
+        create_associated_token(
+            CpiContext::new(associated_token_program, CreateAssociatedToken {
                 payer,
                 authority: owner,
                 mint,
                 associated_token: associated_token_account,
                 system_program,
                 token_program,
-            },
-        ))?;
+            })
+        )?;
     }
     Ok(())
-}
-
-pub fn decode_update_token_price_payload(payload: &[u8]) -> Result<(u8, u64)> {
-    if payload.len() != 9 {
-        return err!(ErrorCode::InvalidPayloadLength);
-    }
-
-    let token_id = payload[0];
-
-    let token_price = u64::from_be_bytes(
-        payload[1..9]
-            .try_into()
-            .map_err(|_| ErrorCode::InvalidPayloadLength)?,
-    );
-
-    Ok((token_id, token_price))
 }
 
 #[repr(u8)]
@@ -298,8 +288,8 @@ impl TryFrom<u8> for Operation {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anchor_lang::{prelude::Pubkey, AnchorDeserialize, AnchorSerialize};
-    use {WhitelistMessage, WhitelistPair}; // 引入测试目标
+    use anchor_lang::{ prelude::Pubkey, AnchorDeserialize, AnchorSerialize };
+    use ::{ WhitelistMessage, WhitelistPair }; // 引入测试目标
     #[test]
     fn test_decode_update_whitelist_message() {
         let original = WhitelistMessage {
@@ -347,18 +337,14 @@ mod tests {
         let serialized = original.try_to_vec().unwrap();
         let deserialized: Message = Message::try_from_slice(&serialized).unwrap();
         println!("{:?}", deserialized);
-        assert_eq!(
-            original, deserialized,
-            "Deserialized message does not match the original!"
-        );
-        if let Ok((decoded_token_id, decoded_token_price)) =
-            decode_update_token_price_payload(&deserialized.payload)
+        assert_eq!(original, deserialized, "Deserialized message does not match the original!");
+        if
+            let Ok((decoded_token_id, decoded_token_price)) = decode_update_token_price_payload(
+                &deserialized.payload
+            )
         {
             assert_eq!(decoded_token_id, token_id, "Token ID does not match!");
-            assert_eq!(
-                decoded_token_price, token_price,
-                "Token Price does not match!"
-            );
+            assert_eq!(decoded_token_price, token_price, "Token Price does not match!");
         } else {
             panic!("Failed to decode payload");
         }

@@ -247,18 +247,18 @@ export type Bridge = {
       ],
       "args": [
         {
-          "name": "msg",
-          "type": {
-            "defined": "Message"
-          }
+          "name": "chainId",
+          "type": "u8"
         },
         {
           "name": "numberOfSignatures",
           "type": "u8"
         },
         {
-          "name": "chainId",
-          "type": "u8"
+          "name": "msg",
+          "type": {
+            "defined": "UpdateTokenPriceMsg"
+          }
         }
       ]
     },
@@ -578,7 +578,7 @@ export type Bridge = {
   ],
   "types": [
     {
-      "name": "Message",
+      "name": "UpdateTokenPriceMsg",
       "type": {
         "kind": "struct",
         "fields": [
@@ -599,8 +599,12 @@ export type Bridge = {
             "type": "u8"
           },
           {
-            "name": "payload",
-            "type": "bytes"
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenPrice",
+            "type": "u64"
           }
         ]
       }
@@ -1236,18 +1240,18 @@ export const IDL: Bridge = {
       ],
       "args": [
         {
-          "name": "msg",
-          "type": {
-            "defined": "Message"
-          }
+          "name": "chainId",
+          "type": "u8"
         },
         {
           "name": "numberOfSignatures",
           "type": "u8"
         },
         {
-          "name": "chainId",
-          "type": "u8"
+          "name": "msg",
+          "type": {
+            "defined": "UpdateTokenPriceMsg"
+          }
         }
       ]
     },
@@ -1567,7 +1571,7 @@ export const IDL: Bridge = {
   ],
   "types": [
     {
-      "name": "Message",
+      "name": "UpdateTokenPriceMsg",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1588,8 +1592,12 @@ export const IDL: Bridge = {
             "type": "u8"
           },
           {
-            "name": "payload",
-            "type": "bytes"
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenPrice",
+            "type": "u64"
           }
         ]
       }

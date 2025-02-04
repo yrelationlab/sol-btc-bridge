@@ -69,7 +69,7 @@ describe("Mint sbtc", () => {
       values.bridgeConfigPDA
     );
     const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
-      [BRIDGE_SBTC_AUTH, values.chainId.toBuffer()],
+      [BRIDGE_SBTC_AUTH,new anchor.BN(values.chainId).toArrayLike(Buffer, 'be', 1)],
       anchor.workspace.bridge.programId
     )[0];
     const accountExists = await checkAssociatedTokenAccount(
@@ -117,7 +117,7 @@ describe("Mint sbtc", () => {
     await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
 
     const transaction = await program.methods
-      .mintSbtcWithSignatures(msg as any, 3, values.chainId.toNumber())
+      .mintSbtcWithSignatures(msg as any, 3, values.chainId)
       .accounts({
         payer: values.payerAdmin.publicKey,
         bridgeConfig: values.bridgeConfigPDA,

@@ -5,9 +5,9 @@ import {Schema, serialize, deserialize} from "borsh";
 export interface TestValues {
     payerAdmin: Keypair;
     feeRecipient: PublicKey;
-    chainId: anchor.BN;
+    chainId: number;
     supportedTokensKeypairs: Keypair[];
-    supportedTokensIndex: anchor.BN[];
+    supportedTokensIndex: number[];
     prices: anchor.BN[];
     supportedChainsBuffer: Buffer;
     tokenFeePercentages: anchor.BN[];
@@ -19,14 +19,14 @@ export interface TestValues {
     tokenConfigPdas: PublicKey[];
     supportedChainsPdas: PublicKey[];
     committeeKeypairs: Keypair[];
-    stakes: anchor.BN[];
-    minStake: anchor.BN;
+    stakes: number[];
+    minStake: number;
     submitter: Keypair;
     submitterPda: PublicKey;
     committeePdas: PublicKey[];
     noncePdaUpdateTokenPrice: PublicKey;
     nonceMintSbtc: PublicKey;
-    supportedChains: anchor.BN[]
+    supportedChains: number[]
 }
 
 

@@ -38,7 +38,7 @@ describe("Update Token Price", () => {
     );
     await createAndSendV0Tx(
       tx.instructions,
-      values.payerAdmin,
+      [values.payerAdmin],
       provider.connection
     );
     const chainConfigData1 = await program.account.supportedChainConfig.fetch(
@@ -65,7 +65,7 @@ describe("Update Token Price", () => {
     try {
       await createAndSendV0Tx(
         tx.instructions,
-        values.committeeKeypairs[0],
+        [values.committeeKeypairs[0]],
         provider.connection
       );
     } catch (error) {
