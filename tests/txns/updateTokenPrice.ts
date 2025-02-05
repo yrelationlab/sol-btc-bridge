@@ -34,7 +34,7 @@ export class UpdateTokenPriceMsg extends BaseMsg {
             }],
     ]);
 
-    constructor(obj: { messageType: number, version: number, nonce: anchor.BN, chainId: number, tokenId:number, tokenPrice: anchor.BN }) {
+    constructor(obj: { messageType: number, version: number, nonce: anchor.BN, chainId: number, tokenId: number, tokenPrice: anchor.BN }) {
         super();
         this.messageType = obj.messageType;
         this.version = obj.version;
@@ -47,9 +47,13 @@ export class UpdateTokenPriceMsg extends BaseMsg {
 
 
 type UpdateTokenPriceMsgTxnDetails = {
-    serialized: Uint8Array;
-    signature: Uint8Array;
-    signerPublicKey: PublicKey;
+    signatures: {
+        data: {
+            encoded: Uint8Array;
+            signature: Uint8Array;
+        };
+        publicKey: anchor.web3.PublicKey;
+    }[],
     msg: UpdateTokenPriceMsg;
     chainID: number;
     numberOfSignatures: number;
@@ -67,9 +71,7 @@ export class UpdateTokenPriceMsgTxn {
     constructor(private readonly programAPI: Program<Bridge>) { }
 
     async createTx({
-        serialized,
-        signature,
-        signerPublicKey,
+        signatures,
         msg,
         chainID,
         numberOfSignatures,
@@ -82,15 +84,17 @@ export class UpdateTokenPriceMsgTxn {
         tokenConfigPdas,
         addixEd25519Program,
     }: UpdateTokenPriceMsgTxnDetails) {
-        console.log(`signature is ${signature.length}, bridgeConfigPDA is ${bridgeConfigPDA}, chainID is ${chainID}`)
-        let ixEd25519Program = Ed25519Program.createInstructionWithPublicKey({
-            publicKey: signerPublicKey.toBytes(),
-            signature,
-            message: serialized,
-        });
-        if (!addixEd25519Program) {
-            ixEd25519Program = null;
-        }
+        console.log(`signature is ${signatures.length}, bridgeConfigPDA is ${bridgeConfigPDA}, chainID is ${chainID}`)
+
+        // 我希望用signatures循环创建ixEd25519Program
+        const ixEd25519Programs = signatures.map(signature =>
+            Ed25519Program.createInstructionWithPublicKey({
+                publicKey: signature.publicKey.toBytes(),
+                signature: signature.data.signature,
+                message: signature.data.encoded,
+            })
+        );
+
         return this.programAPI.methods
             .updateTokenPriceWithSignatures(
                 chainID,
@@ -114,7 +118,7 @@ export class UpdateTokenPriceMsgTxn {
                 },
             ])
             .preInstructions(
-                [ixEd25519Program].filter(Boolean)
+                [...ixEd25519Programs]
             )
             .transaction();
     }

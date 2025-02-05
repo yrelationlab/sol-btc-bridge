@@ -64,13 +64,14 @@ pub fn update_token_price_with_signatures<'info>(
     let mut bitmap: u128 = 0;
     let mut approval_stake: u16 = 0;
 
+    msg!("update_token_price_with_signatures: number_of_signatures={}", number_of_signatures);
     for i in 0..number_of_signatures {
         let (signer_pubkey, data) = resolve_ed25519_with_index(
             &ctx.accounts.instructions_sysvar,
             i as usize
         )?;
 
-        let message_of_signer = UpdateTokenPriceMsg::deserialize_message(&data)?;
+        let message_of_signer: UpdateTokenPriceMsg = UpdateTokenPriceMsg::deserialize_message(&data)?;
         // check signer_pubkey is allowed
         if message_of_signer != msg {
             return err!(ErrorCode::MessageMismatch);
@@ -87,24 +88,26 @@ pub fn update_token_price_with_signatures<'info>(
         nonce_config.nonce += 1;
 
         let (_, pda_of_committee_config) = get_commitee_account(
-            &ctx.program_id,
             ctx.remaining_accounts.to_vec(),
-            &signer_pubkey
+            &signer_pubkey,
+            &ctx.program_id,
         )?;
         let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
-        let commite_config = Committee::try_from_slice(&account_data[ANCHOR_HEADER_LEN..]).map_err(
+        let committee_config = Committee::try_from_slice(&account_data[ANCHOR_HEADER_LEN..]).map_err(
             |_| ErrorCode::InvalidSigner
         )?;
 
-        let mask = 1u128 << commite_config.index;
+        let mask = 1u128 << committee_config.index;
         if (bitmap & mask) != 0 {
             return err!(ErrorCode::DuplicateSignature);
         }
         bitmap |= mask;
-        approval_stake += commite_config.stake_amount;
+        msg!("InsufficientStake: signer_pubkey={}, committee_config.stake_amount={:?}", signer_pubkey, committee_config.stake_amount);
+        approval_stake += committee_config.stake_amount;
     }
     // Ensure the total approval stake meets the required stake
     if approval_stake < required_stake(&msg)? {
+        msg!("InsufficientStake: approval_stake={}, required_stake={:?}", approval_stake, required_stake(&msg));
         return err!(ErrorCode::InsufficientStake);
     }
 

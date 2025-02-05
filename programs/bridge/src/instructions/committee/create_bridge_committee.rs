@@ -30,9 +30,9 @@ pub fn create_bridge_committee<'info>(
     for (i, committee_address) in committee.iter().enumerate() {
         total_stake += stake[i];
         let (signer_seeds, pda_of_committee_config) = get_commitee_account(
-            &ctx.program_id,
             ctx.remaining_accounts.to_vec(),
             committee_address,
+            &ctx.program_id,
         )?;
         create_account(
             &ctx.program_id,

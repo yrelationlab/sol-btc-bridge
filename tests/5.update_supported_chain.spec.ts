@@ -8,6 +8,7 @@ import {
   createValues,
   expectRevert,
 } from "./init";
+
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
 describe("Update Token Price", () => {
@@ -46,6 +47,8 @@ describe("Update Token Price", () => {
     );
     expect(chainConfigData1.supported).to.be.false;
   });
+
+
   it("Update supported chain without admin", async () => {
     const chainConfigData = await program.account.supportedChainConfig.fetch(
       values.supportedChainsPdas[0]

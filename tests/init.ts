@@ -42,6 +42,12 @@ import secret from "../cli/.config/secret.json";
 import cm1 from "../cli/.config/cm1.json";
 import cm2 from "../cli/.config/cm2.json";
 import cm3 from "../cli/.config/cm3.json";
+import cm4 from "../cli/.config/cm4.json";
+import cm5 from "../cli/.config/cm5.json";
+import cm6 from "../cli/.config/cm6.json";
+import cm7 from "../cli/.config/cm7.json";
+import cm8 from "../cli/.config/cm8.json";
+
 import { assert, expect } from "chai";
 import { Bridge } from "../target/types/bridge";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
@@ -91,7 +97,7 @@ function keypairsToPublicArrays(keypairs): PublicKey[] {
     return keypair.publicKey;
   });
 }
-export async function airdrop(connection: Connection, key: PublicKey, amount: number = 1) {
+export async function airdrop(connection: Connection, key: PublicKey, amount: number = 100) {
   const airdropSignature = await connection.requestAirdrop(key, amount * LAMPORTS_PER_SOL);
   await connection.confirmTransaction(airdropSignature);
 }
@@ -115,7 +121,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   const decimals = [DECIMALS9, DECIMALS9];
   const prices = [
     new anchor.BN(9999).mul(decimals[0]),
-    new anchor.BN(9999).mul(decimals[1]),
+    new anchor.BN(8888).mul(decimals[1]),
   ];
   const supportedChains = [2, 3, 4];
   const supportedChainsBuffer = Buffer.from(new Uint8Array(supportedChains));
@@ -155,6 +161,12 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     Keypair.fromSecretKey(new Uint8Array(cm1)),
     Keypair.fromSecretKey(new Uint8Array(cm2)),
     Keypair.fromSecretKey(new Uint8Array(cm3)),
+    Keypair.fromSecretKey(new Uint8Array(cm4)),
+    Keypair.fromSecretKey(new Uint8Array(cm5)),
+    Keypair.fromSecretKey(new Uint8Array(cm6)),
+    // Keypair.fromSecretKey(new Uint8Array(cm7)),
+    // Keypair.fromSecretKey(new Uint8Array(cm8)),
+
   ];
   committeeKeypairs.forEach((keypair, index) => {
     console.log(`PublicKey of committeeKeypair ${index} is ${keypair.publicKey.toBase58()}`);
@@ -165,7 +177,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   });
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
-  const stakes = [1000, 2000, 3000];
+  const stakes = [1000, 1000, 1000, 2222, 1000, 2222];
   const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
@@ -296,24 +308,6 @@ export async function createBridgeConfig(
     ])
     .rpc({ skipPreflight: false });
 }
-export async function createLookupTable(
-  authority: PublicKey,
-  payer: Keypair,
-  connection: Connection
-) {
-  // Step 1 - Get a lookup table address and create lookup table instruction
-  const [lookupTableInst, lookupTableAddress] =
-    AddressLookupTableProgram.createLookupTable({
-      authority: authority,
-      payer: payer.publicKey,
-      recentSlot: await connection.getSlot(),
-    });
-  // Step 2 - Log Lookup Table Address
-  console.log("Lookup Table Address:", lookupTableAddress.toBase58());
-  // Step 3 - Generate a transaction and send it to the network
-  createAndSendV0Tx([lookupTableInst], [payer], connection);
-  return lookupTableAddress;
-}
 
 export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false) {
   // Step 1 - Fetch Latest Blockhash
@@ -347,15 +341,8 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
 
   } catch (err) {
     console.error("Transaction failed:", err);
-    if (err.logs) {
-      console.error("Logs:", err.logs);
-    } else if ("getLogs" in err && typeof err.getLogs === "function") {
-      console.error("Logs:", await err.getLogs());
-    }
+    throw err
   }
-
-
-
 }
 
 export async function confirmTransaction(
@@ -382,7 +369,7 @@ export async function confirmTransaction(
       continue;
     }
     if (status.err) {
-      throw new Error(`Transaction failed: ${JSON.stringify(status.err)}`);
+      throw new Error(`Transaction failed: ${JSON.stringify(status)}`);
     }
     if (
       status.confirmationStatus &&
@@ -453,4 +440,33 @@ export function assembleUpdateTokenPricePayload(
 
   // Concatenate tokenIdBytes and tokenPriceBytes to form the final payload
   return new Uint8Array([...tokenIdBytes, ...tokenPriceBytes]);
+}
+export async function createLookupTable(authority: PublicKey, payer: Keypair, connection: Connection) {
+  // Step 1 - Get a lookup table address and create lookup table instruction
+  const [lookupTableInst, lookupTableAddress] =
+    AddressLookupTableProgram.createLookupTable({
+      authority: authority,
+      payer: payer.publicKey,
+      recentSlot: await connection.getSlot(),
+    });
+
+  // Step 2 - Log Lookup Table Address
+  console.log("Lookup Table Address:", lookupTableAddress.toBase58());
+
+  // Step 3 - Generate a transaction and send it to the network
+  createAndSendV0Tx([lookupTableInst], [payer], connection, null, true);
+  return lookupTableAddress;
+}
+
+export function getTxnAddress(tx: Transaction) {
+  const accounts: PublicKey[] = [];
+  // Extract accounts from tx.instructions
+  tx.instructions.forEach((instruction: TransactionInstruction) => {
+    instruction.keys.forEach((key) => {
+      // Add account addresses to the respective arrays
+      accounts.push(key.pubkey);
+    });
+  });
+  console.log(`accounts is ${JSON.stringify(accounts)}`)
+  return accounts;
 }

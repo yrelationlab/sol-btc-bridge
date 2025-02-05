@@ -176,18 +176,12 @@ export type Bridge = {
         {
           "name": "chainConfig",
           "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "要更新的 SupportedChain PDA"
-          ]
+          "isSigner": false
         },
         {
           "name": "admin",
           "isMut": false,
-          "isSigner": true,
-          "docs": [
-            "由硬编码的管理员来操作"
-          ]
+          "isSigner": true
         },
         {
           "name": "systemProgram",
@@ -1169,18 +1163,12 @@ export const IDL: Bridge = {
         {
           "name": "chainConfig",
           "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "要更新的 SupportedChain PDA"
-          ]
+          "isSigner": false
         },
         {
           "name": "admin",
           "isMut": false,
-          "isSigner": true,
-          "docs": [
-            "由硬编码的管理员来操作"
-          ]
+          "isSigner": true
         },
         {
           "name": "systemProgram",

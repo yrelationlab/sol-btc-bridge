@@ -28,7 +28,6 @@ pub fn update_supported_chain<'info>(
 #[derive(Accounts)]
 #[instruction(_chain_id: u8)]
 pub struct UpdateSupportedChain<'info> {
-    /// 要更新的 SupportedChain PDA
     #[account(
         mut,
         seeds = [
@@ -40,7 +39,6 @@ pub struct UpdateSupportedChain<'info> {
     )]
     pub chain_config: Account<'info, SupportedChainConfig>,
 
-    /// 由硬编码的管理员来操作
     #[account(
         address = HARDCODED_PUBKEY @ ErrorCode::InvalidAdminAddress
     )]

@@ -184,13 +184,13 @@ pub fn get_support_chains_pda_bump_seeds(
 }
 
 pub fn get_commitee_account<'info>(
-    program_id: &Pubkey,
     remaining_accounts: Vec<AccountInfo<'info>>,
-    committee_address: &Pubkey
+    committee_address: &Pubkey,
+    program_id: &Pubkey,
 ) -> Result<(Vec<Vec<u8>>, AccountInfo<'info>)> {
     let (pda_of_committee_config_address, _, _, signer_seeds) = get_committee_config_pda_bump_seeds(
+        committee_address,
         program_id,
-        committee_address
     );
     let pda_of_committee_config = find_ata_in_accounts(
         remaining_accounts.to_vec(),
@@ -200,8 +200,8 @@ pub fn get_commitee_account<'info>(
 }
 
 pub fn get_committee_config_pda_bump_seeds(
+    committee_address: &Pubkey,
     program_id: &Pubkey,
-    committee_address: &Pubkey
 ) -> (Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>) {
     let seeds = &[COMMITTEE_CONFIG.as_ref(), committee_address.as_ref()];
     let (pda, bump) = Pubkey::find_program_address(seeds, program_id);
