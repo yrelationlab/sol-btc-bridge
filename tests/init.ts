@@ -166,7 +166,6 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     Keypair.fromSecretKey(new Uint8Array(cm6)),
     // Keypair.fromSecretKey(new Uint8Array(cm7)),
     // Keypair.fromSecretKey(new Uint8Array(cm8)),
-
   ];
   committeeKeypairs.forEach((keypair, index) => {
     console.log(`PublicKey of committeeKeypair ${index} is ${keypair.publicKey.toBase58()}`);
@@ -324,7 +323,7 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
   const transaction = new VersionedTransaction(messageV0);
   console.log("   ✅ - Transaction Size < 1232:", transaction.serialize().length);
   // Step 3 - Sign your transaction with the required `Signers`
-  transaction.sign(signers);
+  transaction.partialSign(signers);
   console.log("   ✅ - Transaction Signed");
 
   try {
