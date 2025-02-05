@@ -47,6 +47,10 @@ import cm5 from "../cli/.config/cm5.json";
 import cm6 from "../cli/.config/cm6.json";
 import cm7 from "../cli/.config/cm7.json";
 import cm8 from "../cli/.config/cm8.json";
+import fee from "../cli/.config/fee.json";
+import t1 from "../cli/.config/t1.json";
+import t2 from "../cli/.config/t2.json";
+import t3 from "../cli/.config/t3.json";
 
 import { assert, expect } from "chai";
 import { Bridge } from "../target/types/bridge";
@@ -106,10 +110,11 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   const payerAdmin = Keypair.fromSecretKey(new Uint8Array(secret));
   console.log(`payerAdmin is ${JSON.stringify(payerAdmin.publicKey)}`);
 
-  const feeRecipient = Keypair.generate().publicKey;
+  const feeRecipient = Keypair.fromSecretKey(new Uint8Array(fee)).publicKey;
+  // Keypair.generate().publicKey;
   console.log(`feeRecipient is ${JSON.stringify(feeRecipient)}`);
 
-  const supportedTokensKeypairs = [Keypair.generate(), Keypair.generate()];
+  const supportedTokensKeypairs = [Keypair.fromSecretKey(new Uint8Array(t1)), Keypair.fromSecretKey(new Uint8Array(t2)), Keypair.fromSecretKey(new Uint8Array(t3))];
   supportedTokensKeypairs.forEach((keypair, index) => {
     console.log(`PublicKey of supportedTokensKeypairs ${index} is ${keypair.publicKey.toBase58()}`);
   });
@@ -118,17 +123,21 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     { length: supportedTokensKeypairs.length },
     (_, i) => i
   );
-  const decimals = [DECIMALS9, DECIMALS9];
+  const decimals = [DECIMALS9, DECIMALS9, DECIMALS9];
   const prices = [
     new anchor.BN(9999).mul(decimals[0]),
     new anchor.BN(8888).mul(decimals[1]),
+    new anchor.BN(7777).mul(decimals[2]),
+
   ];
   const supportedChains = [2, 3, 4];
   const supportedChainsBuffer = Buffer.from(new Uint8Array(supportedChains));
-  const tokenFeePercentages = [new anchor.BN(100), new anchor.BN(2000)];
+  const tokenFeePercentages = [new anchor.BN(100), new anchor.BN(2000), new anchor.BN(2000000)];
   const tokenMinAmounts = [
     new anchor.BN(100).mul(decimals[0]),
     new anchor.BN(2000).mul(decimals[1]),
+    new anchor.BN(200).mul(decimals[2]),
+
   ];
   const curChainId = 1;
   const bridgeConfigPDA = PublicKey.findProgramAddressSync(
@@ -157,13 +166,14 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   const supportedChainsPdas = supportedChains.map((chainId) => {
     return getSupportChainPda(new anchor.BN(chainId));
   });
+  // https://explorer.solana.com/tx/3gR4kGmU9cQpcQL8wC8HATPVhMghMrKBzqL6aaoHGN2BnoUUbK5dnbxmd1KuLjz4wTtHDWcq93P8evuVK2oUWLUA?cluster=devnet
   const committeeKeypairs = [
     Keypair.fromSecretKey(new Uint8Array(cm1)),
     Keypair.fromSecretKey(new Uint8Array(cm2)),
     Keypair.fromSecretKey(new Uint8Array(cm3)),
     Keypair.fromSecretKey(new Uint8Array(cm4)),
-    // Keypair.fromSecretKey(new Uint8Array(cm5)),
-    // Keypair.fromSecretKey(new Uint8Array(cm6)),
+    Keypair.fromSecretKey(new Uint8Array(cm5)),
+    Keypair.fromSecretKey(new Uint8Array(cm6)),
     // Keypair.fromSecretKey(new Uint8Array(cm7)),
     // Keypair.fromSecretKey(new Uint8Array(cm8)),
   ];
@@ -176,7 +186,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   });
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
-  const stakes = [1000, 1000, 1000, 2222,  ];
+  const stakes = [1000, 1000, 1000, 2222, 2222, 2222];
   const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
@@ -329,7 +339,7 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
   try {
     // partialsign for a Versioned Transaction, instead
     // https://web3engineering.co.uk/partially-signing-versionedtransaction
-    const txid = await connection.sendTransaction(transaction, { skipPreflight: skipPreflight, maxRetries: 5 });
+    const txid = await connection.sendTransaction(transaction, { skipPreflight: skipPreflight, maxRetries: 3 });
     // Step 4 - Send our v0 transaction to the cluster
     console.log(`   ✅ - Transaction ${txid} sent to network`);
     // Step 5 - Confirm Transaction 

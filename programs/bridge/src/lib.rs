@@ -5,7 +5,7 @@ mod errors;
 mod instructions;
 
 // Set the correct key here
-declare_id!("4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx");
+declare_id!("Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs");
 #[program]
 pub mod bridge {
     pub use super::instructions::*;

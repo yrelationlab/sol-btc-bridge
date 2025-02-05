@@ -2,7 +2,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
 import { assert, expect } from "chai";
-import { Ed25519Program, Keypair, PublicKey, sendAndConfirmTransaction, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from "@solana/web3.js";
+import { ComputeBudgetProgram, Ed25519Program, Keypair, PublicKey, sendAndConfirmTransaction, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from "@solana/web3.js";
 import { getAccount, NATIVE_MINT } from "@solana/spl-token";
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
@@ -116,7 +116,7 @@ export class UpdateTokenPriceMsgTxn {
                 },
             ])
             .preInstructions(
-                [...ixEd25519Programs]
+                [ComputeBudgetProgram.setComputeUnitLimit({ units: 10000000 }), ...ixEd25519Programs]
             )
             .transaction();
     }
