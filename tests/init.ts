@@ -162,8 +162,8 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     Keypair.fromSecretKey(new Uint8Array(cm2)),
     Keypair.fromSecretKey(new Uint8Array(cm3)),
     Keypair.fromSecretKey(new Uint8Array(cm4)),
-    Keypair.fromSecretKey(new Uint8Array(cm5)),
-    Keypair.fromSecretKey(new Uint8Array(cm6)),
+    // Keypair.fromSecretKey(new Uint8Array(cm5)),
+    // Keypair.fromSecretKey(new Uint8Array(cm6)),
     // Keypair.fromSecretKey(new Uint8Array(cm7)),
     // Keypair.fromSecretKey(new Uint8Array(cm8)),
   ];
@@ -176,7 +176,7 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   });
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
-  const stakes = [1000, 1000, 1000, 2222, 1000, 2222];
+  const stakes = [1000, 1000, 1000, 2222,  ];
   const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);

@@ -57,13 +57,12 @@ describe("Update Token Price", () => {
       submitter: values.submitter.publicKey,
       committeePdas: values.committeePdas,
       tokenConfigPdas: values.tokenConfigPdas[0],
-      addixEd25519Program: true,
     });
 
     console.log(`tx.instructions[0] is ${JSON.stringify(tx.instructions[0].programId, null, 2)}`);
     console.log(`tx.instructions[1] is ${JSON.stringify(tx.instructions[1].programId, null, 2)}`);
 
-    // const LOOKUP_TABLE_ADDRESS = new PublicKey("h66n9o8ZpHDoJ1F36hK9HsRa4nccqdKfucoQVAtPcg2")
+    // const LOOKUP_TABLE_ADDRESS = new PublicKey("583AuKCdQa79vsiGyAFwhpb5YGSkaFzBPHLh5tFCP9Di")
     const LOOKUP_TABLE_ADDRESS = await createLookupTable(values.submitter.publicKey, values.submitter, provider.connection);
     console.log(`LOOKUP_TABLE_ADDRESS is : ${LOOKUP_TABLE_ADDRESS}`);
 
@@ -78,8 +77,8 @@ describe("Update Token Price", () => {
     const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value; 
 
     console.log(`claimLpRewards...start...`)
-    await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable]);
-    // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
+    // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
+    await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
     console.log(`claimLpRewards....end...`)
 
     const tokenConfig = await program.account.tokenConfig.fetch(values.tokenConfigPdas[0]);

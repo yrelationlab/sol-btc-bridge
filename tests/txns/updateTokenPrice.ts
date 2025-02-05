@@ -64,7 +64,6 @@ type UpdateTokenPriceMsgTxnDetails = {
     submitter: PublicKey;
     committeePdas: PublicKey[];
     tokenConfigPdas: PublicKey;
-    addixEd25519Program: boolean;
 };
 
 export class UpdateTokenPriceMsgTxn {
@@ -82,7 +81,6 @@ export class UpdateTokenPriceMsgTxn {
         submitter,
         committeePdas,
         tokenConfigPdas,
-        addixEd25519Program,
     }: UpdateTokenPriceMsgTxnDetails) {
         console.log(`signature is ${signatures.length}, bridgeConfigPDA is ${bridgeConfigPDA}, chainID is ${chainID}`)
 
