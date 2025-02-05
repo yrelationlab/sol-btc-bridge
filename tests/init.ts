@@ -323,10 +323,12 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
   const transaction = new VersionedTransaction(messageV0);
   console.log("   ✅ - Transaction Size < 1232:", transaction.serialize().length);
   // Step 3 - Sign your transaction with the required `Signers`
-  transaction.partialSign(signers);
+  transaction.sign(signers);
   console.log("   ✅ - Transaction Signed");
 
   try {
+    // partialsign for a Versioned Transaction, instead
+    // https://web3engineering.co.uk/partially-signing-versionedtransaction
     const txid = await connection.sendTransaction(transaction, { skipPreflight: skipPreflight, maxRetries: 5 });
     // Step 4 - Send our v0 transaction to the cluster
     console.log(`   ✅ - Transaction ${txid} sent to network`);
