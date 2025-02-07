@@ -13,6 +13,8 @@ pub const TOKEN_CONFIG: &str = "TOKEN_CONFIG";
 #[constant]
 pub const COMMITTEE_CONFIG: &str = "COMMITTEE_CONFIG";
 #[constant]
+pub const BRIDGE_COMMITTEE: &str = "BRIDGE_COMMITTEE";
+#[constant]
 pub const COMMITTEE_SUBMITTER_CONFIG: &str = "COMMITTEE_SUBMITTER_CONFIG";
 #[constant]
 pub const SUPPORTED_CHAINS_CONFIG: &str = "SUPPORTED_CHAINS_CONFIG";

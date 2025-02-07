@@ -33,6 +33,11 @@ export type Bridge = {
       "value": "\"COMMITTEE_CONFIG\""
     },
     {
+      "name": "BRIDGE_COMMITTEE",
+      "type": "string",
+      "value": "\"BRIDGE_COMMITTEE\""
+    },
+    {
       "name": "COMMITTEE_SUBMITTER_CONFIG",
       "type": "string",
       "value": "\"COMMITTEE_SUBMITTER_CONFIG\""
@@ -1000,6 +1005,16 @@ export type Bridge = {
       "code": 6038,
       "name": "InstructionMissing",
       "msg": "InstructionMissing"
+    },
+    {
+      "code": 6039,
+      "name": "AddressNotFound",
+      "msg": "Address not found"
+    },
+    {
+      "code": 6040,
+      "name": "AddressAlreadyInCommittee",
+      "msg": "Address already in committee"
     }
   ]
 };
@@ -1039,6 +1054,11 @@ export const IDL: Bridge = {
       "value": "\"COMMITTEE_CONFIG\""
     },
     {
+      "name": "BRIDGE_COMMITTEE",
+      "type": "string",
+      "value": "\"BRIDGE_COMMITTEE\""
+    },
+    {
       "name": "COMMITTEE_SUBMITTER_CONFIG",
       "type": "string",
       "value": "\"COMMITTEE_SUBMITTER_CONFIG\""
@@ -2006,6 +2026,16 @@ export const IDL: Bridge = {
       "code": 6038,
       "name": "InstructionMissing",
       "msg": "InstructionMissing"
+    },
+    {
+      "code": 6039,
+      "name": "AddressNotFound",
+      "msg": "Address not found"
+    },
+    {
+      "code": 6040,
+      "name": "AddressAlreadyInCommittee",
+      "msg": "Address already in committee"
     }
   ]
 };

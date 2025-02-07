@@ -80,5 +80,11 @@ pub enum ErrorCode {
     #[msg("Signature verification failed")]
     SigVerificationFailed,
     #[msg("InstructionMissing")]
-    InstructionMissing
+    InstructionMissing,
+
+    #[msg("Address not found")]
+    AddressNotFound,
+
+    #[msg("Address already in committee")]
+    AddressAlreadyInCommittee,
 }
