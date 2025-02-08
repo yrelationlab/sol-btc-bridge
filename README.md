@@ -12,3 +12,16 @@
 ## deploy failed
 1. solana-keygen recover -o ~/deploy-keys/recover-deploy-key --force
 2. solana program deploy -k ./cli/.config/secret.json --buffer ~/deploy-keys/recover-deploy-key target/deploy/bridge.so
+
+# 工作汇报 20250206
+1. 数据结构设计，模块及设计
+2. config的保存，committee的保存
+3. 完成多方签名机制，验证有lookup table的情况下支持5个签名，没有的情况下支持4个左右。
+4. stake的验证
+5. mint sbtc
+
+# 准备开展的工作 
+1. typescript sdk
+2. burn token
+3. bridge流程打通
+4. vault开发

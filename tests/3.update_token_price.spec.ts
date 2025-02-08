@@ -18,14 +18,14 @@ describe("Update Token Price", () => {
   beforeEach(async () => {
     values = createValues();
     console.log(`connection: ${provider.connection.rpcEndpoint}`)
-    // const createBridgeConfig_tx = await createBridgeConfig(program, values);
-    // console.log(`createBridgeConfig_tx is ${createBridgeConfig_tx}`)
-    // const createCommitteeConfig_tx = await createCommitteeConfig(program, values);
-    // console.log(`createCommitteeConfig_tx is ${createCommitteeConfig_tx}`)
+    const createBridgeConfig_tx = await createBridgeConfig(program, values);
+    console.log(`createBridgeConfig_tx is ${createBridgeConfig_tx}`)
+    const createCommitteeConfig_tx = await createCommitteeConfig(program, values);
+    console.log(`createCommitteeConfig_tx is ${createCommitteeConfig_tx}`)
   }, 1000000);
   it("1. update Token Price with only submitter", async () => {
 
-    // await airdrop(provider.connection, values.submitter.publicKey);
+    await airdrop(provider.connection, values.submitter.publicKey);
     const changedPrice = new anchor.BN(999);
     // Create the msg object
     const msg = new UpdateTokenPriceMsg({
@@ -63,9 +63,9 @@ describe("Update Token Price", () => {
     console.log(`tx.instructions[0] is ${JSON.stringify(tx.instructions[0].programId, null, 2)}`);
     console.log(`tx.instructions[1] is ${JSON.stringify(tx.instructions[1].programId, null, 2)}`);
 
-    const LOOKUP_TABLE_ADDRESS = new PublicKey("8j3Tgegjq5hY2joaC6hGUZQZhTg2cohkxVhCPVxYj3WP")
+    // const LOOKUP_TABLE_ADDRESS = new PublicKey("8j3Tgegjq5hY2joaC6hGUZQZhTg2cohkxVhCPVxYj3WP")
     // const LOOKUP_TABLE_ADDRESS = await createLookupTable(values.submitter.publicKey, values.submitter, provider.connection);
-    console.log(`LOOKUP_TABLE_ADDRESS is : ${LOOKUP_TABLE_ADDRESS}`);
+    // console.log(`LOOKUP_TABLE_ADDRESS is : ${LOOKUP_TABLE_ADDRESS}`);
 
     // await createAndSendV0Tx([AddressLookupTableProgram.extendLookupTable({
     //   payer: values.submitter.publicKey,
@@ -75,12 +75,12 @@ describe("Update Token Price", () => {
     // })], [values.submitter], provider.connection, null, true);
     // console.log(`table create success 0 !`);
 
-    const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value; 
+    // const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value; 
 
     console.log(`claimLpRewards...start...`)
     // https://explorer.solana.com/tx/2EmXQsAbFxWQoNAZNYdVTRgmu649i9p8xm73U8M5MVcWWCpWWidqMV7jwPAd8C1Em2Q9K8ASJg885HDAASsGRFVG?cluster=devnet
-    await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
-    // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
+    // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
+    await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
     console.log(`claimLpRewards....end...`)
 
     const tokenConfig = await program.account.tokenConfig.fetch(values.tokenConfigPdas[0]);
