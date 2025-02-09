@@ -108,7 +108,7 @@ export async function airdrop(connection: Connection, key: PublicKey, amount: nu
   await connection.confirmTransaction(airdropSignature);
 }
 
-export function createValues(defaults?: TestValuesDefaults): TestValues {
+export async function createValues(defaults?: TestValuesDefaults): Promise<TestValues> {
   const payerAdmin = Keypair.fromSecretKey(new Uint8Array(secret));
   console.log(`payerAdmin is ${JSON.stringify(payerAdmin.publicKey)}`);
 
@@ -161,6 +161,12 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     anchor.workspace.bridge.programId
   )[0]
   console.log(`sbtcMint is ${JSON.stringify(sbtcMint)}`);
+
+  let userSbtcAta = await getAssociatedTokenAddress(
+    sbtcMint,
+    user.publicKey,
+    true
+  );
 
   const tokenConfigPdas = supportedTokensIndex.map((tokenId, index) =>
     getTokenConfigPda(tokenId)
@@ -233,7 +239,8 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     sbtcMint,
     nonceMintSbtc,
     ethBtcAddress,
-    user
+    user,
+    userSbtcAta
   };
 }
 

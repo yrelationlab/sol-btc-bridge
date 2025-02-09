@@ -11,7 +11,7 @@ describe("Create Bridge Config", () => {
   const program = anchor.workspace.Bridge as Program<Bridge>;
   let values: TestValues;
   beforeEach(async () => {
-    values = createValues();
+    values = await createValues();
   });
   it("Creation", async () => {
     console.log(`values.chainId is ${values.chainId}`)

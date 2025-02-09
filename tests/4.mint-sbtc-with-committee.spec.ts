@@ -50,7 +50,7 @@ describe("Mint sbtc", () => {
   const program = anchor.workspace.Bridge as Program<Bridge>;
   let values: TestValues;
   beforeAll(async () => {
-    values = createValues();
+    values = await createValues();
     await createBridgeConfig(program, values);
     await createCommitteeConfig(program, values);
   });
@@ -67,46 +67,11 @@ describe("Mint sbtc", () => {
       sourceTokenId: values.supportedTokensIndex[0], // 转换为数字
     });
 
-    const configAccount = await program.account.bridgeConfig.fetch(
-      values.bridgeConfigPDA
-    );
-    const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
-      [BRIDGE_SBTC_AUTH, new anchor.BN(values.chainId).toArrayLike(Buffer, 'be', 1)],
-      anchor.workspace.bridge.programId
-    )[0];
-    const accountExists = await checkAssociatedTokenAccount(
-      provider.connection,
-      configAccount.sbtcMint,
-      values.submitter.publicKey // use submitter as user to receive sbtc
-    );
-    let associatedTokenAddress = await getAssociatedTokenAddress(
-      configAccount.sbtcMint,
-      values.submitter.publicKey,
-      true
-    );
-
-    const associatedInx = [];
-    if (!accountExists) {
-      associatedInx.push(
-        createAssociatedTokenAccountInstruction(
-          values.submitter.publicKey, // payer
-          associatedTokenAddress, // ata address
-          values.submitter.publicKey, // owner
-          configAccount.sbtcMint // mint
-        )
-      );
-    }
-    const balance = await provider.connection.getBalance(
-      values.submitter.publicKey
-    );
-    // console.log("balance: ", balance, values.submitter.publicKey);
-
-    // 5. 检查用户在 mint 前的余额
     let beforeBalance = 0;
     try {
       const beforeAccountInfo = await getAccount(
         provider.connection,
-        associatedTokenAddress
+        values.userSbtcAta
       );
       beforeBalance = Number(beforeAccountInfo.amount);
     } catch (err) {
@@ -126,8 +91,8 @@ describe("Mint sbtc", () => {
         //   nonce: values.nonceMintSbtc,
         submitterAccount: values.submitterPda,
         submitter: values.submitter.publicKey,
-        userSbtcAta: associatedTokenAddress,
-        user: values.submitter.publicKey,
+        userSbtcAta: values.userSbtcAta,
+        user: values.user.publicKey,
         sbtcMint: values.sbtcMint,
         instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
       })
@@ -138,7 +103,6 @@ describe("Mint sbtc", () => {
           isWritable: true,
         })),
       ])
-      .preInstructions([...associatedInx])
       .signers([values.payerAdmin, values.submitter])
       .rpc();
     console.log("txSig: ", transaction);
@@ -147,7 +111,7 @@ describe("Mint sbtc", () => {
     try {
       const afterAccountInfo = await getAccount(
         provider.connection,
-        associatedTokenAddress
+        values.userSbtcAta
       );
       afterBalance = Number(afterAccountInfo.amount);
     } catch (err) {

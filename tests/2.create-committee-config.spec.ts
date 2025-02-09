@@ -11,7 +11,7 @@ describe("Create Committee config", () => {
   const program = anchor.workspace.Bridge as Program<Bridge>;
   let values: TestValues;
   beforeEach(async () => {
-    values = createValues();
+    values = await createValues();
   });
   it("Creation", async () => {
     const tx = await createCommitteeConfig(program, values);

@@ -1,19 +1,20 @@
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_module;
 use anchor_lang::prelude::*;
+use anchor_spl::associated_token::AssociatedToken;
 
 use crate::constants::{ COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, SBTC_MINT };
 use crate::errors::ErrorCode;
 use crate::{ MintSbtcMessage, Submitter };
 
-use anchor_spl::token::Mint;
+use anchor_spl::token::{ Mint, TokenAccount };
 
 use crate::BridgeConfig;
 pub fn mint_sbtc_with_signatures(
     ctx: Context<MintSbtcWithSignatures>,
     _chain_id: u8,
     number_of_signatures: u8,
-    msg: MintSbtcMessage,
+    msg: MintSbtcMessage
 ) -> Result<()> {
     let bridge_config = &ctx.accounts.bridge_config;
     // let nonce_config = &mut ctx.accounts.nonce;
@@ -91,7 +92,7 @@ pub fn mint_sbtc_with_signatures(
 }
 
 #[derive(Accounts)]
-#[instruction(msg: MintSbtcMessage, number_of_signatures: u8,_chain_id: u8)]
+#[instruction(_chain_id: u8)]
 pub struct MintSbtcWithSignatures<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -136,20 +137,21 @@ pub struct MintSbtcWithSignatures<'info> {
     #[account(
         mut,
         seeds = [
-                    SBTC_MINT.as_bytes(),
-                    &_chain_id.to_be_bytes()
-                ],
-                bump,
+            SBTC_MINT.as_bytes(),
+            &_chain_id.to_be_bytes()
+        ],
+        bump,
     )]
     pub sbtc_mint: Account<'info, Mint>,
 
     /// the user's sBTC Token Account
     #[account(
-        mut,
-        constraint = user_sbtc_ata.owner == user.key(),
-        constraint = user_sbtc_ata.mint == bridge_config.sbtc_mint
+        init_if_needed,
+        payer = payer,
+        associated_token::mint = sbtc_mint,
+        associated_token::authority = user
     )]
-    pub user_sbtc_ata: Account<'info, anchor_spl::token::TokenAccount>,
+    pub user_sbtc_ata: Account<'info, TokenAccount>,
 
     /// the user to receive minted sBTC
     /// CHECK: only need .key()
@@ -170,7 +172,7 @@ pub struct MintSbtcWithSignatures<'info> {
     /// CHECK: This is not dangerous because we explicitly check the id
     #[account(address = instructions_sysvar_module::ID)]
     pub instructions_sysvar: AccountInfo<'info>,
-
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, anchor_spl::token::Token>,
     pub system_program: Program<'info, System>,
 }

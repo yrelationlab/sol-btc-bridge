@@ -29,6 +29,7 @@ export interface TestValues {
     supportedChains: number[];
     ethBtcAddress: Uint8Array;
     user: Keypair;
+    userSbtcAta: PublicKey;
 }
 
 

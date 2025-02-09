@@ -17,7 +17,7 @@ describe("Update Token Price", () => {
   const program = anchor.workspace.Bridge as Program<Bridge>;
   let values: TestValues;
   beforeAll(async () => {
-    values = createValues();
+    values = await createValues();
     await createBridgeConfig(program, values);
   });
 

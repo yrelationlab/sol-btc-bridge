@@ -16,7 +16,7 @@ describe("Update Token Price", () => {
   const program = anchor.workspace.Bridge as Program<Bridge>;
   let values: TestValues;
   beforeEach(async () => {
-    values = createValues();
+    values = await createValues();
     console.log(`connection: ${provider.connection.rpcEndpoint}`)
     const createBridgeConfig_tx = await createBridgeConfig(program, values);
     console.log(`createBridgeConfig_tx is ${createBridgeConfig_tx}`)
