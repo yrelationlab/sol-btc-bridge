@@ -57,10 +57,11 @@ describe("Mint sbtc", () => {
     const msg = {
       messageType: 9, // for Mint_SBTC
       version: 1,
-      nonce: new anchor.BN(1), 
+      nonce: new anchor.BN(1),
+      fromAddressLength: 20,
       fromAddress: values.submitter.publicKey.toBuffer(),
       toAddress: values.submitter.publicKey.toBuffer().slice(0, 32),
-      amount: new anchor.BN(1000), 
+      amount: new anchor.BN(1000),
       sourceChainId: new anchor.BN(2).toNumber(), // 转换为数字
       sourceTokenId: new anchor.BN(2).toNumber(), // 转换为数字
     };
@@ -69,7 +70,7 @@ describe("Mint sbtc", () => {
       values.bridgeConfigPDA
     );
     const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
-      [BRIDGE_SBTC_AUTH,new anchor.BN(values.chainId).toArrayLike(Buffer, 'be', 1)],
+      [BRIDGE_SBTC_AUTH, new anchor.BN(values.chainId).toArrayLike(Buffer, 'be', 1)],
       anchor.workspace.bridge.programId
     )[0];
     const accountExists = await checkAssociatedTokenAccount(
@@ -117,7 +118,7 @@ describe("Mint sbtc", () => {
     await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
 
     const transaction = await program.methods
-      .mintSbtcWithSignatures(msg as any, 3, values.chainId)
+      .mintSbtcWithSignatures(values.chainId, 3, msg as any,)
       .accounts({
         payer: values.payerAdmin.publicKey,
         bridgeConfig: values.bridgeConfigPDA,

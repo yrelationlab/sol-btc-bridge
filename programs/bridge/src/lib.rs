@@ -57,17 +57,17 @@ pub mod bridge {
         ctx: Context<'_, '_, 'info, 'info, UpdateTokenPrice<'info>>,
         _chain_id: u8,
         number_of_signatures: u8,
-        msg: UpdateTokenPriceMsg,
+        msg: UpdateTokenPriceMsg
     ) -> Result<()> {
         instructions::update_token_price_with_signatures(ctx, _chain_id, number_of_signatures, msg)
     }
 
     pub fn mint_sbtc_with_signatures<'info>(
         ctx: Context<'_, '_, 'info, 'info, MintSbtcWithSignatures<'info>>,
-        msg: MintSbtcMessage,
+        _chain_id: u8,
         number_of_signatures: u8,
-        _chain_id: u8
+        msg: MintSbtcMessage
     ) -> Result<()> {
-        instructions::mint_sbtc_with_signatures(ctx, msg, number_of_signatures, _chain_id)
+        instructions::mint_sbtc_with_signatures(ctx, _chain_id, number_of_signatures, msg)
     }
 }

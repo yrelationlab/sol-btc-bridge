@@ -10,7 +10,8 @@ pub struct MintSbtcMessage {
     pub nonce: u64,
     pub source_chain_id: u8,
     pub source_token_id: u8,
-    pub from_address: Vec<u8>,
+    pub from_address_length: u8, 
+    pub from_address: Vec<u8>,  
     pub to_address: [u8; 32],
     pub amount: u64,
 }

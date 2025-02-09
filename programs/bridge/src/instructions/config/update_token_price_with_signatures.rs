@@ -9,7 +9,7 @@ use crate::constants::{
     ANCHOR_HEADER_LEN,
     COMMITTEE_SUBMITTER_CONFIG,
     GLOBAL_CONFIG,
-    NONCE_CONFIG,
+    NONCE_CONFIG, TOKEN_CONFIG,
 };
 use crate::errors::ErrorCode;
 
@@ -98,6 +98,17 @@ pub struct UpdateTokenPrice<'info> {
         bump
     )]
     pub submitter_account: Box<Account<'info, Submitter>>,
+
+    // #[account(
+    //     init_if_needed,
+    //     payer = payer,
+    //     space = TokenConfig::LEN,
+    //     seeds = [
+    //         TOKEN_CONFIG.as_ref(), msg.token_id_bytes.as_ref()
+    //     ],
+    //     bump
+    // )]
+    // pub token_config: Box<Account<'info, TokenConfig>>,
 
     /// CHECK: This is not dangerous because we explicitly check the id
     #[account(address = instructions_sysvar_module::ID)]

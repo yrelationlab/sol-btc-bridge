@@ -24,7 +24,7 @@
     "pgid": "solana address -k target/deploy/bridge-keypair.json",
     "clean": "cargo clean",
     "log": "solana logs",
-    "kn": "ps aux | grep solana-test-validator",
+    "kn": "kill -9 $(lsof -ti:8899) && kill -9 $(lsof -ti:9900)",
     "test": "./scripts/test-local.sh"
   },
   "dependencies": {

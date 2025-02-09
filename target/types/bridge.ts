@@ -324,18 +324,18 @@ export type Bridge = {
       ],
       "args": [
         {
-          "name": "msg",
-          "type": {
-            "defined": "MintSbtcMessage"
-          }
+          "name": "chainId",
+          "type": "u8"
         },
         {
           "name": "numberOfSignatures",
           "type": "u8"
         },
         {
-          "name": "chainId",
-          "type": "u8"
+          "name": "msg",
+          "type": {
+            "defined": "MintSbtcMessage"
+          }
         }
       ]
     }
@@ -1272,18 +1272,18 @@ export const IDL: Bridge = {
       ],
       "args": [
         {
-          "name": "msg",
-          "type": {
-            "defined": "MintSbtcMessage"
-          }
+          "name": "chainId",
+          "type": "u8"
         },
         {
           "name": "numberOfSignatures",
           "type": "u8"
         },
         {
-          "name": "chainId",
-          "type": "u8"
+          "name": "msg",
+          "type": {
+            "defined": "MintSbtcMessage"
+          }
         }
       ]
     }

@@ -11,9 +11,9 @@ use anchor_spl::token::Mint;
 use crate::BridgeConfig;
 pub fn mint_sbtc_with_signatures(
     ctx: Context<MintSbtcWithSignatures>,
-    msg: MintSbtcMessage,
+    _chain_id: u8,
     number_of_signatures: u8,
-    _chain_id: u8
+    msg: MintSbtcMessage,
 ) -> Result<()> {
     let bridge_config = &ctx.accounts.bridge_config;
     // let nonce_config = &mut ctx.accounts.nonce;

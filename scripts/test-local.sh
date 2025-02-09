@@ -20,3 +20,4 @@ rm -f .solana-test.pid
 
 # 返回原始测试状态码
 exit $exit_code
+kill -9 $(lsof -ti:8899) && kill -9 $(lsof -ti:9900)
