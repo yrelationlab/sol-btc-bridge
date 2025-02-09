@@ -58,6 +58,24 @@ export type Bridge = {
   "instructions": [
     {
       "name": "createBridgeConfig",
+      "docs": [
+        "# Arguments",
+        "",
+        "* `ctx` - The context containing all accounts required for this instruction.",
+        "* `chain_id` - The ID of the chain for which the bridge configuration is being created.",
+        "* `fee_recipient` - The public key of the account that will receive fees.",
+        "* `token_ids` - A vector of token IDs that will be supported by the bridge.",
+        "* `token_prices` - A vector of token prices corresponding to the token IDs.",
+        "* `supported_chains` - A vector of chain IDs that will be supported by the bridge.",
+        "* `token_fee_percentages` - A vector of fee percentages for each token.",
+        "* `token_min_amount` - A vector of minimum amounts for each token.",
+        "* note: each supported_chain has at least one <token_id, token_price>",
+        "",
+        "# Returns",
+        "",
+        "This function returns a `Result` which is `Ok` if the bridge configuration is created successfully,",
+        "or an `Error` if there is an issue with the provided arguments or during the creation process."
+      ],
       "accounts": [
         {
           "name": "bridgeConfig",
@@ -96,6 +114,10 @@ export type Bridge = {
         {
           "name": "feeRecipient",
           "type": "publicKey"
+        },
+        {
+          "name": "tokenIds",
+          "type": "bytes"
         },
         {
           "name": "tokenPrices",
@@ -755,12 +777,12 @@ export type Bridge = {
     {
       "code": 6003,
       "name": "InvalidSupportedTokenAddresses",
-      "msg": "Invalid supported token addresses"
+      "msg": "Invalid Supported Token Addresses"
     },
     {
       "code": 6004,
       "name": "InvalidTokenFeePercentage",
-      "msg": "Invalid token fee percentage"
+      "msg": "Invalid Token Fee Percentage"
     },
     {
       "code": 6005,
@@ -770,27 +792,27 @@ export type Bridge = {
     {
       "code": 6006,
       "name": "InvalidTokenMinimumAmount",
-      "msg": "Invalid token minimum amount"
+      "msg": "Invalid Token Minimum Amount"
     },
     {
       "code": 6007,
-      "name": "InvalidTokenPrices",
-      "msg": "Invalid token prices"
+      "name": "InvalidTokenIds",
+      "msg": "Invalid Token Ids"
     },
     {
       "code": 6008,
       "name": "InvalidAdminAddress",
-      "msg": "Invalid admin address"
+      "msg": "Invalid Admin Address"
     },
     {
       "code": 6009,
       "name": "InvalidFeeRecipientAddress",
-      "msg": "Invalid fee recipient address"
+      "msg": "Invalid Fee Recipient Address"
     },
     {
       "code": 6010,
       "name": "CannotSupportSelf",
-      "msg": "Cannot support self"
+      "msg": "Cannot Support Self"
     },
     {
       "code": 6011,
@@ -1000,6 +1022,24 @@ export const IDL: Bridge = {
   "instructions": [
     {
       "name": "createBridgeConfig",
+      "docs": [
+        "# Arguments",
+        "",
+        "* `ctx` - The context containing all accounts required for this instruction.",
+        "* `chain_id` - The ID of the chain for which the bridge configuration is being created.",
+        "* `fee_recipient` - The public key of the account that will receive fees.",
+        "* `token_ids` - A vector of token IDs that will be supported by the bridge.",
+        "* `token_prices` - A vector of token prices corresponding to the token IDs.",
+        "* `supported_chains` - A vector of chain IDs that will be supported by the bridge.",
+        "* `token_fee_percentages` - A vector of fee percentages for each token.",
+        "* `token_min_amount` - A vector of minimum amounts for each token.",
+        "* note: each supported_chain has at least one <token_id, token_price>",
+        "",
+        "# Returns",
+        "",
+        "This function returns a `Result` which is `Ok` if the bridge configuration is created successfully,",
+        "or an `Error` if there is an issue with the provided arguments or during the creation process."
+      ],
       "accounts": [
         {
           "name": "bridgeConfig",
@@ -1038,6 +1078,10 @@ export const IDL: Bridge = {
         {
           "name": "feeRecipient",
           "type": "publicKey"
+        },
+        {
+          "name": "tokenIds",
+          "type": "bytes"
         },
         {
           "name": "tokenPrices",
@@ -1697,12 +1741,12 @@ export const IDL: Bridge = {
     {
       "code": 6003,
       "name": "InvalidSupportedTokenAddresses",
-      "msg": "Invalid supported token addresses"
+      "msg": "Invalid Supported Token Addresses"
     },
     {
       "code": 6004,
       "name": "InvalidTokenFeePercentage",
-      "msg": "Invalid token fee percentage"
+      "msg": "Invalid Token Fee Percentage"
     },
     {
       "code": 6005,
@@ -1712,27 +1756,27 @@ export const IDL: Bridge = {
     {
       "code": 6006,
       "name": "InvalidTokenMinimumAmount",
-      "msg": "Invalid token minimum amount"
+      "msg": "Invalid Token Minimum Amount"
     },
     {
       "code": 6007,
-      "name": "InvalidTokenPrices",
-      "msg": "Invalid token prices"
+      "name": "InvalidTokenIds",
+      "msg": "Invalid Token Ids"
     },
     {
       "code": 6008,
       "name": "InvalidAdminAddress",
-      "msg": "Invalid admin address"
+      "msg": "Invalid Admin Address"
     },
     {
       "code": 6009,
       "name": "InvalidFeeRecipientAddress",
-      "msg": "Invalid fee recipient address"
+      "msg": "Invalid Fee Recipient Address"
     },
     {
       "code": 6010,
       "name": "CannotSupportSelf",
-      "msg": "Cannot support self"
+      "msg": "Cannot Support Self"
     },
     {
       "code": 6011,

@@ -40,7 +40,9 @@ import {
 } from "@solana/spl-token";
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
-import { BRIDGE_SBTC_AUTH } from "./constants";
+import { BRIDGE_SBTC_AUTH, MSG_VERSION } from "./constants";
+import { MintSbtcMessage } from "./txns/mint-sbtc-message ";
+import { MessageIds } from "./types";
 
 describe("Mint sbtc", () => {
   const provider = anchor.AnchorProvider.env();
@@ -54,17 +56,16 @@ describe("Mint sbtc", () => {
   });
 
   it("mint sbtc with committee", async () => {
-    const msg = {
-      messageType: 9, // for Mint_SBTC
-      version: 1,
+    const msg = new MintSbtcMessage({
+      messageType: MessageIds.TokenTransfer, // for Mint_SBTC
+      version: MSG_VERSION,
       nonce: new anchor.BN(1),
-      fromAddressLength: 20,
-      fromAddress: values.submitter.publicKey.toBuffer(),
-      toAddress: values.submitter.publicKey.toBuffer().slice(0, 32),
+      fromAddress: values.ethBtcAddress,
+      toAddress: values.user.publicKey.toBuffer(),
       amount: new anchor.BN(1000),
-      sourceChainId: new anchor.BN(2).toNumber(), // 转换为数字
-      sourceTokenId: new anchor.BN(2).toNumber(), // 转换为数字
-    };
+      sourceChainId: values.supportedChains[0], // 转换为数字
+      sourceTokenId: values.supportedTokensIndex[0], // 转换为数字
+    });
 
     const configAccount = await program.account.bridgeConfig.fetch(
       values.bridgeConfigPDA

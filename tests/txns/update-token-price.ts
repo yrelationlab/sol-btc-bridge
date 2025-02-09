@@ -9,7 +9,7 @@ import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { Schema } from "borsh";
 
 import { Bridge } from "../../target/types/bridge";
-import { BaseMsg } from "./baseMsg";
+import { BaseMsg } from "./base-msg";
 
 export class UpdateTokenPriceMsg extends BaseMsg {
     messageType: number;

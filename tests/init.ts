@@ -51,6 +51,8 @@ import fee from "../cli/.config/fee.json";
 import t1 from "../cli/.config/t1.json";
 import t2 from "../cli/.config/t2.json";
 import t3 from "../cli/.config/t3.json";
+import u1 from "../cli/.config/u1.json";
+
 
 import { assert, expect } from "chai";
 import { Bridge } from "../target/types/bridge";
@@ -111,8 +113,9 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   console.log(`payerAdmin is ${JSON.stringify(payerAdmin.publicKey)}`);
 
   const feeRecipient = Keypair.fromSecretKey(new Uint8Array(fee)).publicKey;
-  // Keypair.generate().publicKey;
   console.log(`feeRecipient is ${JSON.stringify(feeRecipient)}`);
+
+  const user = Keypair.fromSecretKey(new Uint8Array(u1));
 
   const supportedTokensKeypairs = [Keypair.fromSecretKey(new Uint8Array(t1)), Keypair.fromSecretKey(new Uint8Array(t2)), Keypair.fromSecretKey(new Uint8Array(t3))];
   supportedTokensKeypairs.forEach((keypair, index) => {
@@ -202,6 +205,8 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
 
+  const ethBtcAddress = Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", "hex");
+
   return {
     chainId: curChainId,
     payerAdmin,
@@ -226,7 +231,9 @@ export function createValues(defaults?: TestValuesDefaults): TestValues {
     supportedChains,
     bridgeSbtcAuth: bridgeSbtcAuth,
     sbtcMint,
-    nonceMintSbtc
+    nonceMintSbtc,
+    ethBtcAddress,
+    user
   };
 }
 
@@ -294,6 +301,7 @@ export async function createBridgeConfig(
     .createBridgeConfig(
       values.chainId,
       values.feeRecipient,
+      Buffer.from(new Uint8Array(values.supportedTokensIndex)),
       values.prices,
       values.supportedChainsBuffer,
       values.tokenFeePercentages,

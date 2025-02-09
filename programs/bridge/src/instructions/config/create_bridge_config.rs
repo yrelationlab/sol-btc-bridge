@@ -1,43 +1,44 @@
+/// Creates a new bridge configuration.
 use crate::{
-    constants::{
-        ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SBTC_MINT,
-    },
+    constants::{ ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SBTC_MINT },
     create_account,
     errors::ErrorCode,
-    find_ata_in_accounts, get_support_chains_pda_bump_seeds, get_token_pda_bump_seeds,
-    BridgeConfig, SupportedChainConfig, TokenConfig,
-    
+    find_ata_in_accounts,
+    get_support_chains_pda_bump_seeds,
+    get_token_pda_bump_seeds,
+    BridgeConfig,
+    SupportedChainConfig,
+    TokenConfig,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
-use anchor_lang::{prelude::*, Discriminator};
+use anchor_lang::{ prelude::*, Discriminator };
 
-use anchor_spl::
-        token::{Mint, Token};
+use anchor_spl::token::{ Mint, Token };
+
 
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
     fee_recipient: Pubkey,
+    token_ids: Vec<u8>,
     token_prices: Vec<u64>,
     supported_chains: Vec<u8>,
     token_fee_percentages: Vec<u64>,
-    token_min_amount: Vec<u64>,
+    token_min_amount: Vec<u64>
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
+
+    require!(token_ids.len() == token_prices.len(), ErrorCode::InvalidTokenIds);
+
     require!(
         token_prices.len() == token_fee_percentages.len(),
         ErrorCode::InvalidTokenFeePercentage
     );
 
-    require!(
-        token_prices.len() == token_min_amount.len(),
-        ErrorCode::InvalidTokenMinimumAmount
-    );
+    require!(token_prices.len() == token_min_amount.len(), ErrorCode::InvalidTokenMinimumAmount);
 
-    require!(
-        fee_recipient != Pubkey::default(),
-        ErrorCode::InvalidFeeRecipientAddress
-    );
+
+    require!(fee_recipient != Pubkey::default(), ErrorCode::InvalidFeeRecipientAddress);
     bridge_config.chain_id = chain_id;
     bridge_config.admin = ctx.accounts.payer.key();
     bridge_config.fee_recipient = fee_recipient;
@@ -45,17 +46,16 @@ pub fn create_bridge_config<'info>(
     bridge_config.is_initialized = true;
 
     for (i, chain_id) in supported_chains.iter().enumerate() {
-        let (pda_of_token_config_addr, _, _, signer_seeds) =
-            get_token_pda_bump_seeds(ctx.program_id, (i as u8).to_be_bytes());
-        msg!(
-            "i:{}, pda_of_token_config_addr: {:?}",
-            i,
-            pda_of_token_config_addr
+        let (pda_of_token_config_addr, _, _, signer_seeds) = get_token_pda_bump_seeds(
+            ctx.program_id,
+            (i as u8).to_be_bytes()
         );
+        msg!("i:{}, pda_of_token_config_addr: {:?}", i, pda_of_token_config_addr);
 
-        let pda_of_token_config =
-            find_ata_in_accounts(ctx.remaining_accounts.to_vec(), &pda_of_token_config_addr)
-                .ok_or(ErrorCode::TokenConfigAddressMissing)?;
+        let pda_of_token_config = find_ata_in_accounts(
+            ctx.remaining_accounts.to_vec(),
+            &pda_of_token_config_addr
+        ).ok_or(ErrorCode::TokenConfigAddressMissing)?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
@@ -66,14 +66,14 @@ pub fn create_bridge_config<'info>(
                 .map(|v| v.as_slice())
                 .collect::<Vec<&[u8]>>()
                 .as_slice(),
-            TokenConfig::LEN,
+            TokenConfig::LEN
         )?;
         let discriminator = TokenConfig::discriminator(); // 获取 discriminator
         let account_data = &mut *pda_of_token_config.try_borrow_mut_data()?;
         account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&discriminator);
         let bridge_config_of_token = TokenConfig {
             is_initialized: true,
-            token_id: i as u8,
+            token_id: token_ids[i],
             chain_id: *chain_id,
             decimal: DECIMALS9,
             native: false,
@@ -88,19 +88,14 @@ pub fn create_bridge_config<'info>(
                 msg!("BridgeConfigSerializationError: error={}", error);
                 ErrorCode::BridgeConfigSerializationError
             })?;
-    }
-    for (_i, chain_id) in supported_chains.iter().enumerate() {
-        require!(
-            *chain_id != bridge_config.chain_id,
-            ErrorCode::CannotSupportSelf
-        );
+
+        require!(*chain_id != bridge_config.chain_id, ErrorCode::CannotSupportSelf);
         let (pda_of_supported_chains_config_addr, _, _, signer_seeds) =
             get_support_chains_pda_bump_seeds(ctx.program_id, chain_id.to_be_bytes());
         let pda_of_supported_chains_config = find_ata_in_accounts(
             ctx.remaining_accounts.to_vec(),
-            &pda_of_supported_chains_config_addr,
-        )
-        .ok_or(ErrorCode::SupportedChainAddressMissing)?;
+            &pda_of_supported_chains_config_addr
+        ).ok_or(ErrorCode::SupportedChainAddressMissing)?;
         create_account(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
@@ -111,7 +106,7 @@ pub fn create_bridge_config<'info>(
                 .map(|v| v.as_slice())
                 .collect::<Vec<&[u8]>>()
                 .as_slice(),
-            SupportedChainConfig::LEN,
+            SupportedChainConfig::LEN
         )?;
 
         let discriminator = SupportedChainConfig::discriminator(); // 获取 discriminator
@@ -143,10 +138,7 @@ pub struct CreateBridgeConfig<'info> {
         init,
         payer = payer,
         space = BridgeConfig::LEN,
-        seeds = [
-            GLOBAL_CONFIG.as_bytes(),
-            &chain_id.to_be_bytes()
-        ],
+        seeds = [GLOBAL_CONFIG.as_bytes(), &chain_id.to_be_bytes()],
         bump
     )]
     pub bridge_config: Account<'info, BridgeConfig>,
@@ -158,7 +150,6 @@ pub struct CreateBridgeConfig<'info> {
     )]
     pub payer: Signer<'info>,
 
-    
     /// CHECK:` Validate address by deriving pda, use as sBTC mint's authority
     // #[account(
     //     seeds = [
@@ -168,19 +159,16 @@ pub struct CreateBridgeConfig<'info> {
     //     bump
     // )]
     // pub sbtc_authority: AccountInfo<'info>,
-    
+
     /// CHECK: `https://solana.stackexchange.com/questions/454/how-to-create-a-program-that-has-the-authority-to-mint-tokens`
     #[account(
         init,
         payer = payer,
-        seeds = [
-            SBTC_MINT.as_bytes(),
-            &chain_id.to_be_bytes()
-        ],
+        seeds = [SBTC_MINT.as_bytes(), &chain_id.to_be_bytes()],
         bump,
         mint::decimals = 9,
         mint::authority = sbtc_mint,
-        mint::freeze_authority = sbtc_mint,
+        mint::freeze_authority = sbtc_mint
     )]
     pub sbtc_mint: Account<'info, Mint>,
 

@@ -10,8 +10,6 @@ pub struct UpdateTokenPriceMsg {
     pub nonce: u64,
     pub chain_id: u8,
     pub payload: [u8; 9], 
-    // pub token_id: u8,
-    // pub token_price: u64,
 }
 
 impl DeserializeMessage for UpdateTokenPriceMsg {

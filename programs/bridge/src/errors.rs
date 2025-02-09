@@ -7,21 +7,21 @@ pub enum ErrorCode {
     InvalidMessageType,
     #[msg("Invalid Op Code")]
     InvalidOpCode,
-    #[msg("Invalid supported token addresses")]
+    #[msg("Invalid Supported Token Addresses")]
     InvalidSupportedTokenAddresses,
-    #[msg("Invalid token fee percentage")]
+    #[msg("Invalid Token Fee Percentage")]
     InvalidTokenFeePercentage,
     #[msg("Invalid Ids Length")]
     InvalidIdsLength,
-    #[msg("Invalid token minimum amount")]
+    #[msg("Invalid Token Minimum Amount")]
     InvalidTokenMinimumAmount,
-    #[msg("Invalid token prices")]
-    InvalidTokenPrices,
-    #[msg("Invalid admin address")]
+    #[msg("Invalid Token Ids")]
+    InvalidTokenIds,
+    #[msg("Invalid Admin Address")]
     InvalidAdminAddress,
-    #[msg("Invalid fee recipient address")]
+    #[msg("Invalid Fee Recipient Address")]
     InvalidFeeRecipientAddress,
-    #[msg("Cannot support self")]
+    #[msg("Cannot Support Self")]
     CannotSupportSelf,
     #[msg("Token Config Address Missing")]
     TokenConfigAddressMissing,

@@ -11,13 +11,28 @@ pub mod bridge {
     pub use super::instructions::*;
 
     use super::*;
-    // pub fn close_memoo_config(ctx: Context<CloseMemooConfig>) -> Result<()> {
-    //     instructions::close_memoo_config(ctx)
-    // }
+
+    /// # Arguments
+    ///
+    /// * `ctx` - The context containing all accounts required for this instruction.
+    /// * `chain_id` - The ID of the chain for which the bridge configuration is being created.
+    /// * `fee_recipient` - The public key of the account that will receive fees.
+    /// * `token_ids` - A vector of token IDs that will be supported by the bridge.
+    /// * `token_prices` - A vector of token prices corresponding to the token IDs.
+    /// * `supported_chains` - A vector of chain IDs that will be supported by the bridge.
+    /// * `token_fee_percentages` - A vector of fee percentages for each token.
+    /// * `token_min_amount` - A vector of minimum amounts for each token.
+    /// * note: each supported_chain has at least one <token_id, token_price>
+    ///
+    /// # Returns
+    ///
+    /// This function returns a `Result` which is `Ok` if the bridge configuration is created successfully,
+    /// or an `Error` if there is an issue with the provided arguments or during the creation process.
     pub fn create_bridge_config<'info>(
         ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
         chain_id: u8,
         fee_recipient: Pubkey,
+        token_ids: Vec<u8>,
         token_prices: Vec<u64>,
         supported_chains: Vec<u8>,
         token_fee_percentages: Vec<u64>,
@@ -27,6 +42,7 @@ pub mod bridge {
             ctx,
             chain_id,
             fee_recipient,
+            token_ids,
             token_prices,
             supported_chains,
             token_fee_percentages,

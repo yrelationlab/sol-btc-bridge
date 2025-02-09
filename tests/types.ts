@@ -26,7 +26,9 @@ export interface TestValues {
     committeePdas: PublicKey[];
     noncePdaUpdateTokenPrice: PublicKey;
     nonceMintSbtc: PublicKey;
-    supportedChains: number[]
+    supportedChains: number[];
+    ethBtcAddress: Uint8Array;
+    user: Keypair;
 }
 
 

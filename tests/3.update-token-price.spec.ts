@@ -7,7 +7,7 @@ import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
 import { MessageType, MessageIds } from "./types";
 import { Keypair, SYSVAR_INSTRUCTIONS_PUBKEY, AddressLookupTableProgram, PublicKey } from '@solana/web3.js'
-import { UpdateTokenPriceMsg, UpdateTokenPriceMsgTxn } from "./txns/updateTokenPrice";
+import { UpdateTokenPriceMsg, UpdateTokenPriceMsgTxn } from "./txns/update-token-price";
 import { MSG_VERSION } from "./constants";
 
 describe("Update Token Price", () => {
