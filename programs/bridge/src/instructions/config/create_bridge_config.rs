@@ -18,7 +18,6 @@ pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
     fee_recipient: Pubkey,
-    supported_tokens: Vec<Pubkey>,
     token_prices: Vec<u64>,
     supported_chains: Vec<u8>,
     token_fee_percentages: Vec<u64>,
@@ -26,19 +25,15 @@ pub fn create_bridge_config<'info>(
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
     require!(
-        supported_tokens.len() == token_fee_percentages.len(),
+        token_prices.len() == token_fee_percentages.len(),
         ErrorCode::InvalidTokenFeePercentage
     );
 
     require!(
-        supported_tokens.len() == token_min_amount.len(),
+        token_prices.len() == token_min_amount.len(),
         ErrorCode::InvalidTokenMinimumAmount
     );
 
-    require!(
-        supported_tokens.len() == token_prices.len(),
-        ErrorCode::InvalidTokenPrices
-    );
     require!(
         fee_recipient != Pubkey::default(),
         ErrorCode::InvalidFeeRecipientAddress
@@ -49,7 +44,7 @@ pub fn create_bridge_config<'info>(
     bridge_config.sbtc_mint = ctx.accounts.sbtc_mint.key();
     bridge_config.is_initialized = true;
 
-    for (i, token_address) in supported_tokens.iter().enumerate() {
+    for (i, chain_id) in supported_chains.iter().enumerate() {
         let (pda_of_token_config_addr, _, _, signer_seeds) =
             get_token_pda_bump_seeds(ctx.program_id, (i as u8).to_be_bytes());
         msg!(
@@ -79,8 +74,7 @@ pub fn create_bridge_config<'info>(
         let bridge_config_of_token = TokenConfig {
             is_initialized: true,
             token_id: i as u8,
-            chain_id: supported_chains[i],
-            token_address: *token_address,
+            chain_id: *chain_id,
             decimal: DECIMALS9,
             native: false,
             token_price: token_prices[i],

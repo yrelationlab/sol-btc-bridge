@@ -9,7 +9,7 @@ use crate::constants::{
     ANCHOR_HEADER_LEN,
     COMMITTEE_SUBMITTER_CONFIG,
     GLOBAL_CONFIG,
-    NONCE_CONFIG, TOKEN_CONFIG,
+    NONCE_CONFIG,
 };
 use crate::errors::ErrorCode;
 

@@ -28,7 +28,6 @@ pub struct TokenConfig {
     pub is_initialized: bool, // 1 byte
     pub token_id: u8,
     pub chain_id: u8,
-    pub token_address: Pubkey,
     pub decimal: u8,
     pub native: bool,
     pub token_price: u64,
@@ -42,7 +41,6 @@ impl TokenConfig {
     + 1 // isInitialized
     + 1 // chain_id
     + 1 // token_id
-    + 32 // token_address
     + 1 // decimal
     + 1 // native
     + 8 // token_price

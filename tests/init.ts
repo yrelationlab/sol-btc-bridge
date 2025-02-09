@@ -294,7 +294,6 @@ export async function createBridgeConfig(
     .createBridgeConfig(
       values.chainId,
       values.feeRecipient,
-      keypairsToPublicArrays(values.supportedTokensKeypairs),
       values.prices,
       values.supportedChainsBuffer,
       values.tokenFeePercentages,

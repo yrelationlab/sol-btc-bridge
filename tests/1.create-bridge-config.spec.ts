@@ -29,7 +29,6 @@ describe("Create Bridge Config", () => {
     for (const [index, tokenConfigPda] of values.tokenConfigPdas.entries()) {
       const tokenConfig = await program.account.tokenConfig.fetch(tokenConfigPda);
       console.log(`tokenConfig is ${JSON.stringify(tokenConfig)}`);
-      expect(tokenConfig.tokenAddress.toString()).to.equal(values.supportedTokensKeypairs[index].publicKey.toString());
       expect(tokenConfig.chainId.toString()).to.equal(values.supportedChainsBuffer[index].toString());
       expect(tokenConfig.tokenPrice.toString()).to.equal(values.prices[index].toString());
       expect(tokenConfig.tokenFeePercentage.toString()).to.equal(values.tokenFeePercentages[index].toString());

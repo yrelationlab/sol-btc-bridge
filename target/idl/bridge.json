@@ -98,12 +98,6 @@
           "type": "publicKey"
         },
         {
-          "name": "supportedTokens",
-          "type": {
-            "vec": "publicKey"
-          }
-        },
-        {
           "name": "tokenPrices",
           "type": {
             "vec": "u64"
@@ -467,10 +461,6 @@
             "type": "u8"
           },
           {
-            "name": "tokenAddress",
-            "type": "publicKey"
-          },
-          {
             "name": "decimal",
             "type": "u8"
           },
@@ -594,6 +584,10 @@
           },
           {
             "name": "sourceTokenId",
+            "type": "u8"
+          },
+          {
+            "name": "fromAddressLength",
             "type": "u8"
           },
           {

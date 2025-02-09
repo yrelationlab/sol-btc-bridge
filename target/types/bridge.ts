@@ -98,12 +98,6 @@ export type Bridge = {
           "type": "publicKey"
         },
         {
-          "name": "supportedTokens",
-          "type": {
-            "vec": "publicKey"
-          }
-        },
-        {
           "name": "tokenPrices",
           "type": {
             "vec": "u64"
@@ -467,10 +461,6 @@ export type Bridge = {
             "type": "u8"
           },
           {
-            "name": "tokenAddress",
-            "type": "publicKey"
-          },
-          {
             "name": "decimal",
             "type": "u8"
           },
@@ -594,6 +584,10 @@ export type Bridge = {
           },
           {
             "name": "sourceTokenId",
+            "type": "u8"
+          },
+          {
+            "name": "fromAddressLength",
             "type": "u8"
           },
           {
@@ -1046,12 +1040,6 @@ export const IDL: Bridge = {
           "type": "publicKey"
         },
         {
-          "name": "supportedTokens",
-          "type": {
-            "vec": "publicKey"
-          }
-        },
-        {
           "name": "tokenPrices",
           "type": {
             "vec": "u64"
@@ -1415,10 +1403,6 @@ export const IDL: Bridge = {
             "type": "u8"
           },
           {
-            "name": "tokenAddress",
-            "type": "publicKey"
-          },
-          {
             "name": "decimal",
             "type": "u8"
           },
@@ -1542,6 +1526,10 @@ export const IDL: Bridge = {
           },
           {
             "name": "sourceTokenId",
+            "type": "u8"
+          },
+          {
+            "name": "fromAddressLength",
             "type": "u8"
           },
           {
