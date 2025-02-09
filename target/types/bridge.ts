@@ -572,38 +572,6 @@ export type Bridge = {
   ],
   "types": [
     {
-      "name": "UpdateTokenPriceMsg",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "messageType",
-            "type": "u8"
-          },
-          {
-            "name": "version",
-            "type": "u8"
-          },
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
-            "name": "chainId",
-            "type": "u8"
-          },
-          {
-            "name": "tokenId",
-            "type": "u8"
-          },
-          {
-            "name": "tokenPrice",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "MintSbtcMessage",
       "type": {
         "kind": "struct",
@@ -644,6 +612,39 @@ export type Bridge = {
           {
             "name": "amount",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateTokenPriceMsg",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "payload",
+            "type": {
+              "array": [
+                "u8",
+                9
+              ]
+            }
           }
         ]
       }
@@ -701,46 +702,6 @@ export type Bridge = {
           {
             "name": "amount",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "WhitelistPair",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "address",
-            "type": "publicKey"
-          },
-          {
-            "name": "percent",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "WhitelistMessage",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "meme",
-            "type": "publicKey"
-          },
-          {
-            "name": "expiry",
-            "type": "i64"
-          },
-          {
-            "name": "items",
-            "type": {
-              "vec": {
-                "defined": "WhitelistPair"
-              }
-            }
           }
         ]
       }
@@ -1559,38 +1520,6 @@ export const IDL: Bridge = {
   ],
   "types": [
     {
-      "name": "UpdateTokenPriceMsg",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "messageType",
-            "type": "u8"
-          },
-          {
-            "name": "version",
-            "type": "u8"
-          },
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
-            "name": "chainId",
-            "type": "u8"
-          },
-          {
-            "name": "tokenId",
-            "type": "u8"
-          },
-          {
-            "name": "tokenPrice",
-            "type": "u64"
-          }
-        ]
-      }
-    },
-    {
       "name": "MintSbtcMessage",
       "type": {
         "kind": "struct",
@@ -1631,6 +1560,39 @@ export const IDL: Bridge = {
           {
             "name": "amount",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateTokenPriceMsg",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "payload",
+            "type": {
+              "array": [
+                "u8",
+                9
+              ]
+            }
           }
         ]
       }
@@ -1688,46 +1650,6 @@ export const IDL: Bridge = {
           {
             "name": "amount",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "WhitelistPair",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "address",
-            "type": "publicKey"
-          },
-          {
-            "name": "percent",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
-      "name": "WhitelistMessage",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "meme",
-            "type": "publicKey"
-          },
-          {
-            "name": "expiry",
-            "type": "i64"
-          },
-          {
-            "name": "items",
-            "type": {
-              "vec": {
-                "defined": "WhitelistPair"
-              }
-            }
           }
         ]
       }

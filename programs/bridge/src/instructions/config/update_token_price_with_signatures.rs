@@ -2,8 +2,8 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_module;
 use anchor_lang::{ prelude::*, Discriminator };
 
-use crate::bridge::HasMessageType;
-use crate::instructions::utils::Message;
+use crate::bridge::{decode_update_token_price_payload, HasPayload, UpdateTokenPriceMsg};
+use crate::instructions::utils::DeserializeMessage;
 use crate::constants::{
     ANCHOR_HEADER_LEN,
     COMMITTEE_SUBMITTER_CONFIG,
@@ -23,30 +23,7 @@ use crate::{
     Submitter,
 };
 
-#[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
-pub struct UpdateTokenPriceMsg {
-    pub message_type: u8,
-    pub version: u8,
-    pub nonce: u64,
-    pub chain_id: u8,
-    pub token_id: u8,
-    pub token_price: u64,
-}
 
-impl Message for UpdateTokenPriceMsg {
-    fn deserialize_message(data: &Vec<u8>) -> Result<UpdateTokenPriceMsg> {
-        match UpdateTokenPriceMsg::try_from_slice(data) {
-            Ok(order) => Ok(order),
-            Err(_) => err!(ErrorCode::DeserializeMessageError),
-        }
-    }
-}
-
-impl HasMessageType for UpdateTokenPriceMsg {
-    fn message_type(&self) -> u8 {
-        self.message_type
-    }
-}
 use super::{ BridgeConfig, TokenConfig };
 pub fn update_token_price_with_signatures<'info>(
     ctx: Context<'_, '_, 'info, 'info, UpdateTokenPrice<'info>>,
@@ -65,7 +42,7 @@ pub fn update_token_price_with_signatures<'info>(
     let mut approval_stake: u16 = 0;
 
     msg!("update_token_price_with_signatures: number_of_signatures={}", number_of_signatures);
-    for i in 1..(number_of_signatures+1) {
+    for i in 1..number_of_signatures + 1 {
         msg!("update_token_price_with_signatures: i={}", i);
 
         let (signer_pubkey, data) = resolve_ed25519_with_index(
@@ -122,9 +99,8 @@ pub fn update_token_price_with_signatures<'info>(
         );
         return err!(ErrorCode::InsufficientStake);
     }
-
-    let token_id = msg.token_id;
-    let price = msg.token_price;
+    
+    let (token_id, price)  = decode_update_token_price_payload(&msg.payload())?;
 
     let (pda_of_token_config_addr, _, _, _) = get_token_pda_bump_seeds(
         ctx.program_id,
@@ -194,22 +170,3 @@ pub struct UpdateTokenPrice<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[cfg(test)]
-mod tests {
-    use std::str::FromStr;
-
-    use anchor_lang::prelude::Pubkey;
-
-    use super::*; // 引入测试目标
-
-    #[test]
-    fn test_pda() {
-        let _chain_id: u8 = 1;
-        let program_id: Pubkey = Pubkey::from_str(
-            "4SRdekDrf4srsADt7sPMkvLsEoCqUtrNvtRDEUvokrgx"
-        ).unwrap();
-        let seeds = &[GLOBAL_CONFIG.as_bytes(), &_chain_id.to_be_bytes()];
-        let (pda, bump) = Pubkey::find_program_address(seeds, &program_id);
-        println!("pda {:?}", pda);
-    }
-}

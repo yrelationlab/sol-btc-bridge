@@ -23,7 +23,9 @@
     "build:program-rust": "cargo build-bpf --manifest-path=./src/program-rust/Cargo.toml --bpf-out-dir=dist/program",
     "pgid": "solana address -k target/deploy/bridge-keypair.json",
     "clean": "cargo clean",
-    "log": "solana logs"
+    "log": "solana logs",
+    "kn": "ps aux | grep solana-test-validator",
+    "test": "./scripts/test-local.sh"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
@@ -56,6 +58,7 @@
     "prettier": "^2.8.8",
     "tslint": "6.1.3",
     "typescript": "^4.9.5",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "wait-on": "^8.0.2"
   }
 }

@@ -435,22 +435,17 @@ export { TestValues };
 
 export function assembleUpdateTokenPricePayload(
   tokenId: number,
-  tokenPrice: number
+  tokenPrice: anchor.BN
 ): Uint8Array {
-  // Ensure the tokenId is a single byte (u8)
-  const tokenIdBytes = new Uint8Array(1);
-  tokenIdBytes[0] = tokenId;
-
-  // Convert tokenPrice (u64) to 8-byte big-endian format
-  const tokenPriceBytes = new Uint8Array(8);
-  let price = tokenPrice;
-  for (let i = 7; i >= 0; i--) {
-    tokenPriceBytes[i] = price & 0xff; // Extract the least significant byte
-    price >>= 8; // Shift the price by 8 bits to the right
+  if (tokenId < 0 || tokenId > 255) {
+    throw new Error("Invalid tokenId, must be between 0 and 255");
   }
 
-  // Concatenate tokenIdBytes and tokenPriceBytes to form the final payload
-  return new Uint8Array([...tokenIdBytes, ...tokenPriceBytes]);
+  const tokenIdBuffer = Buffer.from([tokenId]);
+  const tokenPriceBuffer = Buffer.alloc(8);
+  tokenPriceBuffer.writeBigUInt64BE(BigInt(tokenPrice.toString()));
+
+  return Buffer.concat([tokenIdBuffer, tokenPriceBuffer]);
 }
 export async function createLookupTable(authority: PublicKey, payer: Keypair, connection: Connection) {
   // Step 1 - Get a lookup table address and create lookup table instruction

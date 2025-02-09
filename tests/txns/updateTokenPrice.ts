@@ -16,8 +16,7 @@ export class UpdateTokenPriceMsg extends BaseMsg {
     version: number;
     nonce: anchor.BN;
     chainId: number;
-    tokenId: number;
-    tokenPrice: anchor.BN;
+    payload: Uint8Array;
 
     static schema: Schema = new Map([
         [UpdateTokenPriceMsg,
@@ -28,20 +27,18 @@ export class UpdateTokenPriceMsg extends BaseMsg {
                     ['version', "u8"],
                     ["nonce", "u64"],
                     ['chainId', "u8"],
-                    ['tokenId', "u8"],
-                    ["tokenPrice", "u64"],
+                    ["payload", ["u8", 9]],
                 ]
             }],
     ]);
 
-    constructor(obj: { messageType: number, version: number, nonce: anchor.BN, chainId: number, tokenId: number, tokenPrice: anchor.BN }) {
+    constructor(obj: { messageType: number, version: number, nonce: anchor.BN, chainId: number, payload: Uint8Array }) {
         super();
         this.messageType = obj.messageType;
         this.version = obj.version;
         this.nonce = obj.nonce;
         this.chainId = obj.chainId;
-        this.tokenId = obj.tokenId;
-        this.tokenPrice = obj.tokenPrice;
+        this.payload = obj.payload;
     }
 }
 

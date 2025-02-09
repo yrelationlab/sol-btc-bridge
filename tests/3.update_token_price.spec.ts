@@ -24,17 +24,16 @@ describe("Update Token Price", () => {
     console.log(`createCommitteeConfig_tx is ${createCommitteeConfig_tx}`)
   }, 1000000);
   it("1. update Token Price with only submitter", async () => {
-
     await airdrop(provider.connection, values.submitter.publicKey);
     const changedPrice = new anchor.BN(999);
+    const payload = assembleUpdateTokenPricePayload( values.supportedTokensIndex[0], changedPrice)
     // Create the msg object
     const msg = new UpdateTokenPriceMsg({
       messageType: MessageIds.UpdateTokenPrice,
       version: MSG_VERSION,
       nonce: new anchor.BN(1), // todo: should get nonce from chian
       chainId: values.chainId,
-      tokenId: values.supportedTokensIndex[0],
-      tokenPrice: changedPrice
+      payload: payload,
     });
 
     const signatures = values.committeeKeypairs.map(committeeKeypair => {

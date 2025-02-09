@@ -29,9 +29,9 @@ rpc_url = "http://127.0.0.1:8900"
 
 
 [scripts]
-test = "vitest --test-timeout=500000 5"
+test = "vitest --test-timeout=5000 3"
 
 # use localnet for test
 [test]
-startup_wait = 50000000
-shutdown_wait = 20000
+startup_wait = 5000
+shutdown_wait = 5000
