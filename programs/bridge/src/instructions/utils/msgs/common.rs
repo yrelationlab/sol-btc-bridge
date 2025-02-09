@@ -1,9 +1,11 @@
-use crate::
-    errors::ErrorCode
-;
+use crate::{
+    bridge::{ get_commitee_account, resolve_ed25519_with_index, BridgeConfig, Committee, Nonces },
+    constants::ANCHOR_HEADER_LEN,
+    errors::ErrorCode,
+};
 use anchor_lang::prelude::*;
 
-use super::{HasMessageType, HasPayload};
+use super::{ DeserializeMessage, HasMessageType, HasPayload };
 // Message type stake requirements
 pub const TRANSFER_STAKE_REQUIRED: u16 = 6666;
 pub const FREEZING_STAKE_REQUIRED: u16 = 450;
@@ -16,6 +18,83 @@ pub const ADD_EVM_TOKENS_STAKE_REQUIRED: u16 = 5001;
 pub const UPDATE_CHAINID_STAKE_REQUIRED: u16 = 5001;
 pub const MINT_SBTC_STAKE_REQUIRED: u16 = 5001;
 
+pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + PartialEq>(
+    remaining_accounts: &[AccountInfo<'info>],
+    instructions_sysvar: &AccountInfo<'info>,
+    program_id: &Pubkey,
+    number_of_signatures: u8,
+    msg: &T,
+    bridge_config: &mut Box<Account<'info, BridgeConfig>>,
+    nonce_config: &mut Box<Account<'info, Nonces>>
+) -> Result<()> {
+    
+    if number_of_signatures < 1 {
+        return err!(ErrorCode::InsufficientSignatures);
+    }
+
+    let mut bitmap: u128 = 0;
+    let mut approval_stake: u16 = 0;
+    msg!("number_of_signatures={}", number_of_signatures);
+    for i in 1..number_of_signatures + 1 {
+        msg!("update_token_price_with_signatures: i={}", i);
+
+        let (signer_pubkey, data) = resolve_ed25519_with_index(instructions_sysvar, i as usize)?;
+
+        let message_of_signer: T = deserialize_message::<T>(&data)?;
+
+        // check signer_pubkey is allowed
+        if message_of_signer != *msg {
+            return err!(ErrorCode::MessageMismatch);
+        }
+
+        if Operation::try_from(msg.message_type()) != Ok(Operation::UpdateTokenPrice) {
+            return err!(ErrorCode::MessageOpTypeMismatch);
+        }
+
+        if bridge_config.chain_id != message_of_signer.chain_id() {
+            return err!(ErrorCode::ChainIdMismatch);
+        }
+
+        nonce_config.nonce += 1;
+
+        let (_, pda_of_committee_config) = get_commitee_account(
+            remaining_accounts.to_vec(),
+            &signer_pubkey,
+            &program_id
+        )?;
+        let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
+        let committee_config = Committee::try_from_slice(
+            &account_data[ANCHOR_HEADER_LEN..]
+        ).map_err(|_| ErrorCode::InvalidSigner)?;
+
+        let mask = 1u128 << committee_config.index;
+        if (bitmap & mask) != 0 {
+            return err!(ErrorCode::DuplicateSignature);
+        }
+        bitmap |= mask;
+        msg!(
+            "signer_pubkey={}, committee_config.stake_amount={:?}",
+            signer_pubkey,
+            committee_config.stake_amount
+        );
+        approval_stake += committee_config.stake_amount;
+    }
+    Ok(
+        if approval_stake < required_stake(msg)? {
+            msg!(
+                "InsufficientStake: approval_stake={}, required_stake={:?}",
+                approval_stake,
+                required_stake(msg)
+            );
+            return err!(ErrorCode::InsufficientStake);
+        }
+    )
+}
+
+pub fn deserialize_message<T: DeserializeMessage>(data: &Vec<u8>) -> Result<T> {
+    T::deserialize_message(data)
+}
+
 pub fn decode_emergency_op_payload(payload: &[u8]) -> Result<bool> {
     if payload.len() != 1 {
         return err!(ErrorCode::InvalidPayloadLength);
@@ -27,8 +106,7 @@ pub fn decode_emergency_op_payload(payload: &[u8]) -> Result<bool> {
     Ok(emergency_op_code == 0) // 返回 `true` 表示冻结操作
 }
 
-
-pub fn required_stake<T: HasMessageType + HasPayload>(message: &T) -> Result<u16>{
+pub fn required_stake<T: HasMessageType + HasPayload>(message: &T) -> Result<u16> {
     match Operation::try_from(message.message_type()).map_err(|_| ErrorCode::InvalidMessageType)? {
         Operation::TokenTransfer => Ok(TRANSFER_STAKE_REQUIRED),
         Operation::Blocklist => Ok(BLOCKLIST_STAKE_REQUIRED),
