@@ -77,7 +77,7 @@ pub mod bridge {
     }
 
     pub fn mint_sbtc_with_signatures<'info>(
-        ctx: Context<'_, '_, 'info, 'info, MintSbtcWithSignatures<'info>>,
+        ctx: Context<'_, '_, 'info, 'info, MintSbtc<'info>>,
         _chain_id: u8,
         number_of_signatures: u8,
         msg: MintSbtcMessage

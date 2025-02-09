@@ -81,7 +81,6 @@ export class UpdateTokenPriceMsgTxn {
     }: UpdateTokenPriceMsgTxnDetails) {
         console.log(`signature is ${signatures.length}, bridgeConfigPDA is ${bridgeConfigPDA}, chainID is ${chainID}`)
 
-        // 我希望用signatures循环创建ixEd25519Program
         const ixEd25519Programs = signatures.map(signature =>
             Ed25519Program.createInstructionWithPublicKey({
                 publicKey: signature.publicKey.toBytes(),

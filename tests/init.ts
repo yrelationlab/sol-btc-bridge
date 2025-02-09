@@ -206,12 +206,13 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   console.log(`noncePdaUpdateTokenPrice is ${JSON.stringify(noncePdaUpdateTokenPrice)}`);
 
   const nonceMintSbtc = PublicKey.findProgramAddressSync(
-    [NONCE_CONFIG, Buffer.from(MessageIds.MintSbtc.toString())],
+    [NONCE_CONFIG, new anchor.BN(MessageIds.MintSbtc.toString()).toArrayLike(Buffer, 'be', 1)],
     anchor.workspace.bridge.programId
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
 
-  const ethBtcAddress = Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", "hex");
+  const ethBtcAddress = Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599".replace("0x", ""), "hex");
+  console.log(`ethBtcAddress is ${ethBtcAddress.toString("hex")}`);
 
   return {
     chainId: curChainId,

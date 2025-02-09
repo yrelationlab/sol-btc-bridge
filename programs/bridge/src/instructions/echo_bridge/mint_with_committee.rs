@@ -3,51 +3,32 @@ use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_mod
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 
-use crate::constants::{ COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, SBTC_MINT };
+use crate::bridge::{ verify, Nonces, Operation };
+use crate::constants::{ COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, NONCE_CONFIG, SBTC_MINT };
 use crate::errors::ErrorCode;
 use crate::{ MintSbtcMessage, Submitter };
-
 use anchor_spl::token::{ Mint, TokenAccount };
 
 use crate::BridgeConfig;
-pub fn mint_sbtc_with_signatures(
-    ctx: Context<MintSbtcWithSignatures>,
+pub fn mint_sbtc_with_signatures<'info>(
+    ctx: Context<'_, '_, 'info, 'info, MintSbtc<'info>>,
     _chain_id: u8,
     number_of_signatures: u8,
     msg: MintSbtcMessage
 ) -> Result<()> {
-    let bridge_config = &ctx.accounts.bridge_config;
-    // let nonce_config = &mut ctx.accounts.nonce;
+    let bridge_config = &mut ctx.accounts.bridge_config;
+    let nonce_config = &mut ctx.accounts.nonce;
 
-    // 1) check signatures
-    require!(number_of_signatures >= 1, ErrorCode::InsufficientSignatures);
-
-    // let mut bitmap: u128 = 0;
-    // let mut approval_stake: u16 = 0;
-
-    // for i in 0..number_of_signatures {
-    //     let (signer_pubkey, data) =
-    //         resolve_secp256k1_with_index(&ctx.accounts.instructions_sysvar, i as usize)?;
-
-    //     // verify the message_of_signer == msg
-    //     // verify Operation::MintSbtc
-    //     // get Committee stake
-    //     let (_, committee_acct) = get_commitee_account(
-    //         &ctx.program_id,
-    //         ctx.remaining_accounts.to_vec(),
-    //         &signer_pubkey,
-    //     )?;
-    //     let acct_data = committee_acct.try_borrow_data()?;
-    //     let comm = Committee::try_from_slice(&acct_data[crate::constants::ANCHOR_HEADER_LEN..])?;
-
-    //     let mask = 1u128 << comm.index;
-    //     require!((bitmap & mask) == 0, ErrorCode::DuplicateSignature);
-    //     bitmap |= mask;
-    //     approval_stake += comm.stake_amount;
-    // }
-    // require!(approval_stake >= MINT_SBTC_STAKE_REQUIRED, ErrorCode::InsufficientStake);
-
-    // nonce_config.nonce += 1;
+    verify(
+        &ctx.remaining_accounts,
+        &ctx.accounts.instructions_sysvar,
+        ctx.program_id,
+        number_of_signatures,
+        &msg,
+        Operation::TokenTransfer,
+        bridge_config,
+        nonce_config
+    )?;
 
     // 2) parse msg.payload => (amount, user, ...)
     let amount = msg.amount;
@@ -59,11 +40,7 @@ pub fn mint_sbtc_with_signatures(
         msg.nonce
     );
     // 3) anchor_spl::token::mint_to
-    // authority = "BRIDGE_SBTC_AUTH", so we must do .with_signer
-    // seeds = [ "bridge", &msg.chain_id.to_be_bytes(), bump ]
-
     let bump = ctx.bumps.sbtc_mint;
-
     let seeds = [SBTC_MINT.as_bytes(), &_chain_id.to_be_bytes(), &[bump]];
 
     // Prepare signer with the bump included
@@ -93,10 +70,7 @@ pub fn mint_sbtc_with_signatures(
 
 #[derive(Accounts)]
 #[instruction(_chain_id: u8)]
-pub struct MintSbtcWithSignatures<'info> {
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
+pub struct MintSbtc<'info> {
     /// The submitter calls it
     #[account(mut)]
     pub submitter: Signer<'info>,
@@ -123,17 +97,6 @@ pub struct MintSbtcWithSignatures<'info> {
     )]
     pub bridge_config: Box<Account<'info, BridgeConfig>>,
 
-    // /// 2. The same PDA used as Mint authority
-    // #[account(
-    //     seeds = [
-    //         BRIDGE_SBTC_AUTH.as_bytes(),
-    //         &_chain_id.to_be_bytes()
-    //     ],
-    //     bump
-    // )]
-    // /// CHECK: Just a PDA for authority
-    // pub bridge_sbtc_auth: UncheckedAccount<'info>,
-
     #[account(
         mut,
         seeds = [
@@ -147,7 +110,7 @@ pub struct MintSbtcWithSignatures<'info> {
     /// the user's sBTC Token Account
     #[account(
         init_if_needed,
-        payer = payer,
+        payer = submitter,
         associated_token::mint = sbtc_mint,
         associated_token::authority = user
     )]
@@ -157,17 +120,14 @@ pub struct MintSbtcWithSignatures<'info> {
     /// CHECK: only need .key()
     pub user: UncheckedAccount<'info>,
 
-    // #[account(
-    //     init_if_needed,
-    //     payer = payer,
-    //     space = Nonces::LEN,
-    //     seeds = [
-    //         NONCE_CONFIG.as_ref(),
-    //         Operation::MintSBTC.to_bytes().as_slice(),
-    //     ],
-    //     bump
-    // )]
-    // pub nonce: Box<Account<'info, Nonces>>,
+    #[account(
+        init_if_needed,
+        payer = submitter,
+        space = Nonces::LEN,
+        seeds = [NONCE_CONFIG.as_ref(), Operation::MintSBTC.to_bytes().as_slice()],
+        bump
+    )]
+    pub nonce: Box<Account<'info, Nonces>>,
 
     /// CHECK: This is not dangerous because we explicitly check the id
     #[account(address = instructions_sysvar_module::ID)]

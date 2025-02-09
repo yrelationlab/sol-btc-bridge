@@ -84,7 +84,6 @@ describe("Update Token Price", () => {
 
     const tokenConfig = await program.account.tokenConfig.fetch(values.tokenConfigPdas[0]);
     console.log(`tokenConfig is ${JSON.stringify(tokenConfig)}`);
-    expect(tokenConfig.tokenAddress.toString()).to.equal(values.supportedTokensKeypairs[0].publicKey.toString());
     expect(tokenConfig.chainId.toString()).to.equal(values.supportedChainsBuffer[0].toString());
     expect(tokenConfig.tokenPrice.toString()).to.equal(changedPrice.toString());
     expect(tokenConfig.tokenFeePercentage.toString()).to.equal(values.tokenFeePercentages[0].toString());

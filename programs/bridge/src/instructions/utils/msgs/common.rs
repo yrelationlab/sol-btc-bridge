@@ -24,10 +24,10 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
     program_id: &Pubkey,
     number_of_signatures: u8,
     msg: &T,
+    op_type: Operation,
     bridge_config: &mut Box<Account<'info, BridgeConfig>>,
     nonce_config: &mut Box<Account<'info, Nonces>>
 ) -> Result<()> {
-    
     if number_of_signatures < 1 {
         return err!(ErrorCode::InsufficientSignatures);
     }
@@ -44,10 +44,12 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
 
         // check signer_pubkey is allowed
         if message_of_signer != *msg {
+            msg!("message_of_signer: {:?}", message_of_signer);
+            msg!("msg: {:?}", msg);
             return err!(ErrorCode::MessageMismatch);
         }
 
-        if Operation::try_from(msg.message_type()) != Ok(Operation::UpdateTokenPrice) {
+        if Operation::try_from(msg.message_type()) != Ok(op_type) {
             return err!(ErrorCode::MessageOpTypeMismatch);
         }
 

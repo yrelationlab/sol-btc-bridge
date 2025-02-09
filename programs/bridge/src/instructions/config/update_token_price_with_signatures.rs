@@ -30,6 +30,7 @@ pub fn update_token_price_with_signatures<'info>(
         ctx.program_id,
         number_of_signatures,
         &msg,
+        Operation::UpdateTokenPrice,
         bridge_config,
         nonce_config
     )?;

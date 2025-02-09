@@ -276,11 +276,6 @@
       "name": "mintSbtcWithSignatures",
       "accounts": [
         {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "submitter",
           "isMut": true,
           "isSigner": true,
@@ -321,6 +316,11 @@
           "docs": [
             "the user to receive minted sBTC"
           ]
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "instructionsSysvar",
@@ -614,12 +614,8 @@
             "type": "u8"
           },
           {
-            "name": "fromAddressLength",
+            "name": "toChainId",
             "type": "u8"
-          },
-          {
-            "name": "fromAddress",
-            "type": "bytes"
           },
           {
             "name": "toAddress",

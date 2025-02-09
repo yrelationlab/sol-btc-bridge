@@ -276,11 +276,6 @@ export type Bridge = {
       "name": "mintSbtcWithSignatures",
       "accounts": [
         {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "submitter",
           "isMut": true,
           "isSigner": true,
@@ -321,6 +316,11 @@ export type Bridge = {
           "docs": [
             "the user to receive minted sBTC"
           ]
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "instructionsSysvar",
@@ -614,12 +614,8 @@ export type Bridge = {
             "type": "u8"
           },
           {
-            "name": "fromAddressLength",
+            "name": "toChainId",
             "type": "u8"
-          },
-          {
-            "name": "fromAddress",
-            "type": "bytes"
           },
           {
             "name": "toAddress",
@@ -1245,11 +1241,6 @@ export const IDL: Bridge = {
       "name": "mintSbtcWithSignatures",
       "accounts": [
         {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "submitter",
           "isMut": true,
           "isSigner": true,
@@ -1290,6 +1281,11 @@ export const IDL: Bridge = {
           "docs": [
             "the user to receive minted sBTC"
           ]
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "instructionsSysvar",
@@ -1583,12 +1579,8 @@ export const IDL: Bridge = {
             "type": "u8"
           },
           {
-            "name": "fromAddressLength",
+            "name": "toChainId",
             "type": "u8"
-          },
-          {
-            "name": "fromAddress",
-            "type": "bytes"
           },
           {
             "name": "toAddress",
