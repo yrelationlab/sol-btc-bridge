@@ -31,7 +31,7 @@ describe("Update Token Price", () => {
     const msg = new UpdateTokenPriceMsg({
       messageType: MessageIds.UpdateTokenPrice,
       version: MSG_VERSION,
-      nonce: new anchor.BN(1), // todo: should get nonce from chian
+      nonce: new anchor.BN(0), // todo: should get nonce from chian
       chainId: values.chainId,
       payload: payload,
     });
