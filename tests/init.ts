@@ -169,7 +169,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   );
 
   const tokenConfigPdas = supportedTokensIndex.map((tokenId, index) =>
-    getTokenConfigPda(tokenId)
+    getTokenConfigPda(supportedChains[index], tokenId)
   );
   console.log(`tokenConfigPdas is ${JSON.stringify(tokenConfigPdas)}`);
   const supportedChainsPdas = supportedChains.map((chainId) => {

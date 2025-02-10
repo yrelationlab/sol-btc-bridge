@@ -50,6 +50,18 @@ export type Bridge = {
       "value": "8"
     },
     {
+      "name": "MAX_STRING_LENGTH",
+      "type": {
+        "defined": "usize"
+      },
+      "value": "255"
+    },
+    {
+      "name": "FEE_DENOMINATOR",
+      "type": "u64",
+      "value": "1000000"
+    },
+    {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
       "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
@@ -285,11 +297,21 @@ export type Bridge = {
         },
         {
           "name": "bridgeConfig",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "1. load BridgeConfig"
           ]
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenConfig",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "sbtcMint",
@@ -340,10 +362,6 @@ export type Bridge = {
       ],
       "args": [
         {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
           "name": "numberOfSignatures",
           "type": "u8"
         },
@@ -351,6 +369,110 @@ export type Bridge = {
           "name": "msg",
           "type": {
             "defined": "MintSbtcMessage"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdrawBtcWithSignatures",
+      "accounts": [
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The submitter calls it"
+          ]
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "1. load BridgeConfig"
+          ]
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sbtcMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userSbtcAta",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "the user's sBTC Token Account"
+          ]
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "the user to receive minted sBTC"
+          ]
+        },
+        {
+          "name": "feeRecipientSbtcAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeRecipient",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "msg",
+          "type": {
+            "defined": "WithdrawBtcMessage"
           }
         }
       ]
@@ -435,6 +557,10 @@ export type Bridge = {
             "type": "bool"
           },
           {
+            "name": "withdrawPaused",
+            "type": "bool"
+          },
+          {
             "name": "chainId",
             "type": "u8"
           },
@@ -475,6 +601,10 @@ export type Bridge = {
             "type": "bool"
           },
           {
+            "name": "withdrawPaused",
+            "type": "bool"
+          },
+          {
             "name": "tokenId",
             "type": "u8"
           },
@@ -501,6 +631,10 @@ export type Bridge = {
           {
             "name": "tokenMinAmount",
             "type": "u64"
+          },
+          {
+            "name": "mintTotal",
+            "type": "u128"
           },
           {
             "name": "padding",
@@ -666,6 +800,55 @@ export type Bridge = {
       }
     },
     {
+      "name": "WithdrawBtcMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "toChainId",
+            "type": "u8"
+          },
+          {
+            "name": "toTokenId",
+            "type": "u8"
+          },
+          {
+            "name": "toAddress",
+            "type": "bytes"
+          },
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "fromAddress",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateSupportedChainMessage",
       "type": {
         "kind": "struct",
@@ -807,6 +990,81 @@ export type Bridge = {
         {
           "name": "amount",
           "type": "u64",
+          "index": false
+        },
+        {
+          "name": "chainMintTotal",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "tokenMintTotal",
+          "type": "u128",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "WithdrawBtctcEvent",
+      "fields": [
+        {
+          "name": "messageType",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "version",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "toChainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "toTokenId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "toAddress",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "chainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "fromAddress",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "chainMintTotal",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "tokenMintTotal",
+          "type": "u128",
           "index": false
         }
       ]
@@ -1017,6 +1275,41 @@ export type Bridge = {
       "code": 6040,
       "name": "InvalidNonce",
       "msg": "Invalid Nonce"
+    },
+    {
+      "code": 6041,
+      "name": "WithdrawPaused",
+      "msg": "Withdraw Paused"
+    },
+    {
+      "code": 6042,
+      "name": "InvalidAddress",
+      "msg": "Invalid Address"
+    },
+    {
+      "code": 6043,
+      "name": "InvalidMinAmount",
+      "msg": "Invalid Min Amount"
+    },
+    {
+      "code": 6044,
+      "name": "InvalidUserAddress",
+      "msg": "Invalid User Address"
+    },
+    {
+      "code": 6045,
+      "name": "InvalidFeeRecipient",
+      "msg": "Invalid Fee Recipient"
+    },
+    {
+      "code": 6046,
+      "name": "LackTargetMint",
+      "msg": "Lack Target Mint"
+    },
+    {
+      "code": 6047,
+      "name": "ChainIdShouldDiffFromSolanaChainId",
+      "msg": "ChainId Should Diff From Solana Chain Id"
     }
   ]
 };
@@ -1073,6 +1366,18 @@ export const IDL: Bridge = {
       "value": "8"
     },
     {
+      "name": "MAX_STRING_LENGTH",
+      "type": {
+        "defined": "usize"
+      },
+      "value": "255"
+    },
+    {
+      "name": "FEE_DENOMINATOR",
+      "type": "u64",
+      "value": "1000000"
+    },
+    {
       "name": "HARDCODED_PUBKEY",
       "type": "publicKey",
       "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
@@ -1308,11 +1613,21 @@ export const IDL: Bridge = {
         },
         {
           "name": "bridgeConfig",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "1. load BridgeConfig"
           ]
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenConfig",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "sbtcMint",
@@ -1363,10 +1678,6 @@ export const IDL: Bridge = {
       ],
       "args": [
         {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
           "name": "numberOfSignatures",
           "type": "u8"
         },
@@ -1374,6 +1685,110 @@ export const IDL: Bridge = {
           "name": "msg",
           "type": {
             "defined": "MintSbtcMessage"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdrawBtcWithSignatures",
+      "accounts": [
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The submitter calls it"
+          ]
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "1. load BridgeConfig"
+          ]
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sbtcMint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userSbtcAta",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "the user's sBTC Token Account"
+          ]
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "the user to receive minted sBTC"
+          ]
+        },
+        {
+          "name": "feeRecipientSbtcAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeRecipient",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "msg",
+          "type": {
+            "defined": "WithdrawBtcMessage"
           }
         }
       ]
@@ -1458,6 +1873,10 @@ export const IDL: Bridge = {
             "type": "bool"
           },
           {
+            "name": "withdrawPaused",
+            "type": "bool"
+          },
+          {
             "name": "chainId",
             "type": "u8"
           },
@@ -1498,6 +1917,10 @@ export const IDL: Bridge = {
             "type": "bool"
           },
           {
+            "name": "withdrawPaused",
+            "type": "bool"
+          },
+          {
             "name": "tokenId",
             "type": "u8"
           },
@@ -1524,6 +1947,10 @@ export const IDL: Bridge = {
           {
             "name": "tokenMinAmount",
             "type": "u64"
+          },
+          {
+            "name": "mintTotal",
+            "type": "u128"
           },
           {
             "name": "padding",
@@ -1689,6 +2116,55 @@ export const IDL: Bridge = {
       }
     },
     {
+      "name": "WithdrawBtcMessage",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "messageType",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "toChainId",
+            "type": "u8"
+          },
+          {
+            "name": "toTokenId",
+            "type": "u8"
+          },
+          {
+            "name": "toAddress",
+            "type": "bytes"
+          },
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "fromAddress",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "UpdateSupportedChainMessage",
       "type": {
         "kind": "struct",
@@ -1830,6 +2306,81 @@ export const IDL: Bridge = {
         {
           "name": "amount",
           "type": "u64",
+          "index": false
+        },
+        {
+          "name": "chainMintTotal",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "tokenMintTotal",
+          "type": "u128",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "WithdrawBtctcEvent",
+      "fields": [
+        {
+          "name": "messageType",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "version",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "toChainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "toTokenId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "toAddress",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "chainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "fromAddress",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "chainMintTotal",
+          "type": "u128",
+          "index": false
+        },
+        {
+          "name": "tokenMintTotal",
+          "type": "u128",
           "index": false
         }
       ]
@@ -2040,6 +2591,41 @@ export const IDL: Bridge = {
       "code": 6040,
       "name": "InvalidNonce",
       "msg": "Invalid Nonce"
+    },
+    {
+      "code": 6041,
+      "name": "WithdrawPaused",
+      "msg": "Withdraw Paused"
+    },
+    {
+      "code": 6042,
+      "name": "InvalidAddress",
+      "msg": "Invalid Address"
+    },
+    {
+      "code": 6043,
+      "name": "InvalidMinAmount",
+      "msg": "Invalid Min Amount"
+    },
+    {
+      "code": 6044,
+      "name": "InvalidUserAddress",
+      "msg": "Invalid User Address"
+    },
+    {
+      "code": 6045,
+      "name": "InvalidFeeRecipient",
+      "msg": "Invalid Fee Recipient"
+    },
+    {
+      "code": 6046,
+      "name": "LackTargetMint",
+      "msg": "Lack Target Mint"
+    },
+    {
+      "code": 6047,
+      "name": "ChainIdShouldDiffFromSolanaChainId",
+      "msg": "ChainId Should Diff From Solana Chain Id"
     }
   ]
 };

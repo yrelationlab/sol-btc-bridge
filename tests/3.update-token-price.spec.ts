@@ -32,7 +32,7 @@ describe("Update Token Price", () => {
       messageType: MessageIds.UpdateTokenPrice,
       version: MSG_VERSION,
       nonce: new anchor.BN(0), // todo: should get nonce from chian
-      chainId: values.chainId,
+      chainId: values.supportedChains[0],
       payload: payload,
     });
 

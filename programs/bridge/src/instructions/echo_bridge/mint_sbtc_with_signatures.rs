@@ -3,20 +3,28 @@ use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_mod
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 
-use crate::bridge::{ verify, MintSbtcEvent, Nonces, Operation };
-use crate::constants::{ COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, NONCE_CONFIG, SBTC_MINT };
+use crate::bridge::{ verify, MintSbtcEvent, Nonces, Operation, SupportedChainConfig, TokenConfig };
+use crate::constants::{
+    COMMITTEE_SUBMITTER_CONFIG,
+    GLOBAL_CONFIG,
+    NONCE_CONFIG,
+    SBTC_MINT,
+    SUPPORTED_CHAINS_CONFIG,
+    TOKEN_CONFIG,
+};
 use crate::errors::ErrorCode;
 use crate::{ MintSbtcMessage, Submitter };
 use anchor_spl::token::{ Mint, TokenAccount };
 use crate::BridgeConfig;
 pub fn mint_sbtc_with_signatures<'info>(
     ctx: Context<'_, '_, 'info, 'info, MintSbtc<'info>>,
-    _chain_id: u8,
     number_of_signatures: u8,
     msg: MintSbtcMessage
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
+    let supported_chain_config = &mut ctx.accounts.supported_chain_config;
+    let token_config = &mut ctx.accounts.token_config;
 
     verify(
         &ctx.remaining_accounts,
@@ -34,7 +42,7 @@ pub fn mint_sbtc_with_signatures<'info>(
 
     // 3) anchor_spl::token::mint_to
     let bump = ctx.bumps.sbtc_mint;
-    let seeds = [SBTC_MINT.as_bytes(), &_chain_id.to_be_bytes(), &[bump]];
+    let seeds = [SBTC_MINT.as_bytes(), &msg.to_chain_id.to_be_bytes(), &[bump]];
 
     // Prepare signer with the bump included
     let signer = &[&seeds[..]];
@@ -49,25 +57,28 @@ pub fn mint_sbtc_with_signatures<'info>(
         signer
     );
     anchor_spl::token::mint_to(mint_to_ctx, amount)?;
-    
-    // msg!("mint_sbtc_with_signatures: {:?}", msg);
+    supported_chain_config.mint_total += amount as u128;
+    token_config.mint_total += amount as u128;
+
     emit!(MintSbtcEvent {
         message_type: msg.message_type,
         version: msg.version,
         nonce: msg.nonce,
         source_chain_id: msg.source_chain_id,
         source_token_id: msg.source_token_id,
-        from_address:msg.from_address, 
+        from_address: msg.from_address,
         to_chain_id: msg.to_chain_id,
-        to_address:msg.to_address, 
+        to_address: msg.to_address,
         amount: msg.amount,
+        chain_mint_total: supported_chain_config.mint_total,
+        token_mint_total: token_config.mint_total,
     });
 
     Ok(())
 }
 
 #[derive(Accounts)]
-#[instruction(_chain_id: u8)]
+#[instruction(msg: MintSbtcMessage)]
 pub struct MintSbtc<'info> {
     /// The submitter calls it
     #[account(mut)]
@@ -86,9 +97,10 @@ pub struct MintSbtc<'info> {
 
     /// 1. load BridgeConfig
     #[account(
+        mut,
         seeds = [
             GLOBAL_CONFIG.as_bytes(),
-            &_chain_id.to_be_bytes()
+            &msg.to_chain_id.to_be_bytes()
         ],
         bump,
         constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized
@@ -98,8 +110,31 @@ pub struct MintSbtc<'info> {
     #[account(
         mut,
         seeds = [
+            SUPPORTED_CHAINS_CONFIG.as_ref(),
+            msg.source_chain_id.to_be_bytes().as_ref(),
+        ],
+        bump,
+    )]
+    pub supported_chain_config: Box<Account<'info, SupportedChainConfig>>,
+
+    #[account(
+        mut,
+        seeds = [
+            TOKEN_CONFIG.as_ref(),
+            msg.source_chain_id.to_be_bytes().as_ref(),
+            msg.source_token_id.to_be_bytes().as_ref(),
+        ],
+        bump,
+        constraint = msg.amount >= token_config.token_min_amount @ ErrorCode::InvalidMinAmount,
+
+    )]
+    pub token_config: Box<Account<'info, TokenConfig>>,
+
+    #[account(
+        mut,
+        seeds = [
             SBTC_MINT.as_bytes(),
-            &_chain_id.to_be_bytes()
+            &msg.to_chain_id.to_be_bytes()
         ],
         bump,
     )]

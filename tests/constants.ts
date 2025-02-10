@@ -22,9 +22,9 @@ export const BRIDGE_COMMITTEE_CONFIG = Buffer.from("COMMITTEE_CONFIG");
 //     return Buffer.from([tokenId]); // Create a single-byte buffer
 // }
 
-export function getTokenConfigPda(tokenId: number): anchor.web3.PublicKey {
+export function getTokenConfigPda(chainId: number, tokenId: number): anchor.web3.PublicKey {
     return PublicKey.findProgramAddressSync(
-        [TOKEN_CONFIG, new anchor.BN(tokenId).toArrayLike(Buffer, 'be', 1)],
+        [TOKEN_CONFIG, new anchor.BN(chainId).toArrayLike(Buffer, 'be', 1), new anchor.BN(tokenId).toArrayLike(Buffer, 'be', 1)],
         anchor.workspace.bridge.programId
     )[0];
 }

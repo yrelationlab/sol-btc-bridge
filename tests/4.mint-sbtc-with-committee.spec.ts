@@ -106,9 +106,11 @@ describe("Mint sbtc", () => {
 
 
     const tx = await program.methods
-      .mintSbtcWithSignatures(values.chainId, numberOfSignatures, msg as any,)
+      .mintSbtcWithSignatures(numberOfSignatures, msg as any,)
       .accounts({
         bridgeConfig: values.bridgeConfigPDA,
+        supportedChainConfig: values.supportedChainsPdas[0],
+        tokenConfig:values.tokenConfigPdas[0],
         nonce: values.nonceMintSbtc,
         submitterAccount: values.submitterPda,
         submitter: values.submitter.publicKey,

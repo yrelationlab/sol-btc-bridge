@@ -1,22 +1,22 @@
-use anchor_lang::solana_program::pubkey::Pubkey;
-use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_module;
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, solana_program::{pubkey::Pubkey, sysvar::instructions as instructions_sysvar_module}};
 use anchor_spl::associated_token::AssociatedToken;
-
-use crate::bridge::{ verify, MintSbtcEvent, Nonces, Operation };
-use crate::constants::{ COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, NONCE_CONFIG, SBTC_MINT };
-use crate::errors::ErrorCode;
-use crate::{ MintSbtcMessage, Submitter };
-use anchor_spl::token::{ Mint, TokenAccount };
+use crate::{bridge::{ verify, Nonces, Operation, SupportedChainConfig, TokenConfig, WithdrawBtcMessage, WithdrawBtctcEvent }, constants::{
+    COMMITTEE_SUBMITTER_CONFIG, FEE_DENOMINATOR, GLOBAL_CONFIG, MAX_STRING_LENGTH, NONCE_CONFIG, SBTC_MINT, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG
+}, errors::ErrorCode, Submitter};
+use anchor_spl::token::{ self, Burn, Mint, TokenAccount, Transfer };
 use crate::BridgeConfig;
+
 pub fn withdraw_btc_with_signatures<'info>(
     ctx: Context<'_, '_, 'info, 'info, WithdrawBtcWithSignatures<'info>>,
-    _chain_id: u8,
     number_of_signatures: u8,
-    msg: MintSbtcMessage
+    msg: WithdrawBtcMessage
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
+    let supported_chain_config = &mut ctx.accounts.supported_chain_config;
+    let token_config = &mut ctx.accounts.token_config;
+
+    require!(msg.to_address.len() <= MAX_STRING_LENGTH, ErrorCode::InvalidAddress);
 
     verify(
         &ctx.remaining_accounts,
@@ -29,45 +29,55 @@ pub fn withdraw_btc_with_signatures<'info>(
         nonce_config
     )?;
 
-    // 2) parse msg.payload => (amount, user, ...)
-    let amount = msg.amount;
+    let fee = (((msg.amount as u128) * (token_config.token_fee_percentage as u128)) /
+        (FEE_DENOMINATOR as u128)) as u64;
+    let amount = msg.amount - fee;
 
-    // 3) anchor_spl::token::mint_to
-    let bump = ctx.bumps.sbtc_mint;
-    let seeds = [SBTC_MINT.as_bytes(), &_chain_id.to_be_bytes(), &[bump]];
+    token::transfer(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.user_sbtc_ata.to_account_info(),
+                to: ctx.accounts.fee_recipient_sbtc_ata.to_account_info(),
+                authority: ctx.accounts.user.to_account_info(),
+            },
+        ),
+        fee as u64
+    )?;
 
-    // Prepare signer with the bump included
-    let signer = &[&seeds[..]];
+     token::burn(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Burn {
+                mint: ctx.accounts.sbtc_mint.to_account_info(),
+                from: ctx.accounts.user_sbtc_ata.to_account_info(),
+                authority: ctx.accounts.user.to_account_info(),
+            },
+        ),
+        amount,
+    )?;
 
-    let mint_to_ctx = CpiContext::new_with_signer(
-        ctx.accounts.token_program.to_account_info(),
-        anchor_spl::token::MintTo {
-            mint: ctx.accounts.sbtc_mint.to_account_info(),
-            to: ctx.accounts.user_sbtc_ata.to_account_info(),
-            authority: ctx.accounts.sbtc_mint.to_account_info(),
-        },
-        signer
-    );
-    anchor_spl::token::mint_to(mint_to_ctx, amount)?;
-    
-    // msg!("mint_sbtc_with_signatures: {:?}", msg);
-    emit!(MintSbtcEvent {
+    supported_chain_config.mint_total -= (amount + fee) as u128;
+    token_config.mint_total -= (amount + fee) as u128;
+
+    emit!(WithdrawBtctcEvent {
         message_type: msg.message_type,
         version: msg.version,
         nonce: msg.nonce,
-        source_chain_id: msg.source_chain_id,
-        source_token_id: msg.source_token_id,
-        from_address:msg.from_address, 
         to_chain_id: msg.to_chain_id,
-        to_address:msg.to_address, 
+        to_token_id: msg.to_token_id,
+        from_address: msg.from_address,
+        chain_id: msg.chain_id,
+        to_address: msg.to_address,
         amount: msg.amount,
+        chain_mint_total: supported_chain_config.mint_total,
+        token_mint_total: token_config.mint_total,
     });
-
     Ok(())
 }
 
 #[derive(Accounts)]
-#[instruction(_chain_id: u8)]
+#[instruction(msg: WithdrawBtcMessage)]
 pub struct WithdrawBtcWithSignatures<'info> {
     /// The submitter calls it
     #[account(mut)]
@@ -88,35 +98,74 @@ pub struct WithdrawBtcWithSignatures<'info> {
     #[account(
         seeds = [
             GLOBAL_CONFIG.as_bytes(),
-            &_chain_id.to_be_bytes()
+            &msg.chain_id.to_be_bytes()
         ],
         bump,
-        constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized
+        constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
+        constraint = !bridge_config.withdraw_paused @ ErrorCode::WithdrawPaused
+
     )]
     pub bridge_config: Box<Account<'info, BridgeConfig>>,
+
+    #[account(
+        seeds = [
+            SUPPORTED_CHAINS_CONFIG.as_ref(),
+            msg.to_chain_id.to_be_bytes().as_ref(),
+        ],
+        bump,
+        constraint = (msg.amount as u128) <= supported_chain_config.mint_total @ ErrorCode::LackTargetMint,
+
+    )]
+    pub supported_chain_config: Box<Account<'info, SupportedChainConfig>>,
+
+    #[account(
+        seeds = [
+            TOKEN_CONFIG.as_ref(),
+            msg.to_chain_id.to_be_bytes().as_ref(),
+            msg.to_token_id.to_be_bytes().as_ref(),
+        ],
+        bump,
+        constraint = msg.amount >= token_config.token_min_amount @ ErrorCode::InvalidMinAmount,
+        constraint = (msg.amount as u128) <= token_config.mint_total @ ErrorCode::LackTargetMint,
+    )]
+    pub token_config: Box<Account<'info, TokenConfig>>,
 
     #[account(
         mut,
         seeds = [
             SBTC_MINT.as_bytes(),
-            &_chain_id.to_be_bytes()
+            &msg.chain_id.to_be_bytes()
         ],
         bump,
     )]
     pub sbtc_mint: Account<'info, Mint>,
 
     /// the user's sBTC Token Account
+    #[account(associated_token::mint = sbtc_mint, associated_token::authority = user)]
+    pub user_sbtc_ata: Box<Account<'info, TokenAccount>>,
+
+    /// the user to receive minted sBTC
+    /// CHECK: only need .key()
+    #[account(
+        mut,
+        constraint = Pubkey::new_from_array(msg.from_address) == user.key() @ ErrorCode::InvalidUserAddress,
+    )]
+    pub user: UncheckedAccount<'info>,
+
     #[account(
         init_if_needed,
         payer = submitter,
         associated_token::mint = sbtc_mint,
-        associated_token::authority = user
+        associated_token::authority = fee_recipient
     )]
-    pub user_sbtc_ata: Account<'info, TokenAccount>,
+    pub fee_recipient_sbtc_ata: Box<Account<'info, TokenAccount>>,
 
-    /// the user to receive minted sBTC
     /// CHECK: only need .key()
-    pub user: UncheckedAccount<'info>,
+    #[account(
+        mut,
+        constraint = bridge_config.fee_recipient == fee_recipient.key() @ ErrorCode::InvalidFeeRecipient,
+    )]
+    pub fee_recipient: UncheckedAccount<'info>,
 
     #[account(
         init_if_needed,

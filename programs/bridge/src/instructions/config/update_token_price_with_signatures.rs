@@ -24,6 +24,7 @@ pub fn update_token_price_with_signatures<'info>(
     let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
 
+
     verify(
         &ctx.remaining_accounts,
         &ctx.accounts.instructions_sysvar,
@@ -39,7 +40,8 @@ pub fn update_token_price_with_signatures<'info>(
 
     let (pda_of_token_config_addr, _, _, _) = get_token_pda_bump_seeds(
         ctx.program_id,
-        token_id.to_be_bytes()
+        msg.chain_id.to_be_bytes().as_ref(),
+        token_id.to_be_bytes().as_ref()
     );
     let pda_of_token_config = find_ata_in_accounts(
         ctx.remaining_accounts.to_vec(),
@@ -62,13 +64,14 @@ pub fn update_token_price_with_signatures<'info>(
 
 
 #[derive(Accounts)]
-#[instruction(_chain_id: u8)]
+#[instruction(_chain_id: u8, msg: UpdateTokenPriceMsg)]
 pub struct UpdateTokenPrice<'info> {
     #[account(mut)]
     pub submitter: Signer<'info>,
 
     #[account(
         constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
+        constraint = _chain_id != msg.chain_id  @ ErrorCode::ChainIdShouldDiffFromSolanaChainId,
         seeds = [
             GLOBAL_CONFIG.as_bytes(),
             &_chain_id.to_be_bytes()

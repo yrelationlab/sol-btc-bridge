@@ -84,5 +84,19 @@ pub enum ErrorCode {
     #[msg("Invalid Signer")]
     InvalidSigner,
     #[msg("Invalid Nonce")]
-    InvalidNonce
+    InvalidNonce,
+    #[msg("Withdraw Paused")]
+    WithdrawPaused,
+    #[msg("Invalid Address")]
+    InvalidAddress,
+    #[msg("Invalid Min Amount")]
+    InvalidMinAmount,
+    #[msg("Invalid User Address")]
+    InvalidUserAddress,
+    #[msg("Invalid Fee Recipient")]
+    InvalidFeeRecipient,
+    #[msg("Lack Target Mint")]
+    LackTargetMint,
+    #[msg("ChainId Should Diff From Solana Chain Id")]
+    ChainIdShouldDiffFromSolanaChainId,
 }

@@ -78,10 +78,17 @@ pub mod bridge {
 
     pub fn mint_sbtc_with_signatures<'info>(
         ctx: Context<'_, '_, 'info, 'info, MintSbtc<'info>>,
-        _chain_id: u8,
         number_of_signatures: u8,
         msg: MintSbtcMessage
     ) -> Result<()> {
-        instructions::mint_sbtc_with_signatures(ctx, _chain_id, number_of_signatures, msg)
+        instructions::mint_sbtc_with_signatures(ctx, number_of_signatures, msg)
+    }
+
+    pub fn withdraw_btc_with_signatures<'info>(
+        ctx: Context<'_, '_, 'info, 'info, WithdrawBtcWithSignatures<'info>>,
+        number_of_signatures: u8,
+        msg: WithdrawBtcMessage
+    ) -> Result<()> {
+        instructions::withdraw_btc_with_signatures(ctx, number_of_signatures, msg)
     }
 }
