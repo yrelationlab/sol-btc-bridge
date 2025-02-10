@@ -614,6 +614,10 @@ export type Bridge = {
             "type": "u8"
           },
           {
+            "name": "fromAddress",
+            "type": "bytes"
+          },
+          {
             "name": "toChainId",
             "type": "u8"
           },
@@ -757,6 +761,63 @@ export type Bridge = {
           }
         ]
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "MintSbtcEvent",
+      "fields": [
+        {
+          "name": "messageType",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "version",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "sourceChainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "sourceTokenId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "fromAddress",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "toChainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "toAddress",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -1579,6 +1640,10 @@ export const IDL: Bridge = {
             "type": "u8"
           },
           {
+            "name": "fromAddress",
+            "type": "bytes"
+          },
+          {
             "name": "toChainId",
             "type": "u8"
           },
@@ -1722,6 +1787,63 @@ export const IDL: Bridge = {
           }
         ]
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "MintSbtcEvent",
+      "fields": [
+        {
+          "name": "messageType",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "version",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "sourceChainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "sourceTokenId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "fromAddress",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "toChainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "toAddress",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [

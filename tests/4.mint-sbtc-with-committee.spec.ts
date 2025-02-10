@@ -59,18 +59,6 @@ describe("Mint sbtc", () => {
   });
 
   it("mint sbtc with committee", async () => {
-    //   pub struct MintSbtcMessage {
-    //     pub message_type: u8,
-    //     pub version: u8,
-    //     pub nonce: u64,
-    //     pub source_chain_id: u8,
-    //     pub source_token_id: u8,
-    //     pub from_address_length: u8, 
-    //     pub from_address: Vec<u8>,  
-    //     pub to_chain_id: u8,
-    //     pub to_address: [u8; 32],
-    //     pub amount: u64,
-    // }
 
     const msg = new MintSbtcMessage({
       messageType: MessageIds.TokenTransfer, // for Mint_SBTC
@@ -80,6 +68,7 @@ describe("Mint sbtc", () => {
       amount: new anchor.BN(1000),
       sourceChainId: values.supportedChains[0], // 转换为数字
       sourceTokenId: values.supportedTokensIndex[0], // 转换为数字
+      fromAddress: values.ethBtcAddress,
       toChainId: values.chainId
     });
 
@@ -152,7 +141,7 @@ describe("Mint sbtc", () => {
 
     console.log(`claimLpRewards...start...`)
     const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value;
-    await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
+    const txid = await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
     // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
     console.log(`claimLpRewards....end...`)
 
@@ -172,5 +161,26 @@ describe("Mint sbtc", () => {
       beforeBalance
     );
     expect(afterBalance - beforeBalance, "should minted 1000").to.equal(1000);
-  }, 300000);
+
+    {
+      // Get transaction from its signature
+      const tx = await anchor.getProvider().connection.getTransaction(txid, {
+        /** The level of finality desired */
+        commitment: "confirmed",
+        /** The max transaction version to return in responses. If the requested transaction is a higher version, an error will be returned */
+        maxSupportedTransactionVersion: 0
+      });
+
+      const eventParser = new anchor.EventParser(program.programId, new anchor.BorshCoder(program.idl));
+      const events = eventParser.parseLogs(tx.meta.logMessages);
+      for (let event of events) {
+        console.log(event);
+        // **转换 ETH 地址**
+        const fromEthAddress = "0x" + event.data.fromAddress.toString("hex");
+        const toSolAddress = new PublicKey(event.data.toAddress).toBase58();
+        console.log("ETH Address:", fromEthAddress);
+        console.log("Solana Address:", toSolAddress);
+      }
+    }
+  }, 400000);
 });

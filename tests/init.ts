@@ -333,7 +333,7 @@ export async function createBridgeConfig(
     .rpc({ skipPreflight: false });
 }
 
-export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false) {
+export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false) : Promise<string> {
   // Step 1 - Fetch Latest Blockhash
   let latestBlockhash = await connection.getLatestBlockhash('finalized');
   console.log("   ✅ - Fetched latest blockhash. Last valid height:", latestBlockhash.lastValidBlockHeight);
@@ -351,10 +351,11 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
   transaction.sign(signers);
   console.log("   ✅ - Transaction Signed");
 
+  let txid = "";
   try {
     // partialsign for a Versioned Transaction, instead
     // https://web3engineering.co.uk/partially-signing-versionedtransaction
-    const txid = await connection.sendTransaction(transaction, { skipPreflight: skipPreflight, maxRetries: 3 });
+    txid = await connection.sendTransaction(transaction, { skipPreflight: skipPreflight, maxRetries: 3 });
     // Step 4 - Send our v0 transaction to the cluster
     console.log(`   ✅ - Transaction ${txid} sent to network`);
     // Step 5 - Confirm Transaction 
@@ -369,12 +370,13 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
     console.error("Transaction failed:", err);
     throw err
   }
+  return txid;
 }
 
 export async function confirmTransaction(
   connection: Connection,
   signature: TransactionSignature,
-  desiredConfirmationStatus: TransactionConfirmationStatus = "confirmed",
+  desiredConfirmationStatus: TransactionConfirmationStatus = "processed",
   timeout: number = 300000,
   pollInterval: number = 1000,
   searchTransactionHistory: boolean = false

@@ -3,12 +3,11 @@ use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_mod
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 
-use crate::bridge::{ verify, Nonces, Operation };
+use crate::bridge::{ verify, MintSbtcEvent, Nonces, Operation };
 use crate::constants::{ COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG, NONCE_CONFIG, SBTC_MINT };
 use crate::errors::ErrorCode;
 use crate::{ MintSbtcMessage, Submitter };
 use anchor_spl::token::{ Mint, TokenAccount };
-
 use crate::BridgeConfig;
 pub fn mint_sbtc_with_signatures<'info>(
     ctx: Context<'_, '_, 'info, 'info, MintSbtc<'info>>,
@@ -33,12 +32,6 @@ pub fn mint_sbtc_with_signatures<'info>(
     // 2) parse msg.payload => (amount, user, ...)
     let amount = msg.amount;
 
-    msg!(
-        "msg data:: amount={}  source_chain_id={} nounce={} ",
-        msg.amount,
-        msg.source_chain_id,
-        msg.nonce
-    );
     // 3) anchor_spl::token::mint_to
     let bump = ctx.bumps.sbtc_mint;
     let seeds = [SBTC_MINT.as_bytes(), &_chain_id.to_be_bytes(), &[bump]];
@@ -56,14 +49,19 @@ pub fn mint_sbtc_with_signatures<'info>(
         signer
     );
     anchor_spl::token::mint_to(mint_to_ctx, amount)?;
-
-    // 4) done
-    msg!(
-        "Minted sBTC: amount={} to user={} with chain_id={}",
-        amount,
-        ctx.accounts.user.key(),
-        bridge_config.chain_id
-    );
+    
+    // msg!("mint_sbtc_with_signatures: {:?}", msg);
+    emit!(MintSbtcEvent {
+        message_type: msg.message_type,
+        version: msg.version,
+        nonce: msg.nonce,
+        source_chain_id: msg.source_chain_id,
+        source_token_id: msg.source_token_id,
+        from_address:msg.from_address, 
+        to_chain_id: msg.to_chain_id,
+        to_address:msg.to_address, 
+        amount: msg.amount,
+    });
 
     Ok(())
 }
