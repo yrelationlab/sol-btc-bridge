@@ -57,7 +57,11 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
             return err!(ErrorCode::ChainIdMismatch);
         }
 
-        nonce_config.nonce += 1;
+        if nonce_config.nonce != msg.nonce() {
+            msg!("nonce_config nonce: {:?}", nonce_config.nonce);
+            msg!("msg nonce: {:?}", msg.nonce());
+            return err!(ErrorCode::InvalidNonce);
+        }
 
         let (_, pda_of_committee_config) = get_commitee_account(
             remaining_accounts.to_vec(),
@@ -81,6 +85,9 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
         );
         approval_stake += committee_config.stake_amount;
     }
+
+    nonce_config.nonce += 1;
+
     Ok(
         if approval_stake < required_stake(msg)? {
             msg!(
@@ -126,7 +133,6 @@ pub fn required_stake<T: HasMessageType + HasPayload>(message: &T) -> Result<u16
         Operation::Upgrade => Ok(UPGRADE_STAKE_REQUIRED),
         Operation::AddEvmTokens => Ok(ADD_EVM_TOKENS_STAKE_REQUIRED),
         Operation::UpdateChainId => Ok(UPDATE_CHAINID_STAKE_REQUIRED),
-        _ => err!(ErrorCode::InvalidMessageType),
     }
 }
 
@@ -141,7 +147,6 @@ pub enum Operation {
     Upgrade = 5,
     AddEvmTokens = 7,
     UpdateChainId = 8,
-    MintSBTC = 9,
 }
 impl Operation {
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -161,7 +166,6 @@ impl TryFrom<u8> for Operation {
             5 => Ok(Operation::Upgrade),
             7 => Ok(Operation::AddEvmTokens),
             8 => Ok(Operation::UpdateChainId),
-            9 => Ok(Operation::MintSBTC),
             _ => Err(()),
         }
     }

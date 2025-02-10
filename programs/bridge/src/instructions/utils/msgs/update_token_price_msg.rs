@@ -29,6 +29,10 @@ impl HasMessageType for UpdateTokenPriceMsg {
     fn chain_id(&self) -> u8 {
         self.chain_id
     }
+    
+    fn nonce(&self) -> u64 {
+        self.nonce
+    }
 }
 
 impl HasPayload for UpdateTokenPriceMsg {

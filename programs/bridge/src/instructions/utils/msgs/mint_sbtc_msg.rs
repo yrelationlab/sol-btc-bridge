@@ -27,6 +27,10 @@ impl HasMessageType for MintSbtcMessage {
     fn chain_id(&self) -> u8 {
         self.to_chain_id
     }
+    
+    fn nonce(&self) -> u64 {
+        self.nonce
+    }
 }
 
 impl HasPayload for MintSbtcMessage {

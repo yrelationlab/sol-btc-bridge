@@ -55,6 +55,5 @@ export interface MessageType {
     Upgrade = 5,
     AddEvmTokens = 7,
     UpdateChainId = 8,
-    MintSbtc = 9
   }
 

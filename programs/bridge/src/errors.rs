@@ -82,5 +82,7 @@ pub enum ErrorCode {
     #[msg("InstructionMissing")]
     InstructionMissing,
     #[msg("Invalid Signer")]
-    InvalidSigner
+    InvalidSigner,
+    #[msg("Invalid Nonce")]
+    InvalidNonce
 }

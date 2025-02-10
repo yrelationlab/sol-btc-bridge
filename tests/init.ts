@@ -206,7 +206,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   console.log(`noncePdaUpdateTokenPrice is ${JSON.stringify(noncePdaUpdateTokenPrice)}`);
 
   const nonceMintSbtc = PublicKey.findProgramAddressSync(
-    [NONCE_CONFIG, new anchor.BN(MessageIds.MintSbtc.toString()).toArrayLike(Buffer, 'be', 1)],
+    [NONCE_CONFIG, new anchor.BN(MessageIds.TokenTransfer.toString()).toArrayLike(Buffer, 'be', 1)],
     anchor.workspace.bridge.programId
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);

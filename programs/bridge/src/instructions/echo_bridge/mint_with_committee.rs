@@ -122,7 +122,7 @@ pub struct MintSbtc<'info> {
         init_if_needed,
         payer = submitter,
         space = Nonces::LEN,
-        seeds = [NONCE_CONFIG.as_ref(), Operation::MintSBTC.to_bytes().as_slice()],
+        seeds = [NONCE_CONFIG.as_ref(), Operation::TokenTransfer.to_bytes().as_slice()],
         bump
     )]
     pub nonce: Box<Account<'info, Nonces>>,

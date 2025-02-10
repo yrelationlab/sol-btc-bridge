@@ -3,6 +3,8 @@ use anchor_lang::prelude::*;
 pub trait HasMessageType {
     fn message_type(&self) -> u8;
     fn chain_id(&self) -> u8;
+    fn nonce(&self) -> u64;
+
 }
 
 pub trait HasPayload {

@@ -47,6 +47,7 @@ export class MintSbtcMessage extends BaseMsg {
         this.messageType = obj.messageType;
         this.version = obj.version;
         this.nonce = obj.nonce;
+        console.log(`nonce ${this.nonce}`);
         this.toChainId = obj.toChainId;
         console.log(`toChainId ${this.toChainId}`);
         this.sourceChainId = obj.sourceChainId;

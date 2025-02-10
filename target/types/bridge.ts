@@ -755,9 +755,6 @@ export type Bridge = {
           },
           {
             "name": "UpdateChainId"
-          },
-          {
-            "name": "MintSBTC"
           }
         ]
       }
@@ -1020,6 +1017,11 @@ export type Bridge = {
       "code": 6039,
       "name": "InvalidSigner",
       "msg": "Invalid Signer"
+    },
+    {
+      "code": 6040,
+      "name": "InvalidNonce",
+      "msg": "Invalid Nonce"
     }
   ]
 };
@@ -1781,9 +1783,6 @@ export const IDL: Bridge = {
           },
           {
             "name": "UpdateChainId"
-          },
-          {
-            "name": "MintSBTC"
           }
         ]
       }
@@ -2046,6 +2045,11 @@ export const IDL: Bridge = {
       "code": 6039,
       "name": "InvalidSigner",
       "msg": "Invalid Signer"
+    },
+    {
+      "code": 6040,
+      "name": "InvalidNonce",
+      "msg": "Invalid Nonce"
     }
   ]
 };

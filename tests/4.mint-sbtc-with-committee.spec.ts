@@ -63,7 +63,7 @@ describe("Mint sbtc", () => {
     const msg = new MintSbtcMessage({
       messageType: MessageIds.TokenTransfer, // for Mint_SBTC
       version: MSG_VERSION,
-      nonce: new anchor.BN(1),
+      nonce: new anchor.BN(0),
       toAddress: values.user.publicKey.toBuffer(),
       amount: new anchor.BN(1000),
       sourceChainId: values.supportedChains[0], // 转换为数字
