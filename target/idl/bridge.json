@@ -220,11 +220,6 @@
       "name": "updateTokenPriceWithSignatures",
       "accounts": [
         {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "submitter",
           "isMut": true,
           "isSigner": true
@@ -1023,5 +1018,8 @@
       "name": "InvalidNonce",
       "msg": "Invalid Nonce"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs"
+  }
 }

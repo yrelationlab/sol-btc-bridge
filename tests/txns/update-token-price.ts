@@ -96,7 +96,6 @@ export class UpdateTokenPriceMsgTxn {
                 msg as any,
             )
             .accounts({
-                payer: payer,
                 bridgeConfig: bridgeConfigPDA,
                 nonce: noncePdaUpdateTokenPrice,
                 submitterAccount: submitterPda,

@@ -65,9 +65,6 @@ pub fn update_token_price_with_signatures<'info>(
 #[instruction(_chain_id: u8)]
 pub struct UpdateTokenPrice<'info> {
     #[account(mut)]
-    pub payer: Signer<'info>,
-
-    #[account(mut)]
     pub submitter: Signer<'info>,
 
     #[account(
@@ -82,7 +79,7 @@ pub struct UpdateTokenPrice<'info> {
 
     #[account(
         init_if_needed,
-        payer = payer,
+        payer = submitter,
         space = Nonces::LEN,
         seeds = [NONCE_CONFIG.as_ref(), Operation::UpdateTokenPrice.to_bytes().as_slice()],
         bump

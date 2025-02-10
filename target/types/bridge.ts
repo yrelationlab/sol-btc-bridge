@@ -220,11 +220,6 @@ export type Bridge = {
       "name": "updateTokenPriceWithSignatures",
       "accounts": [
         {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "submitter",
           "isMut": true,
           "isSigner": true
@@ -1247,11 +1242,6 @@ export const IDL: Bridge = {
     {
       "name": "updateTokenPriceWithSignatures",
       "accounts": [
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
         {
           "name": "submitter",
           "isMut": true,
