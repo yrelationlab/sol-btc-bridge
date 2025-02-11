@@ -211,8 +211,10 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
 
-  const ethBtcAddress = new Uint8Array(35); // 固定 32 字节
-  ethBtcAddress.set(Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599".replace("0x", ""), "hex"), 0); // 将前 20 字节
+  // const ethBtcAddress = new Uint8Array(35); // 固定 32 字节
+  // ethBtcAddress.set(Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599".replace("0x", ""), "hex"), 0); // 将前 20 字节
+
+  const ethBtcAddress = Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599".replace("0x", ""), "hex")
 
   return {
     chainId: curChainId,
