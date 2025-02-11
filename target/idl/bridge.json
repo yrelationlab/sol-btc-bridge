@@ -744,7 +744,12 @@
           },
           {
             "name": "fromAddress",
-            "type": "bytes"
+            "type": {
+              "array": [
+                "u8",
+                35
+              ]
+            }
           },
           {
             "name": "toChainId",
@@ -969,7 +974,12 @@
         },
         {
           "name": "fromAddress",
-          "type": "bytes",
+          "type": {
+            "array": [
+              "u8",
+              35
+            ]
+          },
           "index": false
         },
         {

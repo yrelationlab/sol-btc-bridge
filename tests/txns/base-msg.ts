@@ -13,6 +13,7 @@ export class BaseMsg {
         return deserialize((this as any).schema, this, data);
     }
 
+    
     createSignature(signer: Keypair): { encoded: Uint8Array; signature: Uint8Array } {
         const encoded = this.serialize();
         console.log('Serialized message:', encoded);

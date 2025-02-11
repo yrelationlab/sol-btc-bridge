@@ -23,7 +23,7 @@ export class MintSbtcMessage extends BaseMsg {
                     ["nonce", "u64"],
                     ["sourceChainId", "u8"],
                     ["sourceTokenId", "u8"],
-                    ["fromAddress", ["u8"]], // 固定 32 字节
+                    ["fromAddress",  ["u8", 35]],
                     ["toChainId", "u8"],
                     ["toAddress", ["u8", 32]], // 固定 32 字节
                     ["amount", "u64"]

@@ -45,10 +45,13 @@ pub fn create_bridge_config<'info>(
     bridge_config.sbtc_mint = ctx.accounts.sbtc_mint.key();
     bridge_config.is_initialized = true;
 
-    for (i, chain_id) in supported_chains.iter().enumerate() {
+    for (i, supported_chain_id) in supported_chains.iter().enumerate() {
+        if *supported_chain_id == chain_id{
+            return err!(ErrorCode::ChainIdShouldDiffFromSolanaChainId);
+        }
         let (pda_of_token_config_addr, _, _, signer_seeds) = get_token_pda_bump_seeds(
             ctx.program_id,
-            chain_id.to_be_bytes().as_ref(),
+            supported_chain_id.to_be_bytes().as_ref(),
             token_ids[i].to_be_bytes().as_ref(),
         );
         msg!("i:{}, pda_of_token_config_addr: {:?}", i, pda_of_token_config_addr);
@@ -76,7 +79,7 @@ pub fn create_bridge_config<'info>(
         let bridge_config_of_token = TokenConfig {
             is_initialized: true,
             token_id: token_ids[i],
-            chain_id: *chain_id,
+            chain_id: *supported_chain_id,
             decimal: DECIMALS9,
             native: false,
             token_price: token_prices[i],
@@ -93,9 +96,9 @@ pub fn create_bridge_config<'info>(
                 ErrorCode::BridgeConfigSerializationError
             })?;
 
-        require!(*chain_id != bridge_config.chain_id, ErrorCode::CannotSupportSelf);
+        require!(*supported_chain_id != bridge_config.chain_id, ErrorCode::CannotSupportSelf);
         let (pda_of_supported_chains_config_addr, _, _, signer_seeds) =
-            get_support_chains_pda_bump_seeds(ctx.program_id, chain_id.to_be_bytes());
+            get_support_chains_pda_bump_seeds(ctx.program_id, supported_chain_id.to_be_bytes());
         let pda_of_supported_chains_config = find_ata_in_accounts(
             ctx.remaining_accounts.to_vec(),
             &pda_of_supported_chains_config_addr
@@ -118,7 +121,7 @@ pub fn create_bridge_config<'info>(
         account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&discriminator);
         let supported_chain: SupportedChainConfig = SupportedChainConfig {
             is_initialized: true,
-            chain_id: *chain_id,
+            chain_id: *supported_chain_id,
             supported: true,
             mint_total: 0 as u128,
             padding: [0u64; SupportedChainConfig::LEN_OF_PADDING],

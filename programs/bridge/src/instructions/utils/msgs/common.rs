@@ -53,8 +53,8 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
             return err!(ErrorCode::MessageOpTypeMismatch);
         }
 
-        if bridge_config.chain_id == message_of_signer.chain_id() {
-            return err!(ErrorCode::ChainIdShouldDiffFromSolanaChainId);
+        if bridge_config.chain_id != message_of_signer.chain_id() {
+            return err!(ErrorCode::ChainIdMismatch);
         }
 
         if nonce_config.nonce != msg.nonce() {

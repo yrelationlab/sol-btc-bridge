@@ -744,7 +744,12 @@ export type Bridge = {
           },
           {
             "name": "fromAddress",
-            "type": "bytes"
+            "type": {
+              "array": [
+                "u8",
+                35
+              ]
+            }
           },
           {
             "name": "toChainId",
@@ -969,7 +974,12 @@ export type Bridge = {
         },
         {
           "name": "fromAddress",
-          "type": "bytes",
+          "type": {
+            "array": [
+              "u8",
+              35
+            ]
+          },
           "index": false
         },
         {
@@ -2060,7 +2070,12 @@ export const IDL: Bridge = {
           },
           {
             "name": "fromAddress",
-            "type": "bytes"
+            "type": {
+              "array": [
+                "u8",
+                35
+              ]
+            }
           },
           {
             "name": "toChainId",
@@ -2285,7 +2300,12 @@ export const IDL: Bridge = {
         },
         {
           "name": "fromAddress",
-          "type": "bytes",
+          "type": {
+            "array": [
+              "u8",
+              35
+            ]
+          },
           "index": false
         },
         {

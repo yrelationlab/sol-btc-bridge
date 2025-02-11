@@ -4,7 +4,7 @@
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "build": "anchor build -- --tools-version v1.41 -- -Znext-lockfile-bump",
     "test-in-remote-node": "anchor run test",
-    "test-in-local": "anchor test -- --tools-version v1.41",
+    "test-in-local": "anchor test -- --tools-version v1.41 -- -Znext-lockfile-bump",
     "test-in-local-validator": "anchor test --skip-local-validator -- --tools-version v1.41 -- -Znext-lockfile-bump",
     "network": "solana config get",
     "url:local": "solana config set --url localhost",

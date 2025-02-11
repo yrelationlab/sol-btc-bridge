@@ -27,7 +27,7 @@ export interface TestValues {
     noncePdaUpdateTokenPrice: PublicKey;
     nonceMintSbtc: PublicKey;
     supportedChains: number[];
-    ethBtcAddress: Buffer;
+    ethBtcAddress: Uint8Array;
     user: Keypair;
     userSbtcAta: PublicKey;
 }

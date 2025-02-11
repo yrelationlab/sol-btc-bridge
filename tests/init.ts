@@ -124,7 +124,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
 
   const supportedTokensIndex = Array.from(
     { length: supportedTokensKeypairs.length },
-    (_, i) => i
+    (_, i) => i + 10
   );
   const decimals = [DECIMALS9, DECIMALS9, DECIMALS9];
   const prices = [
@@ -137,9 +137,9 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   const supportedChainsBuffer = Buffer.from(new Uint8Array(supportedChains));
   const tokenFeePercentages = [new anchor.BN(100), new anchor.BN(2000), new anchor.BN(2000000)];
   const tokenMinAmounts = [
-    new anchor.BN(100).mul(decimals[0]),
-    new anchor.BN(2000).mul(decimals[1]),
-    new anchor.BN(200).mul(decimals[2]),
+    new anchor.BN(1).mul(decimals[0]),
+    new anchor.BN(1).mul(decimals[1]),
+    new anchor.BN(1).mul(decimals[2]),
 
   ];
   const curChainId = 1;
@@ -147,7 +147,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     [GLOBAL_CONFIG, new anchor.BN(curChainId).toArrayLike(Buffer, 'be', 1)],
     anchor.workspace.bridge.programId
   )[0];
-  console.log(`curChainId is ${new anchor.BN(curChainId).toArrayLike(Buffer, 'be', 1)}`);
+  console.log(`curChainId is ${new anchor.BN(curChainId).toString()}`);
   console.log(`bridgeConfigPDA is ${JSON.stringify(bridgeConfigPDA)}`);
 
   const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
@@ -211,8 +211,8 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
 
-  const ethBtcAddress = Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599".replace("0x", ""), "hex");
-  console.log(`ethBtcAddress is ${ethBtcAddress.toString("hex")}`);
+  const ethBtcAddress = new Uint8Array(35); // 固定 32 字节
+  ethBtcAddress.set(Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599".replace("0x", ""), "hex"), 0); // 将前 20 字节
 
   return {
     chainId: curChainId,
@@ -333,7 +333,7 @@ export async function createBridgeConfig(
     .rpc({ skipPreflight: false });
 }
 
-export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false) : Promise<string> {
+export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false): Promise<string> {
   // Step 1 - Fetch Latest Blockhash
   let latestBlockhash = await connection.getLatestBlockhash('finalized');
   console.log("   ✅ - Fetched latest blockhash. Last valid height:", latestBlockhash.lastValidBlockHeight);

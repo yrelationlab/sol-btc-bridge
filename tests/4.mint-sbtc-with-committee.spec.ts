@@ -43,9 +43,10 @@ import {
 } from "@solana/spl-token";
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
-import { BRIDGE_SBTC_AUTH, MSG_VERSION } from "./constants";
+import { BRIDGE_SBTC_AUTH, DECIMALS9, MSG_VERSION } from "./constants";
 import { MintSbtcMessage } from "./txns/mint-sbtc-message ";
 import { MessageIds } from "./types";
+import { BaseMsg } from "./txns/base-msg";
 
 describe("Mint sbtc", () => {
   const provider = anchor.AnchorProvider.env();
@@ -60,17 +61,22 @@ describe("Mint sbtc", () => {
 
   it("mint sbtc with committee", async () => {
 
+    const mintAmout = new anchor.BN(1000).mul(DECIMALS9);
     const msg = new MintSbtcMessage({
       messageType: MessageIds.TokenTransfer, // for Mint_SBTC
       version: MSG_VERSION,
       nonce: new anchor.BN(0),
       toAddress: values.user.publicKey.toBuffer(),
-      amount: new anchor.BN(1000),
+      amount: mintAmout,
       sourceChainId: values.supportedChains[0], // 转换为数字
       sourceTokenId: values.supportedTokensIndex[0], // 转换为数字
       fromAddress: values.ethBtcAddress,
       toChainId: values.chainId
     });
+
+    console.log("Serialized Message (Hex):", Buffer.from(msg.serialize()).toString("hex"));
+    const m = MintSbtcMessage.deserialize(Buffer.from(msg.serialize()));
+    console.log(`m is ${m.toChainId}`)
 
     let beforeBalance = 0;
     try {
@@ -110,7 +116,7 @@ describe("Mint sbtc", () => {
       .accounts({
         bridgeConfig: values.bridgeConfigPDA,
         supportedChainConfig: values.supportedChainsPdas[0],
-        tokenConfig:values.tokenConfigPdas[0],
+        tokenConfig: values.tokenConfigPdas[0],
         nonce: values.nonceMintSbtc,
         submitterAccount: values.submitterPda,
         submitter: values.submitter.publicKey,
@@ -162,7 +168,7 @@ describe("Mint sbtc", () => {
     expect(afterBalance, "user sBTC balance must increase").to.be.greaterThan(
       beforeBalance
     );
-    expect(afterBalance - beforeBalance, "should minted 1000").to.equal(1000);
+    expect(afterBalance - beforeBalance, "should minted 1000").to.equal(mintAmout.toNumber());
 
     {
       // Get transaction from its signature
