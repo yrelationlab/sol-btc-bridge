@@ -1,6 +1,6 @@
 /// Creates a new bridge configuration.
 use crate::{
-    constants::{ ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, HARDCODED_PUBKEY, SBTC_MINT },
+    constants::{ ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, SBTC_MINT },
     create_account,
     errors::ErrorCode,
     find_ata_in_accounts,
@@ -36,7 +36,6 @@ pub fn create_bridge_config<'info>(
     );
 
     require!(token_prices.len() == token_min_amount.len(), ErrorCode::InvalidTokenMinimumAmount);
-
 
     require!(fee_recipient != Pubkey::default(), ErrorCode::InvalidFeeRecipientAddress);
     bridge_config.chain_id = chain_id;
@@ -153,7 +152,7 @@ pub struct CreateBridgeConfig<'info> {
     /// The account paying for all rents
     #[account(
         mut,
-        address = HARDCODED_PUBKEY @ ErrorCode::InvalidAdminAddress
+        address = crate::admin::id() @ ErrorCode::InvalidAdminAddress
     )]
     pub payer: Signer<'info>,
 

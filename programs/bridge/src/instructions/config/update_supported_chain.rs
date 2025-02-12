@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 
 use crate::{
-    constants::{HARDCODED_PUBKEY, SUPPORTED_CHAINS_CONFIG},
+    constants::{ SUPPORTED_CHAINS_CONFIG},
     errors::ErrorCode,
     SupportedChainConfig,
 };
@@ -40,7 +40,7 @@ pub struct UpdateSupportedChain<'info> {
     pub chain_config: Account<'info, SupportedChainConfig>,
 
     #[account(
-        address = HARDCODED_PUBKEY @ ErrorCode::InvalidAdminAddress
+        address = crate::admin::id()  @ ErrorCode::InvalidAdminAddress
     )]
     pub admin: Signer<'info>,
 

@@ -43,6 +43,7 @@ import {
     getAssociatedTokenAddress,
     getAccount,
     TOKEN_PROGRAM_ID,
+    ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
@@ -114,20 +115,18 @@ describe("Withdraw Btc", () => {
         const tx = await program.methods
             .withdrawBtcWithSignatures(numberOfSignatures, msg as any)
             .accounts({
+                submitter: values.submitter.publicKey,
+                submitterAccount: values.submitterPda,
                 bridgeConfig: values.bridgeConfigPDA,
                 supportedChainConfig: values.supportedChainsPdas[0],
                 tokenConfig: values.tokenConfigPdas[0],
-                nonce: values.nonceWithdrawBtc,
-                submitterAccount: values.submitterPda,
-                submitter: values.submitter.publicKey,
-                userSbtcAta: values.userSbtcAta,
-                feeRecipientSbtcAta: values.feeRecipientSbtcAta,
                 sbtcMint: values.sbtcMint,
+                userSbtcAta: values.userSbtcAta,
                 user: values.user.publicKey,
+                feeRecipientSbtcAta: values.feeRecipientSbtcAta,
                 feeRecipient: values.feeRecipient,
+                nonce: values.nonceWithdrawBtc,
                 instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
-                tokenProgram: TOKEN_PROGRAM_ID,
-                systemProgram: SystemProgram.programId,
             })
             .remainingAccounts(
                 values.committeePdas.map(pubkey => ({

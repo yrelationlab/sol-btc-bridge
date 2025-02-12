@@ -4,8 +4,19 @@ mod constants;
 mod errors;
 mod instructions;
 
-// Set the correct key here
+
+#[cfg(feature = "devnet")]
 declare_id!("Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs");
+#[cfg(not(feature = "devnet"))]
+declare_id!("Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs");
+
+pub mod admin {
+    use anchor_lang::prelude::declare_id;
+    #[cfg(feature = "devnet")]
+    declare_id!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
+    #[cfg(not(feature = "devnet"))]
+    declare_id!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
+}
 #[program]
 pub mod bridge {
     pub use super::instructions::*;

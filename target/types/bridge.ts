@@ -60,11 +60,6 @@ export type Bridge = {
       "name": "FEE_DENOMINATOR",
       "type": "u64",
       "value": "1000000"
-    },
-    {
-      "name": "HARDCODED_PUBKEY",
-      "type": "publicKey",
-      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [
@@ -1376,11 +1371,6 @@ export const IDL: Bridge = {
       "name": "FEE_DENOMINATOR",
       "type": "u64",
       "value": "1000000"
-    },
-    {
-      "name": "HARDCODED_PUBKEY",
-      "type": "publicKey",
-      "value": "pubkey ! (\"admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV\")"
     }
   ],
   "instructions": [

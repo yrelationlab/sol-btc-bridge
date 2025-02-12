@@ -29,7 +29,6 @@ pub fn update_token_price_with_signatures<'info>(
     number_of_signatures: u8,
     msg: UpdateTokenPriceMsg
 ) -> Result<()> {
-    let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
 
     verify(
@@ -39,7 +38,6 @@ pub fn update_token_price_with_signatures<'info>(
         number_of_signatures,
         &msg,
         Operation::UpdateTokenPrice,
-        bridge_config,
         nonce_config
     )?;
 

@@ -1,5 +1,5 @@
 use crate::{
-    bridge::{ get_commitee_account, resolve_ed25519_with_index, BridgeConfig, Committee, Nonces },
+    bridge::{ get_commitee_account, resolve_ed25519_with_index, Committee, Nonces },
     constants::ANCHOR_HEADER_LEN,
     errors::ErrorCode,
 };
@@ -25,7 +25,6 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
     number_of_signatures: u8,
     msg: &T,
     op_type: Operation,
-    bridge_config: &mut Box<Account<'info, BridgeConfig>>,
     nonce_config: &mut Box<Account<'info, Nonces>>
 ) -> Result<()> {
     if number_of_signatures < 1 {

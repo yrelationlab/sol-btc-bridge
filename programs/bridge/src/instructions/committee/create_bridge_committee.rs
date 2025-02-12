@@ -1,30 +1,25 @@
 use crate::{
-    constants::{ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG},
+    constants::{ ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG },
     create_account,
     errors::ErrorCode,
-    get_commitee_account, Committee,
+    get_commitee_account,
+    Committee,
     Submitter,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
-use anchor_lang::{prelude::*, Discriminator};
+use anchor_lang::{ prelude::*, Discriminator };
 
 pub fn create_bridge_committee<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
     committee: Vec<Pubkey>,
     stake: Vec<u16>,
-    min_stake_required: u16,
+    min_stake_required: u16
 ) -> Result<()> {
     let committee_length = committee.len();
 
-    require!(
-        committee_length < 256,
-        ErrorCode::CommitteeLengthExceedsLimit
-    );
+    require!(committee_length < 256, ErrorCode::CommitteeLengthExceedsLimit);
 
-    require!(
-        committee_length == stake.len(),
-        ErrorCode::CommitteeAndStakeLengthMismatch
-    );
+    require!(committee_length == stake.len(), ErrorCode::CommitteeAndStakeLengthMismatch);
 
     let mut total_stake: u16 = 0;
     for (i, committee_address) in committee.iter().enumerate() {
@@ -32,7 +27,7 @@ pub fn create_bridge_committee<'info>(
         let (signer_seeds, pda_of_committee_config) = get_commitee_account(
             ctx.remaining_accounts.to_vec(),
             committee_address,
-            &ctx.program_id,
+            &ctx.program_id
         )?;
         create_account(
             &ctx.program_id,
@@ -44,7 +39,7 @@ pub fn create_bridge_committee<'info>(
                 .map(|v| v.as_slice())
                 .collect::<Vec<&[u8]>>()
                 .as_slice(),
-            Committee::LEN,
+            Committee::LEN
         )?;
         let bridge_committee = Committee {
             is_initialized: true,
@@ -55,18 +50,13 @@ pub fn create_bridge_committee<'info>(
         };
         let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
         account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&Committee::discriminator());
-        bridge_committee
-            .serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..])
-            .map_err(|error| {
-                msg!("BridgeCommitteeSerializationError: error={}", error);
-                ErrorCode::BridgeCommitteeSerializationError
-            })?;
+        bridge_committee.serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..]).map_err(|error| {
+            msg!("BridgeCommitteeSerializationError: error={}", error);
+            ErrorCode::BridgeCommitteeSerializationError
+        })?;
     }
 
-    require!(
-        total_stake >= min_stake_required,
-        ErrorCode::InsufficientTotalStake
-    );
+    require!(total_stake >= min_stake_required, ErrorCode::InsufficientTotalStake);
 
     // submitter
     {
@@ -80,17 +70,17 @@ pub fn create_bridge_committee<'info>(
 
 #[derive(Accounts)]
 pub struct CreateBridgeCommittee<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        address = crate::admin::id() @ ErrorCode::InvalidAdminAddress
+    )]
     pub payer: Signer<'info>,
 
     #[account(
         init,
         payer = payer,
         space = Submitter::LEN,
-        seeds = [
-            COMMITTEE_SUBMITTER_CONFIG.as_ref(),
-            submitter.key().as_ref(),
-        ],
+        seeds = [COMMITTEE_SUBMITTER_CONFIG.as_ref(), submitter.key().as_ref()],
         bump
     )]
     pub submitter_pda: Box<Account<'info, Submitter>>,

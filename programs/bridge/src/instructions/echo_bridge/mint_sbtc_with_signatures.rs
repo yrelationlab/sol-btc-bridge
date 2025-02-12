@@ -21,7 +21,6 @@ pub fn mint_sbtc_with_signatures<'info>(
     number_of_signatures: u8,
     msg: MintSbtcMessage
 ) -> Result<()> {
-    let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
     let supported_chain_config = &mut ctx.accounts.supported_chain_config;
     let token_config = &mut ctx.accounts.token_config;
@@ -33,7 +32,6 @@ pub fn mint_sbtc_with_signatures<'info>(
         number_of_signatures,
         &msg,
         Operation::TokenTransfer,
-        bridge_config,
         nonce_config
     )?;
 

@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use solana_program::pubkey;
 #[constant]
 pub const GLOBAL_CONFIG: &str = "GLOBAL_CONFIG";
 #[constant]
@@ -29,6 +28,3 @@ pub const MAX_STRING_LENGTH: usize = 255;
 #[constant]
 pub const FEE_DENOMINATOR: u64 = 1000000;
 
-#[constant]
-// Hardcoded pubkey for create config
-pub const HARDCODED_PUBKEY: Pubkey = pubkey!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");

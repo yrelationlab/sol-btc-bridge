@@ -11,7 +11,6 @@ pub fn withdraw_btc_with_signatures<'info>(
     number_of_signatures: u8,
     msg: WithdrawBtcMessage
 ) -> Result<()> {
-    let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
     let supported_chain_config = &mut ctx.accounts.supported_chain_config;
     let token_config = &mut ctx.accounts.token_config;
@@ -25,7 +24,6 @@ pub fn withdraw_btc_with_signatures<'info>(
         number_of_signatures,
         &msg,
         Operation::TokenTransfer,
-        bridge_config,
         nonce_config
     )?;
 
@@ -106,8 +104,8 @@ pub struct WithdrawBtcWithSignatures<'info> {
         ],
         bump,
         constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
-        constraint = !bridge_config.withdraw_paused @ ErrorCode::WithdrawPaused
-
+        constraint = !bridge_config.withdraw_paused @ ErrorCode::WithdrawPaused,
+        constraint = msg.chain_id != msg.to_chain_id @ ErrorCode::ChainIdShouldDiffFromSolanaChainId
     )]
     pub bridge_config: Box<Account<'info, BridgeConfig>>,
 
