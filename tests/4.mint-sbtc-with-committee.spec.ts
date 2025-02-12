@@ -12,6 +12,7 @@ import {
   airdrop,
   createLookupTable,
   getTxnAddress,
+  mintSBtc,
 } from "./init";
 import {
   clusterApiUrl,
@@ -57,26 +58,11 @@ describe("Mint sbtc", () => {
     values = await createValues();
     await createBridgeConfig(program, values);
     await createCommitteeConfig(program, values);
+    await airdrop(provider.connection, values.submitter.publicKey, 1)
+    await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
   });
 
   it("mint sbtc with committee", async () => {
-
-    const mintAmout = new anchor.BN(1000).mul(DECIMALS9);
-    const msg = new MintSbtcMessage({
-      messageType: MessageIds.TokenTransfer, // for Mint_SBTC
-      version: MSG_VERSION,
-      nonce: new anchor.BN(0),
-      toAddress: values.user.publicKey.toBuffer(),
-      amount: mintAmout,
-      sourceChainId: values.supportedChains[0], // 转换为数字
-      sourceTokenId: values.supportedTokensIndex[0], // 转换为数字
-      fromAddress: values.ethBtcAddress,
-      toChainId: values.chainId
-    });
-
-    console.log("Serialized Message (Hex):", Buffer.from(msg.serialize()).toString("hex"));
-    const m = MintSbtcMessage.deserialize(Buffer.from(msg.serialize()));
-    console.log(`m is ${m.toChainId}`)
 
     let beforeBalance = 0;
     try {
@@ -90,69 +76,7 @@ describe("Mint sbtc", () => {
       beforeBalance = 0;
     }
     console.log(`User sBTC balance before mint: ${beforeBalance}`);
-
-    await airdrop(provider.connection, values.submitter.publicKey, 1)
-    await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
-
-    const signatures = values.committeeKeypairs.map(committeeKeypair => {
-      return {
-        data: msg.createSignature(committeeKeypair),
-        publicKey: committeeKeypair.publicKey
-      };
-    });
-
-    const numberOfSignatures = values.committeeKeypairs.length;
-    const ixEd25519Programs = signatures.map(signature =>
-      Ed25519Program.createInstructionWithPublicKey({
-        publicKey: signature.publicKey.toBytes(),
-        signature: signature.data.signature,
-        message: signature.data.encoded,
-      })
-    );
-
-
-    const tx = await program.methods
-      .mintSbtcWithSignatures(numberOfSignatures, msg as any,)
-      .accounts({
-        bridgeConfig: values.bridgeConfigPDA,
-        supportedChainConfig: values.supportedChainsPdas[0],
-        tokenConfig: values.tokenConfigPdas[0],
-        nonce: values.nonceMintSbtc,
-        submitterAccount: values.submitterPda,
-        submitter: values.submitter.publicKey,
-        userSbtcAta: values.userSbtcAta,
-        user: values.user.publicKey,
-        sbtcMint: values.sbtcMint,
-        instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
-      })
-      .remainingAccounts([
-        ...values.committeePdas.map((pubkey) => ({
-          pubkey,
-          isSigner: false,
-          isWritable: true,
-        })),
-      ]).preInstructions(
-        [ComputeBudgetProgram.setComputeUnitLimit({ units: 10000000 }), ...ixEd25519Programs]
-      ).transaction();
-
-    // const LOOKUP_TABLE_ADDRESS = new PublicKey("8j3Tgegjq5hY2joaC6hGUZQZhTg2cohkxVhCPVxYj3WP")
-    const LOOKUP_TABLE_ADDRESS = await createLookupTable(values.submitter.publicKey, values.submitter, provider.connection);
-    console.log(`LOOKUP_TABLE_ADDRESS is : ${LOOKUP_TABLE_ADDRESS}`);
-
-    await createAndSendV0Tx([AddressLookupTableProgram.extendLookupTable({
-      payer: values.submitter.publicKey,
-      authority: values.submitter.publicKey,
-      lookupTable: LOOKUP_TABLE_ADDRESS,
-      addresses: getTxnAddress(tx),
-    })], [values.submitter], provider.connection, null, true);
-    console.log(`table create success 0 !`);
-
-    console.log(`claimLpRewards...start...`)
-    const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value;
-    const txid = await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
-    // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
-    console.log(`claimLpRewards....end...`)
-
+    const { mintAmout, txid } = await mintSBtc(values, program, provider);
     let afterBalance = 0;
     try {
       const afterAccountInfo = await getAccount(
@@ -190,5 +114,6 @@ describe("Mint sbtc", () => {
         console.log("Solana Address:", toSolAddress);
       }
     }
-  }, 400000);
+  }, 700000);
 });
+

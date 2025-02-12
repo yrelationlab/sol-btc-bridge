@@ -29,6 +29,8 @@ import {
   SignatureStatus,
   AddressLookupTableAccount,
   Signer,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+  Ed25519Program,
 } from "@solana/web3.js";
 import {
   Liquidity,
@@ -72,7 +74,41 @@ import {
   NONCE_CONFIG,
   SUPPORTED_CHAINS_CONFIG,
   TOKEN_CONFIG,
+  MSG_VERSION,
 } from "./constants";
+import { MintSbtcMessage } from "./txns/mint-sbtc-message ";
+
+export interface TestValues {
+  payerAdmin: Keypair;
+  feeRecipient: PublicKey;
+  chainId: number;
+  supportedTokensKeypairs: Keypair[];
+  supportedTokensIndex: number[];
+  prices: anchor.BN[];
+  supportedChainsBuffer: Buffer;
+  tokenFeePercentages: anchor.BN[];
+  decimals: anchor.BN[];
+  tokenMinAmounts: anchor.BN[];
+  bridgeConfigPDA: PublicKey;
+  bridgeSbtcAuth: PublicKey;
+  sbtcMint: PublicKey;
+  tokenConfigPdas: PublicKey[];
+  supportedChainsPdas: PublicKey[];
+  committeeKeypairs: Keypair[];
+  stakes: number[];
+  minStake: number;
+  submitter: Keypair;
+  submitterPda: PublicKey;
+  committeePdas: PublicKey[];
+  noncePdaUpdateTokenPrice: PublicKey;
+  nonceMintSbtc: PublicKey;
+  nonceWithdrawBtc: PublicKey;
+  supportedChains: number[];
+  ethBtcAddress: Uint8Array;
+  user: Keypair;
+  userSbtcAta: PublicKey;
+  feeRecipientSbtcAta: PublicKey;
+}
 
 export async function sleep(seconds: number) {
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -109,13 +145,39 @@ export async function airdrop(connection: Connection, key: PublicKey, amount: nu
 }
 
 export async function createValues(defaults?: TestValuesDefaults): Promise<TestValues> {
+  const curChainId = 1;
+
   const payerAdmin = Keypair.fromSecretKey(new Uint8Array(secret));
   console.log(`payerAdmin is ${JSON.stringify(payerAdmin.publicKey)}`);
+
+
+  const user = Keypair.fromSecretKey(new Uint8Array(u1));
+  const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
+    [BRIDGE_SBTC_AUTH, new anchor.BN(curChainId).toArrayLike(Buffer, 'be', 1)],
+    anchor.workspace.bridge.programId
+  )[0];
+  console.log(`bridgeSbtcAuth is ${JSON.stringify(bridgeSbtcAuth)}`);
+
+  const sbtcMint = PublicKey.findProgramAddressSync(
+    [SBTC_MINT, new anchor.BN(curChainId).toArrayLike(Buffer, 'be', 1)],
+    anchor.workspace.bridge.programId
+  )[0]
+  console.log(`sbtcMint is ${JSON.stringify(sbtcMint)}`);
+
+  let userSbtcAta = await getAssociatedTokenAddress(
+    sbtcMint,
+    user.publicKey,
+    true
+  );
 
   const feeRecipient = Keypair.fromSecretKey(new Uint8Array(fee)).publicKey;
   console.log(`feeRecipient is ${JSON.stringify(feeRecipient)}`);
 
-  const user = Keypair.fromSecretKey(new Uint8Array(u1));
+  const feeRecipientSbtcAta = await getAssociatedTokenAddress(
+    sbtcMint,
+    feeRecipient,
+    true
+  );
 
   const supportedTokensKeypairs = [Keypair.fromSecretKey(new Uint8Array(t1)), Keypair.fromSecretKey(new Uint8Array(t2)), Keypair.fromSecretKey(new Uint8Array(t3))];
   supportedTokensKeypairs.forEach((keypair, index) => {
@@ -135,14 +197,13 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   ];
   const supportedChains = [2, 3, 4];
   const supportedChainsBuffer = Buffer.from(new Uint8Array(supportedChains));
-  const tokenFeePercentages = [new anchor.BN(100), new anchor.BN(2000), new anchor.BN(2000000)];
+  const tokenFeePercentages = [new anchor.BN(100), new anchor.BN(2000), new anchor.BN(10000)];
   const tokenMinAmounts = [
     new anchor.BN(1).mul(decimals[0]),
     new anchor.BN(1).mul(decimals[1]),
     new anchor.BN(1).mul(decimals[2]),
 
   ];
-  const curChainId = 1;
   const bridgeConfigPDA = PublicKey.findProgramAddressSync(
     [GLOBAL_CONFIG, new anchor.BN(curChainId).toArrayLike(Buffer, 'be', 1)],
     anchor.workspace.bridge.programId
@@ -150,23 +211,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   console.log(`curChainId is ${new anchor.BN(curChainId).toString()}`);
   console.log(`bridgeConfigPDA is ${JSON.stringify(bridgeConfigPDA)}`);
 
-  const bridgeSbtcAuth = PublicKey.findProgramAddressSync(
-    [BRIDGE_SBTC_AUTH, new anchor.BN(curChainId).toArrayLike(Buffer, 'be', 1)],
-    anchor.workspace.bridge.programId
-  )[0];
-  console.log(`bridgeSbtcAuth is ${JSON.stringify(bridgeSbtcAuth)}`);
 
-  const sbtcMint = PublicKey.findProgramAddressSync(
-    [SBTC_MINT, new anchor.BN(curChainId).toArrayLike(Buffer, 'be', 1)],
-    anchor.workspace.bridge.programId
-  )[0]
-  console.log(`sbtcMint is ${JSON.stringify(sbtcMint)}`);
-
-  let userSbtcAta = await getAssociatedTokenAddress(
-    sbtcMint,
-    user.publicKey,
-    true
-  );
 
   const tokenConfigPdas = supportedTokensIndex.map((tokenId, index) =>
     getTokenConfigPda(supportedChains[index], tokenId)
@@ -178,8 +223,8 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   // https://explorer.solana.com/tx/3gR4kGmU9cQpcQL8wC8HATPVhMghMrKBzqL6aaoHGN2BnoUUbK5dnbxmd1KuLjz4wTtHDWcq93P8evuVK2oUWLUA?cluster=devnet
   const committeeKeypairs = [
     Keypair.fromSecretKey(new Uint8Array(cm1)),
-    Keypair.fromSecretKey(new Uint8Array(cm2)),
-    Keypair.fromSecretKey(new Uint8Array(cm3)),
+    // Keypair.fromSecretKey(new Uint8Array(cm2)),
+    // Keypair.fromSecretKey(new Uint8Array(cm3)),
     // Keypair.fromSecretKey(new Uint8Array(cm4)),
     // Keypair.fromSecretKey(new Uint8Array(cm5)),
     // Keypair.fromSecretKey(new Uint8Array(cm6)),
@@ -195,7 +240,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   });
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
-  const stakes = [3000, 3000, 1000];
+  const stakes = [9000,];
   const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
@@ -210,6 +255,13 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     anchor.workspace.bridge.programId
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
+
+  const nonceWithdrawBtc = PublicKey.findProgramAddressSync(
+    [NONCE_CONFIG, new anchor.BN(MessageIds.TokenTransfer.toString()).toArrayLike(Buffer, 'be', 1)],
+    anchor.workspace.bridge.programId
+  )[0];
+  console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
+
 
   // const ethBtcAddress = new Uint8Array(35); // 固定 32 字节
   // ethBtcAddress.set(Buffer.from("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599".replace("0x", ""), "hex"), 0); // 将前 20 字节
@@ -241,9 +293,11 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     bridgeSbtcAuth: bridgeSbtcAuth,
     sbtcMint,
     nonceMintSbtc,
+    nonceWithdrawBtc,
     ethBtcAddress,
     user,
-    userSbtcAta
+    userSbtcAta,
+    feeRecipientSbtcAta
   };
 }
 
@@ -335,7 +389,7 @@ export async function createBridgeConfig(
     .rpc({ skipPreflight: false });
 }
 
-export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false): Promise<string> {
+export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false, confirm: boolean = true): Promise<string> {
   // Step 1 - Fetch Latest Blockhash
   let latestBlockhash = await connection.getLatestBlockhash('finalized');
   console.log("   ✅ - Fetched latest blockhash. Last valid height:", latestBlockhash.lastValidBlockHeight);
@@ -360,14 +414,15 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
     txid = await connection.sendTransaction(transaction, { skipPreflight: skipPreflight, maxRetries: 3 });
     // Step 4 - Send our v0 transaction to the cluster
     console.log(`   ✅ - Transaction ${txid} sent to network`);
-    // Step 5 - Confirm Transaction 
-    const confirmation = await confirmTransaction(connection, txid);
-    if (confirmation.err) {
-      console.log("   ❌ - Transaction not confirmed.")
-      throw confirmation.err
+    if (confirm) {
+      // Step 5 - Confirm Transaction 
+      const confirmation = await confirmTransaction(connection, txid);
+      if (confirmation.err) {
+        console.log("   ❌ - Transaction not confirmed.")
+        throw confirmation.err
+      }
+      console.log('🎉 Transaction succesfully confirmed!', '\n', `https://explorer.solana.com/tx/${txid}?cluster=devnet`);
     }
-    console.log('🎉 Transaction succesfully confirmed!', '\n', `https://explorer.solana.com/tx/${txid}?cluster=devnet`);
-
   } catch (err) {
     console.error("Transaction failed:", err);
     throw err
@@ -379,8 +434,8 @@ export async function confirmTransaction(
   connection: Connection,
   signature: TransactionSignature,
   desiredConfirmationStatus: TransactionConfirmationStatus = "processed",
-  timeout: number = 300000,
-  pollInterval: number = 1000,
+  timeout: number = 500000,
+  pollInterval: number = 3000,
   searchTransactionHistory: boolean = false
 ): Promise<SignatureStatus> {
   const start = Date.now();
@@ -415,10 +470,8 @@ export async function confirmTransaction(
   throw new Error(`Transaction confirmation timeout after ${timeout}ms`);
 }
 export function compareAddresses(address1: string, address2: string): number {
-  // 将Base58地址转换为Uint8Array
   const bytes1: Uint8Array = bs58.decode(address1);
   const bytes2: Uint8Array = bs58.decode(address2);
-  // 比较两个Uint8Array
   if (bytes1.length !== bytes2.length) {
     return bytes1.length - bytes2.length;
   }
@@ -494,4 +547,96 @@ export function getTxnAddress(tx: Transaction) {
   });
   console.log(`accounts is ${JSON.stringify(accounts)}`)
   return accounts;
+}
+
+export async function mintSBtc(values: TestValues, program: anchor.Program<Bridge>, provider: anchor.AnchorProvider, withTable: boolean = true) {
+  console.log("mintSBtc");
+
+  const mintAmout = new anchor.BN(1000).mul(DECIMALS9);
+  const msg = new MintSbtcMessage({
+    messageType: MessageIds.TokenTransfer, // for Mint_SBTC
+    version: MSG_VERSION,
+    nonce: new anchor.BN(0),
+    toAddress: values.user.publicKey.toBuffer(),
+    amount: mintAmout,
+    sourceChainId: values.supportedChains[0], // 转换为数字
+    sourceTokenId: values.supportedTokensIndex[0], // 转换为数字
+    fromAddress: values.ethBtcAddress,
+    toChainId: values.chainId
+  });
+
+  const signatures = values.committeeKeypairs.map(committeeKeypair => {
+    return {
+      data: msg.createSignature(committeeKeypair),
+      publicKey: committeeKeypair.publicKey
+    };
+  });
+
+  const numberOfSignatures = values.committeeKeypairs.length;
+  const ixEd25519Programs = signatures.map(signature => Ed25519Program.createInstructionWithPublicKey({
+    publicKey: signature.publicKey.toBytes(),
+    signature: signature.data.signature,
+    message: signature.data.encoded,
+  })
+  );
+
+  const tx = await program.methods
+    .mintSbtcWithSignatures(numberOfSignatures, msg as any)
+    .accounts({
+      bridgeConfig: values.bridgeConfigPDA,
+      supportedChainConfig: values.supportedChainsPdas[0],
+      tokenConfig: values.tokenConfigPdas[0],
+      nonce: values.nonceMintSbtc,
+      submitterAccount: values.submitterPda,
+      submitter: values.submitter.publicKey,
+      userSbtcAta: values.userSbtcAta,
+      user: values.user.publicKey,
+      sbtcMint: values.sbtcMint,
+      instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
+    })
+    .remainingAccounts([
+      ...values.committeePdas.map((pubkey) => ({
+        pubkey,
+        isSigner: false,
+        isWritable: true,
+      })),
+    ]).preInstructions(
+      [ComputeBudgetProgram.setComputeUnitLimit({ units: 10000000 }), ...ixEd25519Programs]
+    ).transaction();
+
+  if (withTable) {
+    // const LOOKUP_TABLE_ADDRESS = new PublicKey("8j3Tgegjq5hY2joaC6hGUZQZhTg2cohkxVhCPVxYj3WP")
+    const LOOKUP_TABLE_ADDRESS = await createLookupTable(values.submitter.publicKey, values.submitter, provider.connection);
+    console.log(`LOOKUP_TABLE_ADDRESS is : ${LOOKUP_TABLE_ADDRESS}`);
+    await createAndSendV0Tx([AddressLookupTableProgram.extendLookupTable({
+      payer: values.submitter.publicKey,
+      authority: values.submitter.publicKey,
+      lookupTable: LOOKUP_TABLE_ADDRESS,
+      addresses: getTxnAddress(tx),
+    })], [values.submitter], provider.connection, null, true);
+    const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value;
+    console.log(`table create success 0 !`);
+    console.log(`mintSBtc...start...`);
+    const txid = await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
+    console.log(`mintSBtc....end...`);
+    return { mintAmout, txid };
+
+  }
+  else {
+    console.log(`mintSBtc...start...`);
+    /// local test validator always timeout when use LookupTable
+    const txid = await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
+    console.log(`mintSBtc....end...`);
+    return { mintAmout, txid };
+
+  }
+}
+export async function getBalance(ata: PublicKey, connection: anchor.web3.Connection): Promise<number> {
+  try {
+    const accountInfo = await getAccount(connection, ata);
+    return Number(accountInfo.amount);
+  } catch (err) {
+    console.log("No existing ATA info, assume zero balance:", err);
+    return 0;
+  }
 }

@@ -1,6 +1,7 @@
 # sol-btc-bridge
 
 ## test in local validator
+0. https://solana.com/docs/toolkit/local-validator
 1. yarn node:local
 2. yarn airdrop, solana airdrop 100 -k ./cli/.config/cm1.json
 3. yarn test-in-local-validator 

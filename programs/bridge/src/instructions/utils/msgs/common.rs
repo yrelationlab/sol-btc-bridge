@@ -36,7 +36,7 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
     let mut approval_stake: u16 = 0;
     msg!("number_of_signatures={}", number_of_signatures);
     for i in 1..number_of_signatures + 1 {
-        msg!("update_token_price_with_signatures: i={}", i);
+        msg!("verify: i={}", i);
 
         let (signer_pubkey, data) = resolve_ed25519_with_index(instructions_sysvar, i as usize)?;
 
@@ -51,10 +51,6 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
 
         if Operation::try_from(msg.message_type()) != Ok(op_type) {
             return err!(ErrorCode::MessageOpTypeMismatch);
-        }
-
-        if bridge_config.chain_id != message_of_signer.chain_id() {
-            return err!(ErrorCode::ChainIdMismatch);
         }
 
         if nonce_config.nonce != msg.nonce() {

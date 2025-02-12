@@ -29,6 +29,7 @@ pub fn withdraw_btc_with_signatures<'info>(
         nonce_config
     )?;
 
+    msg!("verify success!");
     let fee = (((msg.amount as u128) * (token_config.token_fee_percentage as u128)) /
         (FEE_DENOMINATOR as u128)) as u64;
     let amount = msg.amount - fee;
@@ -45,6 +46,8 @@ pub fn withdraw_btc_with_signatures<'info>(
         fee as u64
     )?;
 
+    msg!("transfer fee success!");
+
      token::burn(
         CpiContext::new(
             ctx.accounts.token_program.to_account_info(),
@@ -56,6 +59,7 @@ pub fn withdraw_btc_with_signatures<'info>(
         ),
         amount,
     )?;
+    msg!("burn success!");
 
     supported_chain_config.mint_total -= (amount + fee) as u128;
     token_config.mint_total -= (amount + fee) as u128;
@@ -77,7 +81,7 @@ pub fn withdraw_btc_with_signatures<'info>(
 }
 
 #[derive(Accounts)]
-#[instruction(msg: WithdrawBtcMessage)]
+#[instruction(number_of_signatures: u8, msg: WithdrawBtcMessage)]
 pub struct WithdrawBtcWithSignatures<'info> {
     /// The submitter calls it
     #[account(mut)]

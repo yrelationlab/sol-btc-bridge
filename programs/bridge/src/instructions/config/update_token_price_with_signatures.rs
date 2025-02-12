@@ -3,7 +3,15 @@ use anchor_lang::solana_program::sysvar::instructions as instructions_sysvar_mod
 use anchor_lang::{ prelude::*, Discriminator };
 
 use crate::bridge::{
-    decode_update_token_price_payload, find_ata_in_accounts, get_token_pda_bump_seeds, verify, HasPayload, Nonces, Operation, Submitter, UpdateTokenPriceMsg
+    decode_update_token_price_payload,
+    find_ata_in_accounts,
+    get_token_pda_bump_seeds,
+    verify,
+    HasPayload,
+    Nonces,
+    Operation,
+    Submitter,
+    UpdateTokenPriceMsg,
 };
 use crate::constants::{
     ANCHOR_HEADER_LEN,
@@ -13,7 +21,7 @@ use crate::constants::{
 };
 use crate::errors::ErrorCode;
 
-use super::{BridgeConfig, TokenConfig};
+use super::{ BridgeConfig, TokenConfig };
 
 pub fn update_token_price_with_signatures<'info>(
     ctx: Context<'_, '_, 'info, 'info, UpdateTokenPrice<'info>>,
@@ -23,7 +31,6 @@ pub fn update_token_price_with_signatures<'info>(
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
     let nonce_config = &mut ctx.accounts.nonce;
-
 
     verify(
         &ctx.remaining_accounts,
@@ -62,9 +69,8 @@ pub fn update_token_price_with_signatures<'info>(
     Ok(())
 }
 
-
 #[derive(Accounts)]
-#[instruction(_chain_id: u8, msg: UpdateTokenPriceMsg)]
+#[instruction(_chain_id: u8, number_of_signatures:u8, msg: UpdateTokenPriceMsg)]
 pub struct UpdateTokenPrice<'info> {
     #[account(mut)]
     pub submitter: Signer<'info>,

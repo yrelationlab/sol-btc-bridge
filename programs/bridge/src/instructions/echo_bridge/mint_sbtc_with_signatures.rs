@@ -26,9 +26,6 @@ pub fn mint_sbtc_with_signatures<'info>(
     let supported_chain_config = &mut ctx.accounts.supported_chain_config;
     let token_config = &mut ctx.accounts.token_config;
 
-    msg!("to_chain_id from msg: {}", msg.to_chain_id);
-    msg!("to_chain_id bytes: {:?}", msg.to_chain_id.to_be_bytes());
-
     verify(
         &ctx.remaining_accounts,
         &ctx.accounts.instructions_sysvar,
@@ -106,7 +103,8 @@ pub struct MintSbtc<'info> {
             msg.to_chain_id.to_be_bytes().as_ref()
         ],
         bump,
-        constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized
+        constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
+        constraint = msg.source_chain_id != msg.to_chain_id @ ErrorCode::ChainIdShouldDiffFromSolanaChainId
     )]
     pub bridge_config: Box<Account<'info, BridgeConfig>>,
 

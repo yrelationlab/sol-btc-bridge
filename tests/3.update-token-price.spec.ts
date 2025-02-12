@@ -5,7 +5,7 @@ import { Bridge } from "../target/types/bridge";
 import { TestValues, airdrop, assembleUpdateTokenPricePayload, createAndSendV0Tx, createBridgeConfig, createCommitteeConfig, createValues, expectRevert, createLookupTable, getTxnAddress } from "./init";
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
-import { MessageType, MessageIds } from "./types";
+import { MessageIds } from "./types";
 import { Keypair, SYSVAR_INSTRUCTIONS_PUBKEY, AddressLookupTableProgram, PublicKey } from '@solana/web3.js'
 import { UpdateTokenPriceMsg, UpdateTokenPriceMsgTxn } from "./txns/update-token-price";
 import { MSG_VERSION } from "./constants";
@@ -26,7 +26,7 @@ describe("Update Token Price", () => {
   it("1. update Token Price with only submitter", async () => {
     await airdrop(provider.connection, values.submitter.publicKey);
     const changedPrice = new anchor.BN(999);
-    const payload = assembleUpdateTokenPricePayload( values.supportedTokensIndex[0], changedPrice)
+    const payload = assembleUpdateTokenPricePayload(values.supportedTokensIndex[0], changedPrice)
     // Create the msg object
     const msg = new UpdateTokenPriceMsg({
       messageType: MessageIds.UpdateTokenPrice,
