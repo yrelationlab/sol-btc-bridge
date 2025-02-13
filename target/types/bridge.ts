@@ -403,34 +403,6 @@ export type Bridge = {
           "isSigner": false
         },
         {
-          "name": "sbtcMint",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "userSbtcAta",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "the user's sBTC Token Account"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeRecipientSbtcAta",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeRecipient",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "nonce",
           "isMut": true,
           "isSigner": false
@@ -1302,6 +1274,36 @@ export type Bridge = {
       "code": 6047,
       "name": "ChainIdShouldDiffFromSolanaChainId",
       "msg": "ChainId Should Diff From Solana Chain Id"
+    },
+    {
+      "code": 6048,
+      "name": "AccountNotFound",
+      "msg": "AccountNotFound"
+    },
+    {
+      "code": 6049,
+      "name": "FeeRecipientNotFound",
+      "msg": "Fee Recipient Not Found"
+    },
+    {
+      "code": 6050,
+      "name": "FeeRecipientSbtcAtaNotFound",
+      "msg": "Fee Recipient Sbtc Ata Not Found"
+    },
+    {
+      "code": 6051,
+      "name": "UserAccountNotFound",
+      "msg": "User Account Not Found"
+    },
+    {
+      "code": 6052,
+      "name": "UserSbtcAtaNotFound",
+      "msg": "User Sbtc Ata Not Found"
+    },
+    {
+      "code": 6053,
+      "name": "SbtcMintAccountNotFound",
+      "msg": "Sbtc Mint Account Not Found"
     }
   ]
 };
@@ -1711,34 +1713,6 @@ export const IDL: Bridge = {
           "isSigner": false
         },
         {
-          "name": "sbtcMint",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "userSbtcAta",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "the user's sBTC Token Account"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeRecipientSbtcAta",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "feeRecipient",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "nonce",
           "isMut": true,
           "isSigner": false
@@ -2610,6 +2584,36 @@ export const IDL: Bridge = {
       "code": 6047,
       "name": "ChainIdShouldDiffFromSolanaChainId",
       "msg": "ChainId Should Diff From Solana Chain Id"
+    },
+    {
+      "code": 6048,
+      "name": "AccountNotFound",
+      "msg": "AccountNotFound"
+    },
+    {
+      "code": 6049,
+      "name": "FeeRecipientNotFound",
+      "msg": "Fee Recipient Not Found"
+    },
+    {
+      "code": 6050,
+      "name": "FeeRecipientSbtcAtaNotFound",
+      "msg": "Fee Recipient Sbtc Ata Not Found"
+    },
+    {
+      "code": 6051,
+      "name": "UserAccountNotFound",
+      "msg": "User Account Not Found"
+    },
+    {
+      "code": 6052,
+      "name": "UserSbtcAtaNotFound",
+      "msg": "User Sbtc Ata Not Found"
+    },
+    {
+      "code": 6053,
+      "name": "SbtcMintAccountNotFound",
+      "msg": "Sbtc Mint Account Not Found"
     }
   ]
 };

@@ -99,10 +99,10 @@ describe("Withdraw Btc", () => {
         // 生成委员会签名
         const signatures = values.committeeKeypairs.map(committeeKeypair => {
             return {
-              data: msg.createSignature(committeeKeypair),
-              publicKey: committeeKeypair.publicKey
+                data: msg.createSignature(committeeKeypair),
+                publicKey: committeeKeypair.publicKey
             };
-          });
+        });
 
         const numberOfSignatures = values.committeeKeypairs.length;
 
@@ -110,8 +110,8 @@ describe("Withdraw Btc", () => {
             publicKey: signature.publicKey.toBytes(),
             signature: signature.data.signature,
             message: signature.data.encoded,
-          })
-          );
+        })
+        );
 
         const tx = await program.methods
             .withdrawBtcWithSignatures(numberOfSignatures, msg as any)
@@ -121,11 +121,11 @@ describe("Withdraw Btc", () => {
                 bridgeConfig: values.bridgeConfigPDA,
                 supportedChainConfig: values.supportedChainsPdas[0],
                 tokenConfig: values.tokenConfigPdas[0],
-                sbtcMint: values.sbtcMint,
-                userSbtcAta: values.userSbtcAta,
-                user: values.user.publicKey,
-                feeRecipientSbtcAta: values.feeRecipientSbtcAta,
-                feeRecipient: values.feeRecipient,
+                // sbtcMint: values.sbtcMint,
+                // userSbtcAta: values.userSbtcAta,
+                // user: values.user.publicKey,
+                // feeRecipientSbtcAta: values.feeRecipientSbtcAta,
+                // feeRecipient: values.feeRecipient,
                 nonce: values.nonceWithdrawBtc,
                 instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
             })
@@ -134,7 +134,27 @@ describe("Withdraw Btc", () => {
                     pubkey,
                     isSigner: false,
                     isWritable: true,
-                }))
+                })).concat([{
+                    pubkey: values.sbtcMint,
+                    isSigner: false,
+                    isWritable: true,
+                }, {
+                    pubkey: values.userSbtcAta,
+                    isSigner: false,
+                    isWritable: true,
+                }, {
+                    pubkey: values.user.publicKey,
+                    isSigner: false,
+                    isWritable: true,
+                }, {
+                    pubkey: values.feeRecipientSbtcAta,
+                    isSigner: false,
+                    isWritable: true,
+                }, {
+                    pubkey: values.feeRecipient,
+                    isSigner: false,
+                    isWritable: true,
+                }]),
             )
             .preInstructions([
                 ComputeBudgetProgram.setComputeUnitLimit({ units: 1000000 }),
@@ -157,7 +177,7 @@ describe("Withdraw Btc", () => {
         // const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value;
         console.log(`withdrawBtcWithSignatures...start...`);
         // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
-        await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, );
+        await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection,);
 
         console.log(`withdrawBtcWithSignatures...end...`);
 

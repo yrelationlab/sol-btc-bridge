@@ -1,11 +1,12 @@
 use crate::{
-    constants::{ COMMITTEE_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG },
+    constants::{ COMMITTEE_CONFIG, SBTC_MINT, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG },
     errors::ErrorCode,
 };
 use anchor_lang::prelude::*;
 use anchor_lang::system_program;
 use anchor_spl::associated_token::{
     create as create_associated_token,
+    get_associated_token_address,
     Create as CreateAssociatedToken,
 };
 
@@ -59,6 +60,101 @@ pub fn create_account<'a>(
         )?;
     }
     Ok(())
+}
+
+pub fn get_user_account_and_sbtc_ata<'info>(
+    remaining_accounts: &'info [AccountInfo<'info>], // 显式指定生命周期
+    user: &Pubkey,
+    sbtc_mint: &Pubkey
+) -> Result<(&'info AccountInfo<'info>, &'info AccountInfo<'info>)> {
+    // 返回值也需要明确生命周期
+    let ata = get_associated_token_address(user, sbtc_mint);
+
+    let mut user_account: Option<&'info AccountInfo<'info>> = None;
+    let mut user_ata_account: Option<&'info AccountInfo<'info>> = None;
+
+    // 单次迭代，提升性能
+    for account in remaining_accounts {
+        if *account.key == *user {
+            user_account = Some(account);
+        } else if *account.key == ata {
+            user_ata_account = Some(account);
+        }
+        if user_account.is_some() && user_ata_account.is_some() {
+            break; // 提前结束循环，提高效率
+        }
+    }
+
+    // 明确不同账户缺失的错误信息
+    let user_account = user_account.ok_or_else(||
+        anchor_lang::error::Error::from(ErrorCode::UserAccountNotFound)
+    )?;
+    let user_ata_account = user_ata_account.ok_or_else(||
+        anchor_lang::error::Error::from(ErrorCode::UserSbtcAtaNotFound)
+    )?;
+
+    Ok((user_account, user_ata_account))
+}
+
+pub fn fee_recipient_sbtc_ata<'info>(
+    remaining_accounts: &'info [AccountInfo<'info>],
+    fee_recipient: &Pubkey,
+    sbtc_mint: &Pubkey
+) -> Result<(&'info AccountInfo<'info>, &'info AccountInfo<'info>)> {
+    let ata = get_associated_token_address(fee_recipient, sbtc_mint);
+
+    let mut fee_recipient_account: Option<&AccountInfo<'info>> = None;
+    let mut fee_recipient_sbtc_ata_account: Option<&AccountInfo<'info>> = None;
+
+    // 一次迭代找出所有目标账户，提升效率
+    for account in remaining_accounts {
+        if *account.key == *fee_recipient {
+            fee_recipient_account = Some(account);
+        } else if *account.key == ata {
+            fee_recipient_sbtc_ata_account = Some(account);
+        }
+        if fee_recipient_account.is_some() && fee_recipient_sbtc_ata_account.is_some() {
+            break;
+        }
+    }
+
+    // 使用自定义错误，区分不同账户未找到的情况
+    let fee_recipient_account = fee_recipient_account.ok_or_else(||
+        anchor_lang::error::Error::from(ErrorCode::FeeRecipientNotFound)
+    )?;
+
+    let fee_recipient_sbtc_ata_account = fee_recipient_sbtc_ata_account.ok_or_else(||
+        anchor_lang::error::Error::from(ErrorCode::FeeRecipientSbtcAtaNotFound)
+    )?;
+
+    Ok((fee_recipient_account, fee_recipient_sbtc_ata_account))
+}
+
+pub fn get_sbtc_mint_account<'info>(
+    program_id: &Pubkey,
+    remaining_accounts: &'info [AccountInfo<'info>],
+    chain_id: &u8
+) -> Result<&'info AccountInfo<'info>> {
+    let binding = chain_id.to_be_bytes();
+    let seeds = &[SBTC_MINT.as_ref(), binding.as_ref()];
+    let (pda, _) = Pubkey::find_program_address(seeds, program_id);
+    let account = remaining_accounts.iter().find(|ac: &&AccountInfo<'info>| ac.key.eq(&pda));
+    account.ok_or_else(|| ErrorCode::AccountNotFound.into())
+}
+
+pub fn get_sbtc_mint_bump_seeds(
+    program_id: &Pubkey,
+    chain_id: &[u8]
+) -> (Pubkey, u8, Vec<Vec<u8>>, Vec<Vec<u8>>) {
+    let seeds = &[SBTC_MINT.as_ref(), chain_id, chain_id];
+    let (pda, bump) = Pubkey::find_program_address(seeds, program_id);
+    let mut signer_seeds_vec: Vec<Vec<u8>> = seeds
+        .iter()
+        .map(|s| s.to_vec())
+        .collect();
+    let seeds_vec = signer_seeds_vec.clone();
+    signer_seeds_vec.push(vec![bump]);
+    (pda, bump, seeds_vec, signer_seeds_vec)
 }
 
 pub fn get_token_pda_bump_seeds(

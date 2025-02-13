@@ -99,4 +99,16 @@ pub enum ErrorCode {
     LackTargetMint,
     #[msg("ChainId Should Diff From Solana Chain Id")]
     ChainIdShouldDiffFromSolanaChainId,
+    #[msg("AccountNotFound")]
+    AccountNotFound,
+    #[msg("Fee Recipient Not Found")]
+    FeeRecipientNotFound,
+    #[msg("Fee Recipient Sbtc Ata Not Found")]
+    FeeRecipientSbtcAtaNotFound,
+    #[msg("User Account Not Found")]
+    UserAccountNotFound,
+    #[msg("User Sbtc Ata Not Found")]
+    UserSbtcAtaNotFound,
+    #[msg("Sbtc Mint Account Not Found")]
+    SbtcMintAccountNotFound
 }
