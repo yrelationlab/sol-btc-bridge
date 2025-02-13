@@ -1,7 +1,7 @@
 /// Creates a new bridge configuration.
 use crate::{
+    bridge::create_account_ifn_exist,
     constants::{ ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, SBTC_MINT },
-    create_account,
     errors::ErrorCode,
     find_ata_in_accounts,
     get_support_chains_pda_bump_seeds,
@@ -15,27 +15,22 @@ use anchor_lang::{ prelude::*, Discriminator };
 
 use anchor_spl::token::{ Mint, Token };
 
-
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
     fee_recipient: Pubkey,
     token_ids: Vec<u8>,
-    token_prices: Vec<u64>,
     supported_chains: Vec<u8>,
     token_fee_percentages: Vec<u64>,
     token_min_amount: Vec<u64>
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
 
-    require!(token_ids.len() == token_prices.len(), ErrorCode::InvalidTokenIds);
+    require!(token_ids.len() == supported_chains.len(), ErrorCode::InvalidTokenIds);
 
-    require!(
-        token_prices.len() == token_fee_percentages.len(),
-        ErrorCode::InvalidTokenFeePercentage
-    );
+    require!(token_ids.len() == token_fee_percentages.len(), ErrorCode::InvalidTokenFeePercentage);
 
-    require!(token_prices.len() == token_min_amount.len(), ErrorCode::InvalidTokenMinimumAmount);
+    require!(token_ids.len() == token_min_amount.len(), ErrorCode::InvalidTokenMinimumAmount);
 
     require!(fee_recipient != Pubkey::default(), ErrorCode::InvalidFeeRecipientAddress);
     bridge_config.chain_id = chain_id;
@@ -45,13 +40,13 @@ pub fn create_bridge_config<'info>(
     bridge_config.is_initialized = true;
 
     for (i, supported_chain_id) in supported_chains.iter().enumerate() {
-        if *supported_chain_id == chain_id{
+        if *supported_chain_id == chain_id {
             return err!(ErrorCode::ChainIdShouldDiffFromSolanaChainId);
         }
         let (pda_of_token_config_addr, _, _, signer_seeds) = get_token_pda_bump_seeds(
             ctx.program_id,
             supported_chain_id.to_be_bytes().as_ref(),
-            token_ids[i].to_be_bytes().as_ref(),
+            token_ids[i].to_be_bytes().as_ref()
         );
         msg!("i:{}, pda_of_token_config_addr: {:?}", i, pda_of_token_config_addr);
 
@@ -60,7 +55,7 @@ pub fn create_bridge_config<'info>(
             &pda_of_token_config_addr
         ).ok_or(ErrorCode::TokenConfigAddressMissing)?;
 
-        create_account(
+        create_account_ifn_exist(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
@@ -81,7 +76,6 @@ pub fn create_bridge_config<'info>(
             chain_id: *supported_chain_id,
             decimal: DECIMALS9,
             native: false,
-            token_price: token_prices[i],
             token_fee_percentage: token_fee_percentages[i],
             token_min_amount: token_min_amount[i],
             padding: [0u64; TokenConfig::LEN_OF_PADDING],
@@ -102,7 +96,7 @@ pub fn create_bridge_config<'info>(
             ctx.remaining_accounts.to_vec(),
             &pda_of_supported_chains_config_addr
         ).ok_or(ErrorCode::SupportedChainAddressMissing)?;
-        create_account(
+        create_account_ifn_exist(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
             ctx.accounts.system_program.to_account_info(),

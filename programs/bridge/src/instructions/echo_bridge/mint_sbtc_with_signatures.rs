@@ -83,7 +83,6 @@ pub struct MintSbtc<'info> {
     pub submitter: Signer<'info>,
 
     #[account(
-        constraint = submitter_account.is_initialized @ ErrorCode::SubmitterNotInitialized,
         constraint = submitter_account.is_submitter @ ErrorCode::NotSubmitter,
         seeds = [
             COMMITTEE_SUBMITTER_CONFIG.as_ref(),
@@ -101,7 +100,6 @@ pub struct MintSbtc<'info> {
             msg.to_chain_id.to_be_bytes().as_ref()
         ],
         bump,
-        constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
         constraint = msg.source_chain_id != msg.to_chain_id @ ErrorCode::ChainIdShouldDiffFromSolanaChainId
     )]
     pub bridge_config: Box<Account<'info, BridgeConfig>>,

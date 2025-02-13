@@ -35,12 +35,12 @@ pub struct TokenTransferPayload {
     pub amount: u64,
 }
 
-pub fn create_account<'a>(
+pub fn create_account_ifn_exist<'a>(
     program_id: &Pubkey,
     payer: AccountInfo<'a>,
     system_program: AccountInfo<'a>,
     target_account: AccountInfo<'a>,
-    siger_seed: &[&[u8]],
+    signer_seed: &[&[u8]],
     space: usize
 ) -> Result<()> {
     let rent = Rent::get()?;
@@ -53,7 +53,7 @@ pub fn create_account<'a>(
         };
         let cpi_context = CpiContext::new(system_program.clone(), cpi_accounts);
         system_program::create_account(
-            cpi_context.with_signer(&[siger_seed]),
+            cpi_context.with_signer(&[signer_seed]),
             lamports,
             u64::try_from(space).unwrap(),
             program_id

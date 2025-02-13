@@ -33,7 +33,6 @@ pub struct TokenConfig {
     pub chain_id: u8,
     pub decimal: u8,
     pub native: bool,
-    pub token_price: u64,
     pub token_fee_percentage: u64,
     pub token_min_amount: u64,
     pub mint_total: u128,
@@ -48,7 +47,6 @@ impl TokenConfig {
     + 1 // token_id
     + 1 // decimal
     + 1 // native
-    + 8 // token_price
     + 8 // token_fee_percentage
     + 8 // token_min_amount
     + 16 // mint_total

@@ -1,6 +1,7 @@
 use crate::{
-    constants::{ ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG },
-    create_account,
+    bridge::BridgeConfig,
+    constants::{ ANCHOR_HEADER_LEN, COMMITTEE_SUBMITTER_CONFIG, GLOBAL_CONFIG },
+    create_account_ifn_exist,
     errors::ErrorCode,
     get_commitee_account,
     Committee,
@@ -11,6 +12,7 @@ use anchor_lang::{ prelude::*, Discriminator };
 
 pub fn create_bridge_committee<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
+    _chian_id: u8,
     committee: Vec<Pubkey>,
     stake: Vec<u16>,
     min_stake_required: u16
@@ -29,7 +31,7 @@ pub fn create_bridge_committee<'info>(
             committee_address,
             &ctx.program_id
         )?;
-        create_account(
+        create_account_ifn_exist(
             &ctx.program_id,
             ctx.accounts.payer.to_account_info(),
             ctx.accounts.system_program.to_account_info(),
@@ -60,7 +62,6 @@ pub fn create_bridge_committee<'info>(
 
     // submitter
     {
-        ctx.accounts.submitter_pda.is_initialized = true;
         ctx.accounts.submitter_pda.admin = ctx.accounts.submitter.key();
         ctx.accounts.submitter_pda.is_submitter = true;
     }
@@ -69,12 +70,17 @@ pub fn create_bridge_committee<'info>(
 }
 
 #[derive(Accounts)]
+#[instruction(_chain_id: u8)]
 pub struct CreateBridgeCommittee<'info> {
-    #[account(
-        mut,
-        address = crate::admin::id() @ ErrorCode::InvalidAdminAddress
-    )]
+    #[account(mut, )]
     pub payer: Signer<'info>,
+
+    #[account(
+        constraint = bridge_config.admin == payer.key() @ ErrorCode::InvalidAdminAddress,
+        seeds = [GLOBAL_CONFIG.as_bytes(), &_chain_id.to_be_bytes()],
+        bump
+    )]
+    pub bridge_config: Account<'info, BridgeConfig>,
 
     #[account(
         init,

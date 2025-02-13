@@ -127,12 +127,6 @@ export type Bridge = {
           "type": "bytes"
         },
         {
-          "name": "tokenPrices",
-          "type": {
-            "vec": "u64"
-          }
-        },
-        {
           "name": "supportedChains",
           "type": "bytes"
         },
@@ -159,6 +153,11 @@ export type Bridge = {
           "isSigner": true
         },
         {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "submitterPda",
           "isMut": true,
           "isSigner": false
@@ -176,6 +175,10 @@ export type Bridge = {
       ],
       "args": [
         {
+          "name": "chianId",
+          "type": "u8"
+        },
+        {
           "name": "committee",
           "type": {
             "vec": "publicKey"
@@ -190,87 +193,6 @@ export type Bridge = {
         {
           "name": "minStakeRequired",
           "type": "u16"
-        }
-      ]
-    },
-    {
-      "name": "updateSupportedChain",
-      "accounts": [
-        {
-          "name": "chainConfig",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "admin",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
-          "name": "supported",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "updateTokenPriceWithSignatures",
-      "accounts": [
-        {
-          "name": "submitter",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bridgeConfig",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "nonce",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
-        {
-          "name": "msg",
-          "type": {
-            "defined": "UpdateTokenPriceMsg"
-          }
         }
       ]
     },
@@ -568,10 +490,6 @@ export type Bridge = {
             "type": "bool"
           },
           {
-            "name": "tokenPrice",
-            "type": "u64"
-          },
-          {
             "name": "tokenFeePercentage",
             "type": "u64"
           },
@@ -656,6 +574,39 @@ export type Bridge = {
               "array": [
                 "u64",
                 16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "chainTokenLimiter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "totalLimit",
+            "type": "u64"
+          },
+          {
+            "name": "oldestHour",
+            "type": "u32"
+          },
+          {
+            "name": "hourlyTransfers",
+            "type": {
+              "array": [
+                "u64",
+                24
               ]
             }
           }
@@ -1287,6 +1238,16 @@ export type Bridge = {
       "code": 6053,
       "name": "SbtcMintAccountNotFound",
       "msg": "Sbtc Mint Account Not Found"
+    },
+    {
+      "code": 6054,
+      "name": "TimeError",
+      "msg": "Time Error"
+    },
+    {
+      "code": 6055,
+      "name": "TransferLimitExceeded",
+      "msg": "Transfer Limit Exceeded"
     }
   ]
 };
@@ -1420,12 +1381,6 @@ export const IDL: Bridge = {
           "type": "bytes"
         },
         {
-          "name": "tokenPrices",
-          "type": {
-            "vec": "u64"
-          }
-        },
-        {
           "name": "supportedChains",
           "type": "bytes"
         },
@@ -1452,6 +1407,11 @@ export const IDL: Bridge = {
           "isSigner": true
         },
         {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "submitterPda",
           "isMut": true,
           "isSigner": false
@@ -1469,6 +1429,10 @@ export const IDL: Bridge = {
       ],
       "args": [
         {
+          "name": "chianId",
+          "type": "u8"
+        },
+        {
           "name": "committee",
           "type": {
             "vec": "publicKey"
@@ -1483,87 +1447,6 @@ export const IDL: Bridge = {
         {
           "name": "minStakeRequired",
           "type": "u16"
-        }
-      ]
-    },
-    {
-      "name": "updateSupportedChain",
-      "accounts": [
-        {
-          "name": "chainConfig",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "admin",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
-          "name": "supported",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "updateTokenPriceWithSignatures",
-      "accounts": [
-        {
-          "name": "submitter",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bridgeConfig",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "nonce",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
-        {
-          "name": "msg",
-          "type": {
-            "defined": "UpdateTokenPriceMsg"
-          }
         }
       ]
     },
@@ -1861,10 +1744,6 @@ export const IDL: Bridge = {
             "type": "bool"
           },
           {
-            "name": "tokenPrice",
-            "type": "u64"
-          },
-          {
             "name": "tokenFeePercentage",
             "type": "u64"
           },
@@ -1949,6 +1828,39 @@ export const IDL: Bridge = {
               "array": [
                 "u64",
                 16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "chainTokenLimiter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "totalLimit",
+            "type": "u64"
+          },
+          {
+            "name": "oldestHour",
+            "type": "u32"
+          },
+          {
+            "name": "hourlyTransfers",
+            "type": {
+              "array": [
+                "u64",
+                24
               ]
             }
           }
@@ -2580,6 +2492,16 @@ export const IDL: Bridge = {
       "code": 6053,
       "name": "SbtcMintAccountNotFound",
       "msg": "Sbtc Mint Account Not Found"
+    },
+    {
+      "code": 6054,
+      "name": "TimeError",
+      "msg": "Time Error"
+    },
+    {
+      "code": 6055,
+      "name": "TransferLimitExceeded",
+      "msg": "Transfer Limit Exceeded"
     }
   ]
 };

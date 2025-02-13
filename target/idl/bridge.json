@@ -127,12 +127,6 @@
           "type": "bytes"
         },
         {
-          "name": "tokenPrices",
-          "type": {
-            "vec": "u64"
-          }
-        },
-        {
           "name": "supportedChains",
           "type": "bytes"
         },
@@ -159,6 +153,11 @@
           "isSigner": true
         },
         {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "submitterPda",
           "isMut": true,
           "isSigner": false
@@ -176,6 +175,10 @@
       ],
       "args": [
         {
+          "name": "chianId",
+          "type": "u8"
+        },
+        {
           "name": "committee",
           "type": {
             "vec": "publicKey"
@@ -190,87 +193,6 @@
         {
           "name": "minStakeRequired",
           "type": "u16"
-        }
-      ]
-    },
-    {
-      "name": "updateSupportedChain",
-      "accounts": [
-        {
-          "name": "chainConfig",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "admin",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
-          "name": "supported",
-          "type": "bool"
-        }
-      ]
-    },
-    {
-      "name": "updateTokenPriceWithSignatures",
-      "accounts": [
-        {
-          "name": "submitter",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bridgeConfig",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "nonce",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "chainId",
-          "type": "u8"
-        },
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
-        {
-          "name": "msg",
-          "type": {
-            "defined": "UpdateTokenPriceMsg"
-          }
         }
       ]
     },
@@ -568,10 +490,6 @@
             "type": "bool"
           },
           {
-            "name": "tokenPrice",
-            "type": "u64"
-          },
-          {
             "name": "tokenFeePercentage",
             "type": "u64"
           },
@@ -656,6 +574,39 @@
               "array": [
                 "u64",
                 16
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ChainTokenLimiter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "chainId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "totalLimit",
+            "type": "u64"
+          },
+          {
+            "name": "oldestHour",
+            "type": "u32"
+          },
+          {
+            "name": "hourlyTransfers",
+            "type": {
+              "array": [
+                "u64",
+                24
               ]
             }
           }
@@ -1287,9 +1238,16 @@
       "code": 6053,
       "name": "SbtcMintAccountNotFound",
       "msg": "Sbtc Mint Account Not Found"
+    },
+    {
+      "code": 6054,
+      "name": "TimeError",
+      "msg": "Time Error"
+    },
+    {
+      "code": 6055,
+      "name": "TransferLimitExceeded",
+      "msg": "Transfer Limit Exceeded"
     }
-  ],
-  "metadata": {
-    "address": "Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs"
-  }
+  ]
 }

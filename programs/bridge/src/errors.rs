@@ -110,5 +110,9 @@ pub enum ErrorCode {
     #[msg("User Sbtc Ata Not Found")]
     UserSbtcAtaNotFound,
     #[msg("Sbtc Mint Account Not Found")]
-    SbtcMintAccountNotFound
+    SbtcMintAccountNotFound,
+    #[msg("Time Error")]
+    TimeError,
+    #[msg("Transfer Limit Exceeded")]
+    TransferLimitExceeded
 }
