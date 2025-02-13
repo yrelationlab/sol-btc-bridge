@@ -369,20 +369,12 @@
       ]
     },
     {
-      "name": "withdrawBtcWithSignatures",
+      "name": "withdrawBtc",
       "accounts": [
         {
-          "name": "submitter",
+          "name": "user",
           "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "The submitter calls it"
-          ]
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "bridgeConfig",
@@ -408,11 +400,6 @@
           "isSigner": false
         },
         {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
@@ -429,10 +416,6 @@
         }
       ],
       "args": [
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
         {
           "name": "msg",
           "type": {

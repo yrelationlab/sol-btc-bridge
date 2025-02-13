@@ -1,15 +1,11 @@
 use anchor_lang::{
     prelude::*,
-    solana_program::{ pubkey::Pubkey, sysvar::instructions as instructions_sysvar_module },
+    solana_program::pubkey::Pubkey,
 };
 use anchor_spl::associated_token::{ get_associated_token_address, AssociatedToken };
 use crate::{
     bridge::{
         create_associated_token_account_ifn_init,
-        fee_recipient_sbtc_ata,
-        get_sbtc_mint_account,
-        get_user_account_and_sbtc_ata,
-        verify,
         Nonces,
         Operation,
         SupportedChainConfig,
@@ -18,7 +14,6 @@ use crate::{
         WithdrawBtctcEvent,
     },
     constants::{
-        COMMITTEE_SUBMITTER_CONFIG,
         FEE_DENOMINATOR,
         GLOBAL_CONFIG,
         MAX_STRING_LENGTH,
@@ -28,14 +23,12 @@ use crate::{
         TOKEN_CONFIG,
     },
     errors::ErrorCode,
-    Submitter,
 };
-use anchor_spl::token::{ self, Burn, Mint, TokenAccount, Transfer };
+use anchor_spl::token::{ self, Burn, Transfer };
 use crate::BridgeConfig;
 
-pub fn withdraw_btc_with_signatures<'info>(
-    ctx: Context<'_, '_, 'info, 'info, WithdrawBtcWithSignatures<'info>>,
-    number_of_signatures: u8,
+pub fn withdraw_btc<'info>(
+    ctx: Context<'_, '_, 'info, 'info, WithdrawBtc<'info>>,
     msg: WithdrawBtcMessage
 ) -> Result<()> {
     let bridge_config = &mut ctx.accounts.bridge_config;
@@ -45,17 +38,12 @@ pub fn withdraw_btc_with_signatures<'info>(
 
     require!(msg.to_address.len() <= MAX_STRING_LENGTH, ErrorCode::InvalidAddress);
 
-    verify(
-        &ctx.remaining_accounts,
-        &ctx.accounts.instructions_sysvar,
-        ctx.program_id,
-        number_of_signatures,
-        &msg,
-        Operation::TokenTransfer,
-        nonce_config
-    )?;
-
-    msg!("verify success!");
+    if nonce_config.nonce != msg.nonce {
+        msg!("nonce_config nonce: {:?}", nonce_config.nonce);
+        msg!("msg nonce: {:?}", msg.nonce);
+        return err!(ErrorCode::InvalidNonce);
+    }
+    nonce_config.nonce += 1;
 
     //get ata
     // &'info AccountInfo<'info>, // user_account
@@ -63,13 +51,7 @@ pub fn withdraw_btc_with_signatures<'info>(
     // &'info AccountInfo<'info>, // fee_recipient_account
     // &'info AccountInfo<'info>, // fee_recipient_sbtc_ata
     // &'info AccountInfo<'info>, // sbtc_mint_account
-    let (
-        user_account,
-        user_sbtc_ata,
-        fee_recipient_account,
-        fee_recipient_sbtc_ata,
-        sbtc_mint,
-    ) = get_accounts(
+    let (user_sbtc_ata, fee_recipient_account, fee_recipient_sbtc_ata, sbtc_mint) = get_accounts(
         ctx.program_id,
         ctx.remaining_accounts,
         &Pubkey::new_from_array(msg.from_address),
@@ -77,8 +59,10 @@ pub fn withdraw_btc_with_signatures<'info>(
         &msg.chain_id
     )?;
 
+    let user_account = ctx.accounts.user.to_account_info();
+
     create_associated_token_account_ifn_init(
-        ctx.accounts.submitter.to_account_info(),
+        ctx.accounts.user.to_account_info(),
         fee_recipient_account.to_account_info(),
         sbtc_mint.to_account_info(),
         fee_recipient_sbtc_ata.to_account_info(),
@@ -89,6 +73,7 @@ pub fn withdraw_btc_with_signatures<'info>(
     let fee = (((msg.amount as u128) * (token_config.token_fee_percentage as u128)) /
         (FEE_DENOMINATOR as u128)) as u64;
     let amount = msg.amount - fee;
+    msg!("transfer fee start!");
 
     token::transfer(
         CpiContext::new(ctx.accounts.token_program.to_account_info(), Transfer {
@@ -131,22 +116,13 @@ pub fn withdraw_btc_with_signatures<'info>(
 }
 
 #[derive(Accounts)]
-#[instruction(number_of_signatures: u8, msg: WithdrawBtcMessage)]
-pub struct WithdrawBtcWithSignatures<'info> {
-    /// The submitter calls it
-    #[account(mut)]
-    pub submitter: Signer<'info>,
-
+#[instruction(msg: WithdrawBtcMessage)]
+pub struct WithdrawBtc<'info> {
     #[account(
-        constraint = submitter_account.is_initialized @ ErrorCode::SubmitterNotInitialized,
-        constraint = submitter_account.is_submitter @ ErrorCode::NotSubmitter,
-        seeds = [
-            COMMITTEE_SUBMITTER_CONFIG.as_ref(),
-            submitter.key().as_ref(),
-        ],
-        bump
+        mut,
+        constraint = Pubkey::new_from_array(msg.from_address) == user.key() @ ErrorCode::InvalidUserAddress,
     )]
-    pub submitter_account: Box<Account<'info, Submitter>>,
+    pub user: Signer<'info>,
 
     /// 1. load BridgeConfig
     #[account(
@@ -198,13 +174,6 @@ pub struct WithdrawBtcWithSignatures<'info> {
     // #[account(associated_token::mint = sbtc_mint, associated_token::authority = user)]
     // pub user_sbtc_ata: Box<Account<'info, TokenAccount>>,
 
-    // /// CHECK: only need .key()
-    // #[account(
-    //     mut,
-    //     constraint = Pubkey::new_from_array(msg.from_address) == user.key() @ ErrorCode::InvalidUserAddress,
-    // )]
-    // pub user: UncheckedAccount<'info>,
-
     // #[account(
     //     init_if_needed,
     //     payer = submitter,
@@ -222,16 +191,13 @@ pub struct WithdrawBtcWithSignatures<'info> {
 
     #[account(
         init_if_needed,
-        payer = submitter,
+        payer = user,
         space = Nonces::LEN,
         seeds = [NONCE_CONFIG.as_ref(), Operation::TokenTransfer.to_bytes().as_slice()],
         bump
     )]
     pub nonce: Box<Account<'info, Nonces>>,
 
-    /// CHECK: This is not dangerous because we explicitly check the id
-    #[account(address = instructions_sysvar_module::ID)]
-    pub instructions_sysvar: AccountInfo<'info>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, anchor_spl::token::Token>,
     pub system_program: Program<'info, System>,
@@ -245,7 +211,6 @@ pub fn get_accounts<'info>(
     chain_id: &u8
 ) -> Result<
     (
-        &'info AccountInfo<'info>, // user_account
         &'info AccountInfo<'info>, // user_sbtc_ata
         &'info AccountInfo<'info>, // fee_recipient_account
         &'info AccountInfo<'info>, // fee_recipient_sbtc_ata
@@ -259,7 +224,6 @@ pub fn get_accounts<'info>(
     let user_ata = get_associated_token_address(user, &sbtc_mint);
     let fee_recipient_ata = get_associated_token_address(fee_recipient, &sbtc_mint);
 
-    let mut user_account: Option<&'info AccountInfo<'info>> = None;
     let mut user_sbtc_ata_account: Option<&'info AccountInfo<'info>> = None;
     let mut fee_recipient_account: Option<&'info AccountInfo<'info>> = None;
     let mut fee_recipient_sbtc_ata_account: Option<&'info AccountInfo<'info>> = None;
@@ -267,9 +231,7 @@ pub fn get_accounts<'info>(
 
     // 查找所有目标账户
     for account in remaining_accounts {
-        if *account.key == *user {
-            user_account = Some(account);
-        } else if *account.key == user_ata {
+        if *account.key == user_ata {
             user_sbtc_ata_account = Some(account);
         } else if *account.key == *fee_recipient {
             fee_recipient_account = Some(account);
@@ -279,9 +241,7 @@ pub fn get_accounts<'info>(
             sbtc_mint_account = Some(account);
         }
 
-        // 如果所有账户都找到了，提前退出
         if
-            user_account.is_some() &&
             user_sbtc_ata_account.is_some() &&
             fee_recipient_account.is_some() &&
             fee_recipient_sbtc_ata_account.is_some() &&
@@ -291,10 +251,6 @@ pub fn get_accounts<'info>(
         }
     }
 
-    // 检查是否都找到了目标账户
-    let user_account = user_account.ok_or_else(|| {
-        anchor_lang::error::Error::from(ErrorCode::UserAccountNotFound)
-    })?;
     let user_sbtc_ata_account = user_sbtc_ata_account.ok_or_else(|| {
         anchor_lang::error::Error::from(ErrorCode::UserSbtcAtaNotFound)
     })?;
@@ -309,7 +265,6 @@ pub fn get_accounts<'info>(
     })?;
 
     Ok((
-        user_account,
         user_sbtc_ata_account,
         fee_recipient_account,
         fee_recipient_sbtc_ata_account,

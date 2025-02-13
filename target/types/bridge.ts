@@ -369,20 +369,12 @@ export type Bridge = {
       ]
     },
     {
-      "name": "withdrawBtcWithSignatures",
+      "name": "withdrawBtc",
       "accounts": [
         {
-          "name": "submitter",
+          "name": "user",
           "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "The submitter calls it"
-          ]
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "bridgeConfig",
@@ -408,11 +400,6 @@ export type Bridge = {
           "isSigner": false
         },
         {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
@@ -429,10 +416,6 @@ export type Bridge = {
         }
       ],
       "args": [
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
         {
           "name": "msg",
           "type": {
@@ -1679,20 +1662,12 @@ export const IDL: Bridge = {
       ]
     },
     {
-      "name": "withdrawBtcWithSignatures",
+      "name": "withdrawBtc",
       "accounts": [
         {
-          "name": "submitter",
+          "name": "user",
           "isMut": true,
-          "isSigner": true,
-          "docs": [
-            "The submitter calls it"
-          ]
-        },
-        {
-          "name": "submitterAccount",
-          "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "bridgeConfig",
@@ -1718,11 +1693,6 @@ export const IDL: Bridge = {
           "isSigner": false
         },
         {
-          "name": "instructionsSysvar",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
@@ -1739,10 +1709,6 @@ export const IDL: Bridge = {
         }
       ],
       "args": [
-        {
-          "name": "numberOfSignatures",
-          "type": "u8"
-        },
         {
           "name": "msg",
           "type": {
