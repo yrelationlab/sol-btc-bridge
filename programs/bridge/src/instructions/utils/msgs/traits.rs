@@ -12,5 +12,5 @@ pub trait HasPayload {
 }
 
 pub trait DeserializeMessage: AnchorSerialize + AnchorDeserialize + std::fmt::Debug {
-    fn deserialize_message(data: &Vec<u8>) -> Result<Self>;
+    fn deserialize_message(data:  &[u8]) -> Result<Self>;
 }

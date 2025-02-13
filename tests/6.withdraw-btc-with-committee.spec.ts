@@ -75,7 +75,7 @@ describe("Withdraw Btc", () => {
         const msg = new WithdrawBtcMessage({
             messageType: MessageIds.TokenTransfer,
             version: MSG_VERSION,
-            nonce: new anchor.BN(0),
+            nonce: new anchor.BN(1),// mint use 0
             toChainId: values.supportedChains[0],
             toTokenId: values.supportedTokensIndex[0],
             toAddress: values.ethBtcAddress, // BTC地址
@@ -96,21 +96,22 @@ describe("Withdraw Btc", () => {
         console.log("User sBTC balance before withdrawal:", userBeforeBalance);
         console.log("Fee Recipient sBTC balance after withdrawal:", feeRecipientBeforeBalance);
 
-
         // 生成委员会签名
-        const signatures = values.committeeKeypairs.map(kp => ({
-            data: msg.createSignature(kp),
-            publicKey: kp.publicKey
-        }));
+        const signatures = values.committeeKeypairs.map(committeeKeypair => {
+            return {
+              data: msg.createSignature(committeeKeypair),
+              publicKey: committeeKeypair.publicKey
+            };
+          });
 
         const numberOfSignatures = values.committeeKeypairs.length;
-        const ed25519Instructions = signatures.map(sig =>
-            Ed25519Program.createInstructionWithPublicKey({
-                publicKey: sig.publicKey.toBytes(),
-                signature: sig.data.signature,
-                message: sig.data.encoded,
-            })
-        );
+
+        const ixEd25519Programs = signatures.map(signature => Ed25519Program.createInstructionWithPublicKey({
+            publicKey: signature.publicKey.toBytes(),
+            signature: signature.data.signature,
+            message: signature.data.encoded,
+          })
+          );
 
         const tx = await program.methods
             .withdrawBtcWithSignatures(numberOfSignatures, msg as any)
@@ -137,25 +138,27 @@ describe("Withdraw Btc", () => {
             )
             .preInstructions([
                 ComputeBudgetProgram.setComputeUnitLimit({ units: 1000000 }),
-                ...ed25519Instructions
+                ...ixEd25519Programs
             ])
             .transaction();
 
         console.log(`tx.instructions[0] is ${JSON.stringify(tx.instructions[0].programId, null, 2)}`);
         console.log(`tx.instructions[1] is ${JSON.stringify(tx.instructions[1].programId, null, 2)}`);
 
-        const LOOKUP_TABLE_ADDRESS = await createLookupTable(values.submitter.publicKey, values.submitter, provider.connection);
+        // const LOOKUP_TABLE_ADDRESS = await createLookupTable(values.submitter.publicKey, values.submitter, provider.connection);
 
-        await createAndSendV0Tx([AddressLookupTableProgram.extendLookupTable({
-            payer: values.submitter.publicKey,
-            authority: values.submitter.publicKey,
-            lookupTable: LOOKUP_TABLE_ADDRESS,
-            addresses: getTxnAddress(tx),
-        })], [values.submitter], provider.connection, null, true);
+        // await createAndSendV0Tx([AddressLookupTableProgram.extendLookupTable({
+        //     payer: values.submitter.publicKey,
+        //     authority: values.submitter.publicKey,
+        //     lookupTable: LOOKUP_TABLE_ADDRESS,
+        //     addresses: getTxnAddress(tx),
+        // })], [values.submitter], provider.connection, null, true);
 
-        const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value;
+        // const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value;
         console.log(`withdrawBtcWithSignatures...start...`);
-        await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
+        // await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
+        await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, );
+
         console.log(`withdrawBtcWithSignatures...end...`);
 
         const [userAfterBalance, feeRecipientAfterBalance] = await Promise.all([

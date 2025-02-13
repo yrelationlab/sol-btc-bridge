@@ -13,7 +13,7 @@ pub struct UpdateTokenPriceMsg {
 }
 
 impl DeserializeMessage for UpdateTokenPriceMsg {
-    fn deserialize_message(data: &Vec<u8>) -> Result<UpdateTokenPriceMsg> {
+    fn deserialize_message(data: &[u8]) -> Result<UpdateTokenPriceMsg> {
         match UpdateTokenPriceMsg::try_from_slice(data) {
             Ok(order) => Ok(order),
             Err(_) => err!(ErrorCode::DeserializeMessageError),

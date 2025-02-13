@@ -418,10 +418,7 @@ export type Bridge = {
         {
           "name": "user",
           "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "the user to receive minted sBTC"
-          ]
+          "isSigner": false
         },
         {
           "name": "feeRecipientSbtcAta",
@@ -1729,10 +1726,7 @@ export const IDL: Bridge = {
         {
           "name": "user",
           "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "the user to receive minted sBTC"
-          ]
+          "isSigner": false
         },
         {
           "name": "feeRecipientSbtcAta",

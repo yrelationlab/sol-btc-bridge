@@ -40,7 +40,7 @@ impl HasPayload for WithdrawBtcMessage {
 }
 
 impl DeserializeMessage for WithdrawBtcMessage {
-    fn deserialize_message(data: &Vec<u8>) -> Result<WithdrawBtcMessage> {
+    fn deserialize_message(data: &[u8]) -> Result<WithdrawBtcMessage> {
         match WithdrawBtcMessage::try_from_slice(data) {
             Ok(order) => Ok(order),
             Err(_) => err!(ErrorCode::DeserializeMessageError),

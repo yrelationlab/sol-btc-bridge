@@ -100,6 +100,7 @@ pub mod bridge {
         number_of_signatures: u8,
         msg: WithdrawBtcMessage
     ) -> Result<()> {
+        msg!("xxx number_of_signatures is {}, WithdrawBtcMessage is {:?}", number_of_signatures, msg);
         instructions::withdraw_btc_with_signatures(ctx, number_of_signatures, msg)
     }
 }

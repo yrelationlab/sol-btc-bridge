@@ -1,8 +1,31 @@
-use anchor_lang::{prelude::*, solana_program::{pubkey::Pubkey, sysvar::instructions as instructions_sysvar_module}};
+use anchor_lang::{
+    prelude::*,
+    solana_program::{ pubkey::Pubkey, sysvar::instructions as instructions_sysvar_module },
+};
 use anchor_spl::associated_token::AssociatedToken;
-use crate::{bridge::{ verify, Nonces, Operation, SupportedChainConfig, TokenConfig, WithdrawBtcMessage, WithdrawBtctcEvent }, constants::{
-    COMMITTEE_SUBMITTER_CONFIG, FEE_DENOMINATOR, GLOBAL_CONFIG, MAX_STRING_LENGTH, NONCE_CONFIG, SBTC_MINT, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG
-}, errors::ErrorCode, Submitter};
+use crate::{
+    bridge::{
+        verify,
+        Nonces,
+        Operation,
+        SupportedChainConfig,
+        TokenConfig,
+        WithdrawBtcMessage,
+        WithdrawBtctcEvent,
+    },
+    constants::{
+        COMMITTEE_SUBMITTER_CONFIG,
+        FEE_DENOMINATOR,
+        GLOBAL_CONFIG,
+        MAX_STRING_LENGTH,
+        NONCE_CONFIG,
+        SBTC_MINT,
+        SUPPORTED_CHAINS_CONFIG,
+        TOKEN_CONFIG,
+    },
+    errors::ErrorCode,
+    Submitter,
+};
 use anchor_spl::token::{ self, Burn, Mint, TokenAccount, Transfer };
 use crate::BridgeConfig;
 
@@ -33,29 +56,23 @@ pub fn withdraw_btc_with_signatures<'info>(
     let amount = msg.amount - fee;
 
     token::transfer(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.user_sbtc_ata.to_account_info(),
-                to: ctx.accounts.fee_recipient_sbtc_ata.to_account_info(),
-                authority: ctx.accounts.user.to_account_info(),
-            },
-        ),
+        CpiContext::new(ctx.accounts.token_program.to_account_info(), Transfer {
+            from: ctx.accounts.user_sbtc_ata.to_account_info(),
+            to: ctx.accounts.fee_recipient_sbtc_ata.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(),
+        }),
         fee as u64
     )?;
 
     msg!("transfer fee success!");
 
-     token::burn(
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Burn {
-                mint: ctx.accounts.sbtc_mint.to_account_info(),
-                from: ctx.accounts.user_sbtc_ata.to_account_info(),
-                authority: ctx.accounts.user.to_account_info(),
-            },
-        ),
-        amount,
+    token::burn(
+        CpiContext::new(ctx.accounts.token_program.to_account_info(), Burn {
+            mint: ctx.accounts.sbtc_mint.to_account_info(),
+            from: ctx.accounts.user_sbtc_ata.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(),
+        }),
+        amount
     )?;
     msg!("burn success!");
 
@@ -146,7 +163,6 @@ pub struct WithdrawBtcWithSignatures<'info> {
     #[account(associated_token::mint = sbtc_mint, associated_token::authority = user)]
     pub user_sbtc_ata: Box<Account<'info, TokenAccount>>,
 
-    /// the user to receive minted sBTC
     /// CHECK: only need .key()
     #[account(
         mut,

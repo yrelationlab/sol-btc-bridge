@@ -37,16 +37,9 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
     for i in 1..number_of_signatures + 1 {
         msg!("verify: i={}", i);
 
-        let (signer_pubkey, data) = resolve_ed25519_with_index(instructions_sysvar, i as usize)?;
+        let signer_pubkey = resolve_ed25519_with_index(instructions_sysvar, i as usize, msg)?;
+        msg!("verify: resolve_ed25519_with_index success");
 
-        let message_of_signer: T = deserialize_message::<T>(&data)?;
-
-        // check signer_pubkey is allowed
-        if message_of_signer != *msg {
-            msg!("message_of_signer: {:?}", message_of_signer);
-            msg!("msg: {:?}", msg);
-            return err!(ErrorCode::MessageMismatch);
-        }
 
         if Operation::try_from(msg.message_type()) != Ok(op_type) {
             return err!(ErrorCode::MessageOpTypeMismatch);
@@ -95,7 +88,7 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
     )
 }
 
-pub fn deserialize_message<T: DeserializeMessage>(data: &Vec<u8>) -> Result<T> {
+pub fn deserialize_message<T: DeserializeMessage>(data: &[u8]) -> Result<T> {
     T::deserialize_message(data)
 }
 

@@ -37,7 +37,7 @@ impl HasPayload for MintSbtcMessage {
 }
 
 impl DeserializeMessage for MintSbtcMessage {
-    fn deserialize_message(data: &Vec<u8>) -> Result<MintSbtcMessage> {
+    fn deserialize_message(data: &[u8]) -> Result<MintSbtcMessage> {
         match MintSbtcMessage::try_from_slice(data) {
             Ok(order) => Ok(order),
             Err(_) => err!(ErrorCode::DeserializeMessageError),
