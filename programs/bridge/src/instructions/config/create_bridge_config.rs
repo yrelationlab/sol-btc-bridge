@@ -1,7 +1,7 @@
 /// Creates a new bridge configuration.
 use crate::{
     bridge::create_account_ifn_exist,
-    constants::{ ANCHOR_HEADER_LEN, DECIMALS9, GLOBAL_CONFIG, SBTC_MINT },
+    constants::{ ANCHOR_HEADER_LEN, DECIMALS9, FEE_DENOMINATOR, GLOBAL_CONFIG, SBTC_MINT },
     errors::ErrorCode,
     find_ata_in_accounts,
     get_support_chains_pda_bump_seeds,
@@ -18,6 +18,7 @@ use anchor_spl::token::{ Mint, Token };
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
+    administrator: Pubkey,
     fee_recipient: Pubkey,
     token_ids: Vec<u8>,
     supported_chains: Vec<u8>,
@@ -33,8 +34,10 @@ pub fn create_bridge_config<'info>(
     require!(token_ids.len() == token_min_amount.len(), ErrorCode::InvalidTokenMinimumAmount);
 
     require!(fee_recipient != Pubkey::default(), ErrorCode::InvalidFeeRecipientAddress);
+    require!(administrator != Pubkey::default(), ErrorCode::InvalidAdminAddress);
+
     bridge_config.chain_id = chain_id;
-    bridge_config.admin = ctx.accounts.payer.key();
+    bridge_config.admin = administrator;
     bridge_config.fee_recipient = fee_recipient;
     bridge_config.sbtc_mint = ctx.accounts.sbtc_mint.key();
     bridge_config.is_initialized = true;
@@ -67,6 +70,9 @@ pub fn create_bridge_config<'info>(
                 .as_slice(),
             TokenConfig::LEN
         )?;
+
+        require!(token_fee_percentages[i] < FEE_DENOMINATOR, ErrorCode::BiggerThanFeeDenominator);
+
         let discriminator = TokenConfig::discriminator(); // 获取 discriminator
         let account_data = &mut *pda_of_token_config.try_borrow_mut_data()?;
         account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&discriminator);
@@ -146,7 +152,7 @@ pub struct CreateBridgeConfig<'info> {
     /// The account paying for all rents
     #[account(
         mut,
-        address = crate::admin::id() @ ErrorCode::InvalidAdminAddress
+        address = crate::supper_admin::id() @ ErrorCode::InvalidAdminAddress
     )]
     pub payer: Signer<'info>,
 

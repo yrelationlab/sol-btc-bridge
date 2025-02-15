@@ -361,12 +361,13 @@ export async function createBridgeConfig(
   program: anchor.Program<Bridge>,
   values: TestValues
 ) {
+  console.log(`administrator is ${values.payerAdmin.publicKey}`)
   return await program.methods
     .createBridgeConfig(
       values.chainId,
+      values.payerAdmin.publicKey,
       values.feeRecipient,
       Buffer.from(new Uint8Array(values.supportedTokensIndex)),
-      values.prices,
       values.supportedChainsBuffer,
       values.tokenFeePercentages,
       values.tokenMinAmounts

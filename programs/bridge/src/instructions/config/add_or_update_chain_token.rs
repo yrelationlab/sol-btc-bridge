@@ -1,6 +1,6 @@
 /// Creates a new bridge configuration.
 use crate::{
-    constants::{ DECIMALS9, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG },
+    constants::{ DECIMALS9, FEE_DENOMINATOR, GLOBAL_CONFIG, SUPPORTED_CHAINS_CONFIG, TOKEN_CONFIG },
     errors::ErrorCode,
     BridgeConfig,
     SupportedChainConfig,
@@ -10,7 +10,7 @@ use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::prelude::*;
 
 
-pub fn add_chain_token<'info>(
+pub fn add_or_update_chain_token<'info>(
     ctx: Context<'_, '_, 'info, 'info, AddChainToken<'info>>,
     _chain_id: u8,
     supported_chain_id: u8,
@@ -25,6 +25,8 @@ pub fn add_chain_token<'info>(
     if bridge_config.chain_id == supported_chain_id {
         return err!(ErrorCode::ChainIdShouldDiffFromSolanaChainId);
     }
+    require!(token_fee_percentages < FEE_DENOMINATOR, ErrorCode::BiggerThanFeeDenominator);
+    
     if !token_config.is_initialized {
         token_config.chain_id = supported_chain_id;
         token_config.token_id = token_id;

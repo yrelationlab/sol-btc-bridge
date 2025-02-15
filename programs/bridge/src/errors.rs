@@ -114,5 +114,7 @@ pub enum ErrorCode {
     #[msg("Time Error")]
     TimeError,
     #[msg("Transfer Limit Exceeded")]
-    TransferLimitExceeded
+    TransferLimitExceeded,
+    #[msg("Bigger Than Fee Denominator")]
+    BiggerThanFeeDenominator
 }

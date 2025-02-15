@@ -119,6 +119,10 @@
           "type": "u8"
         },
         {
+          "name": "administrator",
+          "type": "publicKey"
+        },
+        {
           "name": "feeRecipient",
           "type": "publicKey"
         },
@@ -141,6 +145,107 @@
           "type": {
             "vec": "u64"
           }
+        }
+      ]
+    },
+    {
+      "name": "addOrUpdateChain",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The account paying for all rents"
+          ]
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "chainId",
+          "type": "u8"
+        },
+        {
+          "name": "supportedChainId",
+          "type": "u8"
+        },
+        {
+          "name": "supported",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "addOrUpdateChainToken",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The account paying for all rents"
+          ]
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "chainId",
+          "type": "u8"
+        },
+        {
+          "name": "supportedChainId",
+          "type": "u8"
+        },
+        {
+          "name": "tokenId",
+          "type": "u8"
+        },
+        {
+          "name": "tokenFeePercentages",
+          "type": "u64"
+        },
+        {
+          "name": "tokenMinAmount",
+          "type": "u64"
+        },
+        {
+          "name": "withdrawPaused",
+          "type": "bool"
         }
       ]
     },
@@ -1248,6 +1353,14 @@
       "code": 6055,
       "name": "TransferLimitExceeded",
       "msg": "Transfer Limit Exceeded"
+    },
+    {
+      "code": 6056,
+      "name": "BiggerThanFeeDenominator",
+      "msg": "Bigger Than Fee Denominator"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs"
+  }
 }

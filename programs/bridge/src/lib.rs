@@ -4,13 +4,12 @@ mod constants;
 mod errors;
 mod instructions;
 
-
 #[cfg(feature = "devnet")]
 declare_id!("Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs");
 #[cfg(not(feature = "devnet"))]
 declare_id!("Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs");
 
-pub mod admin {
+pub mod supper_admin {
     use anchor_lang::prelude::declare_id;
     #[cfg(feature = "devnet")]
     declare_id!("admvjpCSCJxquTVPsNtCCoTno4zC1ozAnSu6wt2BmnV");
@@ -42,6 +41,7 @@ pub mod bridge {
     pub fn create_bridge_config<'info>(
         ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
         chain_id: u8,
+        administrator: Pubkey,
         fee_recipient: Pubkey,
         token_ids: Vec<u8>,
         supported_chains: Vec<u8>,
@@ -51,11 +51,41 @@ pub mod bridge {
         instructions::create_bridge_config(
             ctx,
             chain_id,
+            administrator,
             fee_recipient,
             token_ids,
             supported_chains,
             token_fee_percentages,
             token_min_amount
+        )
+    }
+
+    pub fn add_or_update_chain<'info>(
+        ctx: Context<'_, '_, 'info, 'info, AddChain<'info>>,
+        _chain_id: u8,
+        supported_chain_id: u8,
+        supported: bool
+    ) -> Result<()> {
+        instructions::add_or_update_chain(ctx, _chain_id, supported_chain_id, supported)
+    }
+
+    pub fn add_or_update_chain_token<'info>(
+        ctx: Context<'_, '_, 'info, 'info, AddChainToken<'info>>,
+        _chain_id: u8,
+        supported_chain_id: u8,
+        token_id: u8,
+        token_fee_percentages: u64,
+        token_min_amount: u64,
+        withdraw_paused: bool
+    ) -> Result<()> {
+        instructions::add_or_update_chain_token(
+            ctx,
+            _chain_id,
+            supported_chain_id,
+            token_id,
+            token_fee_percentages,
+            token_min_amount,
+            withdraw_paused
         )
     }
 
@@ -68,7 +98,6 @@ pub mod bridge {
     ) -> Result<()> {
         instructions::create_bridge_committee(ctx, _chian_id, committee, stake, min_stake_required)
     }
-
 
     pub fn mint_sbtc_with_signatures<'info>(
         ctx: Context<'_, '_, 'info, 'info, MintSbtc<'info>>,
