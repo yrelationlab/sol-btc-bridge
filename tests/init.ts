@@ -96,7 +96,6 @@ export interface TestValues {
   supportedChainsPdas: PublicKey[];
   committeeKeypairs: Keypair[];
   stakes: number[];
-  minStake: number;
   submitter: Keypair;
   submitterPda: PublicKey;
   committeePdas: PublicKey[];
@@ -127,7 +126,7 @@ export const expectRevert = async (promise: Promise<any>) => {
     return;
   }
 };
-function keypairsToPublicArrays(keypairs): PublicKey[] {
+export function keypairsToPublicArrays(keypairs): PublicKey[] {
   if (!Array.isArray(keypairs)) {
     throw new Error("Input must be an array");
   }
@@ -241,7 +240,6 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
   const stakes = [9000,];
-  const minStake = 1000;
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
   const noncePdaUpdateTokenPrice = PublicKey.findProgramAddressSync(
@@ -284,7 +282,6 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     supportedChainsPdas,
     committeeKeypairs,
     stakes,
-    minStake,
     submitter,
     submitterPda,
     committeePdas,
@@ -339,11 +336,12 @@ export async function createCommitteeConfig(
 ) {
   return await program.methods
     .createBridgeCommittee(
+      values.chainId,
       keypairsToPublicArrays(values.committeeKeypairs),
       values.stakes,
-      values.minStake
     )
     .accounts({
+      bridgeConfig:values.bridgeConfigPDA,
       submitterPda: values.submitterPda,
       submitter: values.submitter.publicKey,
     })
@@ -361,7 +359,6 @@ export async function createBridgeConfig(
   program: anchor.Program<Bridge>,
   values: TestValues
 ) {
-  console.log(`administrator is ${values.payerAdmin.publicKey}`)
   return await program.methods
     .createBridgeConfig(
       values.chainId,

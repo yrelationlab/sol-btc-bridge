@@ -294,10 +294,89 @@
           "type": {
             "vec": "u16"
           }
+        }
+      ]
+    },
+    {
+      "name": "addOrUpdateCommittee",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
         },
         {
-          "name": "minStakeRequired",
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "committeeConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "chianId",
+          "type": "u8"
+        },
+        {
+          "name": "committee",
+          "type": "publicKey"
+        },
+        {
+          "name": "stake",
           "type": "u16"
+        },
+        {
+          "name": "isBlocklisted",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "addOrUpdateSubmitter",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "submitterPda",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "submitter",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "chianId",
+          "type": "u8"
+        },
+        {
+          "name": "isSubmitter",
+          "type": "bool"
         }
       ]
     },
@@ -464,7 +543,7 @@
           },
           {
             "name": "index",
-            "type": "u8"
+            "type": "publicKey"
           },
           {
             "name": "stakeAmount",
@@ -482,7 +561,7 @@
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -499,7 +578,7 @@
             "type": "bool"
           },
           {
-            "name": "admin",
+            "name": "submitter",
             "type": "publicKey"
           },
           {
@@ -514,7 +593,7 @@
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }

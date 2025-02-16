@@ -40,7 +40,6 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
         let signer_pubkey = resolve_ed25519_with_index(instructions_sysvar, i as usize, msg)?;
         msg!("verify: resolve_ed25519_with_index success");
 
-
         if Operation::try_from(msg.message_type()) != Ok(op_type) {
             return err!(ErrorCode::MessageOpTypeMismatch);
         }
@@ -61,11 +60,15 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
             &account_data[ANCHOR_HEADER_LEN..]
         ).map_err(|_| ErrorCode::InvalidSigner)?;
 
-        let mask = 1u128 << committee_config.index;
+        let address: Pubkey = committee_config.index.clone(); // Solana 地址
+        let bytes = address.to_bytes(); // 将地址转化为字节数组
+        let mask = u128::from_le_bytes(bytes[0..4].try_into().unwrap()); // 直接用前4字节
         if (bitmap & mask) != 0 {
             return err!(ErrorCode::DuplicateSignature);
+        } else {
+            // 更新位图
+            bitmap |= mask;
         }
-        bitmap |= mask;
         msg!(
             "signer_pubkey={}, committee_config.stake_amount={:?}",
             signer_pubkey,

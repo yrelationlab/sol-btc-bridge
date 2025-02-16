@@ -45,6 +45,33 @@ describe("Create Bridge Config", () => {
     }
   });
 
+  it.skip("only config admin & feeRecipient", async () => {
+    console.log(`values.chainId is ${values.chainId}`)
+    console.log(`values.feeRecipient is ${values.feeRecipient}`)
+    const tx = await program.methods
+      .createBridgeConfig(
+        values.chainId,
+        values.payerAdmin.publicKey,
+        values.feeRecipient,
+        Buffer.from(""),
+        Buffer.from(""),
+        [],
+        []
+      )
+      .accounts({
+        payer: values.payerAdmin.publicKey, bridgeConfig: values.bridgeConfigPDA, sbtcMint: values.sbtcMint,
+      })
+      .rpc({ skipPreflight: false });
+    console.log(`tx is ${tx}`)
+    const configAccount = await program.account.bridgeConfig.fetch(values.bridgeConfigPDA);
+    console.log(`configAccount is ${JSON.stringify(configAccount)}`)
+    expect(configAccount.admin.toString()).to.equal(
+      values.payerAdmin.publicKey.toString()
+    );
+    expect(configAccount.chainId.toString()).to.equal(values.chainId.toString());
+    expect(configAccount.feeRecipient.toString()).to.equal(values.feeRecipient.toString());
+  });
+
   it("add chain", async () => {
     // await createBridgeConfig(program, values);
     const supported_chain_id = 100;

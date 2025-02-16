@@ -42,6 +42,7 @@ pub enum ErrorCode {
     CommitteeLengthExceedsLimit,
     #[msg("Committee And Stake Length Mismatch")]
     CommitteeAndStakeLengthMismatch,
+
     #[msg("Insufficient Total Stake")]
     InsufficientTotalStake,
     #[msg("Committee Config Address Missing")]

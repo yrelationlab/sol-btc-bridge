@@ -93,10 +93,27 @@ pub mod bridge {
         ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
         _chian_id: u8,
         committee: Vec<Pubkey>,
-        stake: Vec<u16>,
-        min_stake_required: u16
+        stake: Vec<u16>
     ) -> Result<()> {
-        instructions::create_bridge_committee(ctx, _chian_id, committee, stake, min_stake_required)
+        instructions::create_bridge_committee(ctx, _chian_id, committee, stake)
+    }
+
+    pub fn add_or_update_committee<'info>(
+        ctx: Context<'_, '_, 'info, 'info, AddOrUpdateCommittee<'info>>,
+        _chian_id: u8,
+        committee: Pubkey,
+        stake: u16,
+        is_blocklisted: bool
+    ) -> Result<()> {
+        instructions::add_or_update_committee(ctx, _chian_id, committee, stake, is_blocklisted)
+    }
+
+    pub fn add_or_update_submitter<'info>(
+        ctx: Context<'_, '_, 'info, 'info, AddOrUpdateSubmitter<'info>>,
+        _chian_id: u8,
+        is_submitter: bool
+    ) -> Result<()> {
+        instructions::add_or_update_submitter(ctx, _chian_id, is_submitter)
     }
 
     pub fn mint_sbtc_with_signatures<'info>(

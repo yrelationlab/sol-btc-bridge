@@ -14,55 +14,55 @@ pub fn create_bridge_committee<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeCommittee<'info>>,
     _chian_id: u8,
     committee: Vec<Pubkey>,
-    stake: Vec<u16>,
-    min_stake_required: u16
+    stake: Vec<u16>
 ) -> Result<()> {
     let committee_length = committee.len();
 
     require!(committee_length < 256, ErrorCode::CommitteeLengthExceedsLimit);
-
     require!(committee_length == stake.len(), ErrorCode::CommitteeAndStakeLengthMismatch);
 
-    let mut total_stake: u16 = 0;
     for (i, committee_address) in committee.iter().enumerate() {
-        total_stake += stake[i];
         let (signer_seeds, pda_of_committee_config) = get_commitee_account(
             ctx.remaining_accounts.to_vec(),
             committee_address,
             &ctx.program_id
         )?;
-        create_account_ifn_exist(
-            &ctx.program_id,
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-            pda_of_committee_config.clone(),
-            &signer_seeds
-                .iter()
-                .map(|v| v.as_slice())
-                .collect::<Vec<&[u8]>>()
-                .as_slice(),
-            Committee::LEN
-        )?;
-        let bridge_committee = Committee {
-            is_initialized: true,
-            index: i as u8,
-            stake_amount: stake[i],
-            is_blocklisted: false,
-            padding: [0u64; Committee::LEN_OF_PADDING],
-        };
-        let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
-        account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&Committee::discriminator());
-        bridge_committee.serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..]).map_err(|error| {
-            msg!("BridgeCommitteeSerializationError: error={}", error);
-            ErrorCode::BridgeCommitteeSerializationError
-        })?;
+        // 只能批量创建
+        let current_lamports = pda_of_committee_config.lamports();
+        if current_lamports == 0 {
+            create_account_ifn_exist(
+                &ctx.program_id,
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+                pda_of_committee_config.clone(),
+                &signer_seeds
+                    .iter()
+                    .map(|v| v.as_slice())
+                    .collect::<Vec<&[u8]>>()
+                    .as_slice(),
+                Committee::LEN
+            )?;
+            let bridge_committee = Committee {
+                is_initialized: true,
+                index: committee[i],
+                stake_amount: stake[i],
+                is_blocklisted: false,
+                padding: [0u64; Committee::LEN_OF_PADDING],
+            };
+            let account_data = &mut *pda_of_committee_config.try_borrow_mut_data()?;
+            account_data[..ANCHOR_HEADER_LEN].copy_from_slice(&Committee::discriminator());
+            bridge_committee
+                .serialize(&mut &mut account_data[ANCHOR_HEADER_LEN..])
+                .map_err(|error| {
+                    msg!("BridgeCommitteeSerializationError: error={}", error);
+                    ErrorCode::BridgeCommitteeSerializationError
+                })?;
+        }
     }
 
-    require!(total_stake >= min_stake_required, ErrorCode::InsufficientTotalStake);
-
     // submitter
-    {
-        ctx.accounts.submitter_pda.admin = ctx.accounts.submitter.key();
+    if !ctx.accounts.submitter_pda.is_initialized {
+        ctx.accounts.submitter_pda.submitter = ctx.accounts.submitter.key();
         ctx.accounts.submitter_pda.is_submitter = true;
     }
 
@@ -83,7 +83,7 @@ pub struct CreateBridgeCommittee<'info> {
     pub bridge_config: Account<'info, BridgeConfig>,
 
     #[account(
-        init,
+        init_if_needed,
         payer = payer,
         space = Submitter::LEN,
         seeds = [COMMITTEE_SUBMITTER_CONFIG.as_ref(), submitter.key().as_ref()],

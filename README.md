@@ -1,5 +1,9 @@
 # sol-btc-bridge
 
+## 注意：
+1. 提供了两种批量操作的方法，一种只能用来创建不能用来修改，比如create_bridge_config
+2. 另一种是单个修改的方法，但是Solana可以把交易打包一起发送，参考这个测试 add Committee batch with add_or_update_committee
+
 ## test in local validator
 0. https://solana.com/docs/toolkit/local-validator
 1. yarn node:local
@@ -38,6 +42,17 @@
 6. 重构代码，btc权限地址和mint地址合并为一个，减少参数
 7. event抛出和解析
 8. vault，limiter代码阅读
+
+## 准备开展的工作 
+1. vault
+2. limiter
+3. sdk
+
+
+## 工作汇报 20250218
+1.limter
+2.增加了单个修改配置的方法（bridge config，committee，submitter）
+3.增加了把单个修改配置串起来批量修改的测试
 
 ## 准备开展的工作 
 1. vault
