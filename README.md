@@ -53,6 +53,7 @@
 1.limter
 2.增加了单个修改配置的方法（bridge config，committee，submitter）
 3.增加了把单个修改配置串起来批量修改的测试
+4.去掉了token price的相关代码和测试
 
 ## 准备开展的工作 
 1. vault
