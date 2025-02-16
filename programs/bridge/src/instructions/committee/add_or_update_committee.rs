@@ -2,7 +2,6 @@ use crate::{
     bridge::BridgeConfig,
     constants::{ COMMITTEE_CONFIG, GLOBAL_CONFIG },
     errors::ErrorCode,
-    Submitter,
 };
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::prelude::*;

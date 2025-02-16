@@ -75,8 +75,10 @@ import {
   SUPPORTED_CHAINS_CONFIG,
   TOKEN_CONFIG,
   MSG_VERSION,
+  getLimiterPda,
 } from "./constants";
 import { MintSbtcMessage } from "./txns/mint-sbtc-message ";
+import { UpdateLimiterMsg, UpdateLimiterMsgTxn } from "./txns/update-limiter-message";
 
 export interface TestValues {
   payerAdmin: Keypair;
@@ -99,7 +101,7 @@ export interface TestValues {
   submitter: Keypair;
   submitterPda: PublicKey;
   committeePdas: PublicKey[];
-  noncePdaUpdateTokenPrice: PublicKey;
+  noncePdaUpdateLimter: PublicKey;
   nonceMintSbtc: PublicKey;
   nonceWithdrawBtc: PublicKey;
   supportedChains: number[];
@@ -107,6 +109,7 @@ export interface TestValues {
   user: Keypair;
   userSbtcAta: PublicKey;
   feeRecipientSbtcAta: PublicKey;
+  limiterPdas: PublicKey[];
 }
 
 export async function sleep(seconds: number) {
@@ -242,11 +245,11 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   const stakes = [9000,];
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
-  const noncePdaUpdateTokenPrice = PublicKey.findProgramAddressSync(
-    [NONCE_CONFIG, new anchor.BN(MessageIds.UpdateTokenPrice.toString()).toArrayLike(Buffer, 'be', 1)],
+  const noncePdaUpdateLimter = PublicKey.findProgramAddressSync(
+    [NONCE_CONFIG, new anchor.BN(MessageIds.UpdateBridgeLimit.toString()).toArrayLike(Buffer, 'be', 1)],
     anchor.workspace.bridge.programId
   )[0];
-  console.log(`noncePdaUpdateTokenPrice is ${JSON.stringify(noncePdaUpdateTokenPrice)}`);
+  console.log(`noncePdaUpdateLimter is ${JSON.stringify(noncePdaUpdateLimter)}`);
 
   const nonceMintSbtc = PublicKey.findProgramAddressSync(
     [NONCE_CONFIG, new anchor.BN(MessageIds.TokenTransfer.toString()).toArrayLike(Buffer, 'be', 1)],
@@ -259,6 +262,10 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     anchor.workspace.bridge.programId
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
+
+  const limiterPdas = supportedTokensIndex.map((tokenId, index) =>
+    getLimiterPda(supportedChains[index], tokenId)
+  );
 
 
   // const ethBtcAddress = new Uint8Array(35); // 固定 32 字节
@@ -285,7 +292,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     submitter,
     submitterPda,
     committeePdas,
-    noncePdaUpdateTokenPrice,
+    noncePdaUpdateLimter: noncePdaUpdateLimter,
     supportedChains,
     bridgeSbtcAuth: bridgeSbtcAuth,
     sbtcMint,
@@ -294,7 +301,8 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     ethBtcAddress,
     user,
     userSbtcAta,
-    feeRecipientSbtcAta
+    feeRecipientSbtcAta,
+    limiterPdas
   };
 }
 
@@ -341,7 +349,7 @@ export async function createCommitteeConfig(
       values.stakes,
     )
     .accounts({
-      bridgeConfig:values.bridgeConfigPDA,
+      bridgeConfig: values.bridgeConfigPDA,
       submitterPda: values.submitterPda,
       submitter: values.submitter.publicKey,
     })
@@ -626,6 +634,70 @@ export async function mintSBtc(values: TestValues, program: anchor.Program<Bridg
     const txid = await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
     console.log(`mintSBtc....end...`);
     return { mintAmout, txid };
+
+  }
+}
+
+export async function updateLimiter(values: TestValues, program: anchor.Program<Bridge>, provider: anchor.AnchorProvider, withTable: boolean = true) {
+  console.log("mintSBtc");
+
+  const totalLimit = new anchor.BN(1000).mul(DECIMALS9);
+  const msg = new UpdateLimiterMsg({
+    messageType: MessageIds.UpdateBridgeLimit, // for Mint_SBTC
+    version: MSG_VERSION,
+    nonce: new anchor.BN(0),
+    chainId: values.chainId,
+    targetChainId: values.supportedChains[0],
+    tokenId: values.supportedTokensIndex[0],
+    totalLimit: totalLimit,
+  });
+
+  const numberOfSignatures = values.committeeKeypairs.length;
+  const signatures = values.committeeKeypairs.map(committeeKeypair => {
+    return {
+      data: msg.createSignature(committeeKeypair),
+      publicKey: committeeKeypair.publicKey
+    };
+  });
+  let tx = await new UpdateLimiterMsgTxn(program).createTx({
+    signatures,
+    msg,
+    chainID: values.chainId,
+    numberOfSignatures,
+    submitter: values.submitter.publicKey,
+    submitterPda: values.submitterPda,
+    bridgeConfigPda: values.bridgeConfigPDA,
+    noncePdaUpdateLimter: values.noncePdaUpdateLimter,
+    committeePdas: values.committeePdas,
+    tokenConfigPda: values.tokenConfigPdas[0],
+    supportChainPda: values.supportedChainsPdas[0],
+    limiterPda: values.limiterPdas[0]
+  });
+
+  if (withTable) {
+    // const LOOKUP_TABLE_ADDRESS = new PublicKey("8j3Tgegjq5hY2joaC6hGUZQZhTg2cohkxVhCPVxYj3WP")
+    const LOOKUP_TABLE_ADDRESS = await createLookupTable(values.submitter.publicKey, values.submitter, provider.connection);
+    console.log(`LOOKUP_TABLE_ADDRESS is : ${LOOKUP_TABLE_ADDRESS}`);
+    await createAndSendV0Tx([AddressLookupTableProgram.extendLookupTable({
+      payer: values.submitter.publicKey,
+      authority: values.submitter.publicKey,
+      lookupTable: LOOKUP_TABLE_ADDRESS,
+      addresses: getTxnAddress(tx),
+    })], [values.submitter], provider.connection, null, true);
+    const lookupTable = (await provider.connection.getAddressLookupTable(LOOKUP_TABLE_ADDRESS)).value;
+    console.log(`table create success 0 !`);
+    console.log(`mintSBtc...start...`);
+    const txid = await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection, [lookupTable], false);
+    console.log(`mintSBtc....end...`);
+    return { txid, totalLimit };
+
+  }
+  else {
+    console.log(`mintSBtc...start...`);
+    /// local test validator always timeout when use LookupTable
+    const txid = await createAndSendV0Tx(tx.instructions, [values.submitter], provider.connection);
+    console.log(`mintSBtc....end...`);
+    return { txid, totalLimit };
 
   }
 }

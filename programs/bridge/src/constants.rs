@@ -15,6 +15,11 @@ pub const COMMITTEE_CONFIG: &str = "COMMITTEE_CONFIG";
 pub const COMMITTEE_SUBMITTER_CONFIG: &str = "COMMITTEE_SUBMITTER_CONFIG";
 #[constant]
 pub const SUPPORTED_CHAINS_CONFIG: &str = "SUPPORTED_CHAINS_CONFIG";
+
+#[constant]
+pub const LIMITER_CONFIG: &str = "LIMITER_CONFIG";
+
+
 // #[constant]
 // pub const AUTHORITY_SEED: &str = "authority";
 #[constant]

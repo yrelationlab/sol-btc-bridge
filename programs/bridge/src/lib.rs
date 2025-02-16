@@ -28,7 +28,6 @@ pub mod bridge {
     /// * `chain_id` - The ID of the chain for which the bridge configuration is being created.
     /// * `fee_recipient` - The public key of the account that will receive fees.
     /// * `token_ids` - A vector of token IDs that will be supported by the bridge.
-    /// * `token_prices` - A vector of token prices corresponding to the token IDs.
     /// * `supported_chains` - A vector of chain IDs that will be supported by the bridge.
     /// * `token_fee_percentages` - A vector of fee percentages for each token.
     /// * `token_min_amount` - A vector of minimum amounts for each token.
@@ -129,5 +128,13 @@ pub mod bridge {
         msg: WithdrawBtcMessage
     ) -> Result<()> {
         instructions::withdraw_btc(ctx, msg)
+    }
+    
+    pub fn add_or_update_limiter_with_signatures<'info>(
+        ctx: Context<'_, '_, 'info, 'info, AddOrUpdateLimiter<'info>>,
+        number_of_signatures: u8,
+        msg: UpdateLimiterMsg
+    ) -> Result<()> {
+        instructions::add_or_update_limiter_with_signatures(ctx, number_of_signatures, msg)
     }
 }

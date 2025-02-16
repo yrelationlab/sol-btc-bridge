@@ -111,6 +111,7 @@ pub struct MintSbtc<'info> {
             msg.source_chain_id.to_be_bytes().as_ref(),
         ],
         bump,
+        constraint = supported_chain_config.supported == true @ ErrorCode::InvalidChain
     )]
     pub supported_chain_config: Box<Account<'info, SupportedChainConfig>>,
 
@@ -123,7 +124,6 @@ pub struct MintSbtc<'info> {
         ],
         bump,
         constraint = msg.amount >= token_config.token_min_amount @ ErrorCode::InvalidMinAmount,
-
     )]
     pub token_config: Box<Account<'info, TokenConfig>>,
 

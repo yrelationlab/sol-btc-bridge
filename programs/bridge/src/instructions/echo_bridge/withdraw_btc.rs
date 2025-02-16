@@ -132,7 +132,7 @@ pub struct WithdrawBtc<'info> {
         ],
         bump,
         constraint = bridge_config.is_initialized @ ErrorCode::BridgeConfigNotInitialized,
-        constraint = !bridge_config.withdraw_paused @ ErrorCode::WithdrawPaused,
+        constraint = !bridge_config.withdraw_paused @ ErrorCode::BridgeWithdrawPaused,
         constraint = msg.chain_id != msg.to_chain_id @ ErrorCode::ChainIdShouldDiffFromSolanaChainId
     )]
     pub bridge_config: Box<Account<'info, BridgeConfig>>,
@@ -143,8 +143,9 @@ pub struct WithdrawBtc<'info> {
             msg.to_chain_id.to_be_bytes().as_ref(),
         ],
         bump,
+        constraint = supported_chain_config.is_initialized @ ErrorCode::SupportedChainConfigNotInitialized,
+        constraint = supported_chain_config.supported @ ErrorCode::SupportedChainConfigNoSupported,
         constraint = (msg.amount as u128) <= supported_chain_config.mint_total @ ErrorCode::LackTargetMint,
-
     )]
     pub supported_chain_config: Box<Account<'info, SupportedChainConfig>>,
 
@@ -155,8 +156,10 @@ pub struct WithdrawBtc<'info> {
             msg.to_token_id.to_be_bytes().as_ref(),
         ],
         bump,
+        constraint = token_config.is_initialized @ ErrorCode::TokenConfigNotInitialized,
         constraint = msg.amount >= token_config.token_min_amount @ ErrorCode::InvalidMinAmount,
         constraint = (msg.amount as u128) <= token_config.mint_total @ ErrorCode::LackTargetMint,
+        constraint = !token_config.withdraw_paused @ ErrorCode::WithdrawPaused
     )]
     pub token_config: Box<Account<'info, TokenConfig>>,
 

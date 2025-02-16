@@ -9,6 +9,8 @@ pub enum ErrorCode {
     InvalidOpCode,
     #[msg("Invalid Supported Token Addresses")]
     InvalidSupportedTokenAddresses,
+    #[msg("Invalid Chain")]
+    InvalidChain,
     #[msg("Invalid Token Fee Percentage")]
     InvalidTokenFeePercentage,
     #[msg("Invalid Ids Length")]
@@ -70,6 +72,12 @@ pub enum ErrorCode {
     MessageOpTypeMismatch,
     #[msg("Bridge Config Not Initialized")]
     BridgeConfigNotInitialized,
+    #[msg("Supported Chain Config Not Initialized")]
+    SupportedChainConfigNotInitialized,
+    #[msg("Token Config Not Initialized")]
+    TokenConfigNotInitialized,
+    #[msg("Supported Chain Config Not Supported")]
+    SupportedChainConfigNoSupported,
     #[msg("Chain Id Mismatch")]
     ChainIdMismatch,
     #[msg("Duplicate Signature")]
@@ -88,6 +96,8 @@ pub enum ErrorCode {
     InvalidNonce,
     #[msg("Withdraw Paused")]
     WithdrawPaused,
+    #[msg("Bridge Withdraw Paused")]
+    BridgeWithdrawPaused,
     #[msg("Invalid Address")]
     InvalidAddress,
     #[msg("Invalid Min Amount")]

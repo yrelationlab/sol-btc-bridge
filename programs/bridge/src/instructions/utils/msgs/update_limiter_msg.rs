@@ -4,24 +4,26 @@ use anchor_lang::prelude::*;
 use super::HasPayload;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
-pub struct UpdateTokenPriceMsg {
+pub struct UpdateLimiterMsg {
     pub message_type: u8,
     pub version: u8,
     pub nonce: u64,
     pub chain_id: u8,
-    pub payload: [u8; 9], 
+    pub target_chain_id: u8,
+    pub token_id: u8,
+    pub total_limit: u64, 
 }
 
-impl DeserializeMessage for UpdateTokenPriceMsg {
-    fn deserialize_message(data: &[u8]) -> Result<UpdateTokenPriceMsg> {
-        match UpdateTokenPriceMsg::try_from_slice(data) {
+impl DeserializeMessage for UpdateLimiterMsg {
+    fn deserialize_message(data: &[u8]) -> Result<UpdateLimiterMsg> {
+        match UpdateLimiterMsg::try_from_slice(data) {
             Ok(order) => Ok(order),
             Err(_) => err!(ErrorCode::DeserializeMessageError),
         }
     }
 }
 
-impl HasMessageType for UpdateTokenPriceMsg {
+impl HasMessageType for UpdateLimiterMsg {
     fn message_type(&self) -> u8 {
         self.message_type
     }
@@ -35,17 +37,8 @@ impl HasMessageType for UpdateTokenPriceMsg {
     }
 }
 
-impl HasPayload for UpdateTokenPriceMsg {
+impl HasPayload for UpdateLimiterMsg {
     fn payload(&self) -> Vec<u8> {
-        self.payload.to_vec()
+        vec![]
     }
-}
-
-pub fn decode_update_token_price_payload(payload: &[u8]) -> Result<(u8, u64)> {
-    require!(payload.len() == 9, ErrorCode::InvalidPayloadLength);
-
-    let token_id = payload[0];
-    let token_price = u64::from_be_bytes(payload[1..9].try_into().unwrap());
-
-    Ok((token_id, token_price))
 }

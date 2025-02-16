@@ -10,6 +10,7 @@ export const SBTC_MINT = Buffer.from("SBTC_MINT");
 
 export const NONCE_CONFIG = Buffer.from("NONCE_CONFIG");
 export const TOKEN_CONFIG = Buffer.from("TOKEN_CONFIG");
+export const LIMITER_CONFIG = Buffer.from("LIMITER_CONFIG");
 export const SUPPORTED_CHAINS_CONFIG = Buffer.from("SUPPORTED_CHAINS_CONFIG");
 export const BRIDGE_COMMITTEE_SUBMITTER_CONFIG = Buffer.from("COMMITTEE_SUBMITTER_CONFIG")
 export const BRIDGE_COMMITTEE_CONFIG = Buffer.from("COMMITTEE_CONFIG");
@@ -21,6 +22,15 @@ export const BRIDGE_COMMITTEE_CONFIG = Buffer.from("COMMITTEE_CONFIG");
 //     }
 //     return Buffer.from([tokenId]); // Create a single-byte buffer
 // }
+
+
+
+export function getLimiterPda(chainId: number, tokenId: number): anchor.web3.PublicKey {
+    return PublicKey.findProgramAddressSync(
+        [LIMITER_CONFIG, new anchor.BN(chainId).toArrayLike(Buffer, 'be', 1), new anchor.BN(tokenId).toArrayLike(Buffer, 'be', 1)],
+        anchor.workspace.bridge.programId
+    )[0];
+}
 
 export function getTokenConfigPda(chainId: number, tokenId: number): anchor.web3.PublicKey {
     return PublicKey.findProgramAddressSync(

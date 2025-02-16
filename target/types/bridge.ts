@@ -38,6 +38,11 @@ export type Bridge = {
       "value": "\"SUPPORTED_CHAINS_CONFIG\""
     },
     {
+      "name": "LIMITER_CONFIG",
+      "type": "string",
+      "value": "\"LIMITER_CONFIG\""
+    },
+    {
       "name": "DECIMALS9",
       "type": "u8",
       "value": "9"
@@ -72,7 +77,6 @@ export type Bridge = {
         "* `chain_id` - The ID of the chain for which the bridge configuration is being created.",
         "* `fee_recipient` - The public key of the account that will receive fees.",
         "* `token_ids` - A vector of token IDs that will be supported by the bridge.",
-        "* `token_prices` - A vector of token prices corresponding to the token IDs.",
         "* `supported_chains` - A vector of chain IDs that will be supported by the bridge.",
         "* `token_fee_percentages` - A vector of fee percentages for each token.",
         "* `token_min_amount` - A vector of minimum amounts for each token.",
@@ -529,6 +533,71 @@ export type Bridge = {
           }
         }
       ]
+    },
+    {
+      "name": "addOrUpdateLimiterWithSignatures",
+      "accounts": [
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The submitter calls it"
+          ]
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "limiter",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "msg",
+          "type": {
+            "defined": "UpdateLimiterMsg"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -770,6 +839,10 @@ export type Bridge = {
         "kind": "struct",
         "fields": [
           {
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
             "name": "chainId",
             "type": "u8"
           },
@@ -849,7 +922,7 @@ export type Bridge = {
       }
     },
     {
-      "name": "UpdateTokenPriceMsg",
+      "name": "UpdateLimiterMsg",
       "type": {
         "kind": "struct",
         "fields": [
@@ -870,13 +943,16 @@ export type Bridge = {
             "type": "u8"
           },
           {
-            "name": "payload",
-            "type": {
-              "array": [
-                "u8",
-                9
-              ]
-            }
+            "name": "targetChainId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "totalLimit",
+            "type": "u64"
           }
         ]
       }
@@ -1021,6 +1097,26 @@ export type Bridge = {
     }
   ],
   "events": [
+    {
+      "name": "LimitUpdated",
+      "fields": [
+        {
+          "name": "chainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "tokenId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "totalLimit",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
     {
       "name": "MintSbtcEvent",
       "fields": [
@@ -1175,266 +1271,291 @@ export type Bridge = {
     },
     {
       "code": 6004,
+      "name": "InvalidChain",
+      "msg": "Invalid Chain"
+    },
+    {
+      "code": 6005,
       "name": "InvalidTokenFeePercentage",
       "msg": "Invalid Token Fee Percentage"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidIdsLength",
       "msg": "Invalid Ids Length"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidTokenMinimumAmount",
       "msg": "Invalid Token Minimum Amount"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidTokenIds",
       "msg": "Invalid Token Ids"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "InvalidAdminAddress",
       "msg": "Invalid Admin Address"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "InvalidFeeRecipientAddress",
       "msg": "Invalid Fee Recipient Address"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "CannotSupportSelf",
       "msg": "Cannot Support Self"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "TokenConfigAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "SupportedChainAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "DeserializeAirdropMessageError",
       "msg": "Deserialize Airdrop Message Error"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "DeserializeWhitelistMessageError",
       "msg": "Deserialize Whitelist Message Error"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "DeserializationError",
       "msg": "Deserialization Error"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "BridgeConfigSerializationError",
       "msg": "Bridge Config Serialization Error"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "SupportedChainSerializationError",
       "msg": "Supported Chain Serialization Error"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "CommitteeLengthExceedsLimit",
       "msg": "Committee Length Exceeds Limit"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "CommitteeAndStakeLengthMismatch",
       "msg": "Committee And Stake Length Mismatch"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "InsufficientTotalStake",
       "msg": "Insufficient Total Stake"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "CommitteeConfigAddressMissing",
       "msg": "Committee Config Address Missing"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "BridgeCommitteeSerializationError",
       "msg": "Bridge Committee Serialization Error"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "SubmitterConfigAddressMissing",
       "msg": "Submitter Config Address Missing"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "Expired",
       "msg": "Expired"
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "InvalidPayloadLength",
       "msg": "InvalidPay load Length"
     },
     {
-      "code": 6026,
+      "code": 6027,
       "name": "FailedToParseTokenPrice",
       "msg": "Failed To  Parse Token Price"
     },
     {
-      "code": 6027,
+      "code": 6028,
       "name": "InsufficientSignatures",
       "msg": "Insufficient Signatures"
     },
     {
-      "code": 6028,
+      "code": 6029,
       "name": "DeserializeMessageError",
       "msg": "Deserialize Message Error"
     },
     {
-      "code": 6029,
+      "code": 6030,
       "name": "MessageMismatch",
       "msg": "Message Mismatch"
     },
     {
-      "code": 6030,
+      "code": 6031,
       "name": "SupportedChainNotInitialized",
       "msg": "Supported Chain Not Initialized"
     },
     {
-      "code": 6031,
+      "code": 6032,
       "name": "MessageOpTypeMismatch",
       "msg": "Message Op Type Mismatch"
     },
     {
-      "code": 6032,
+      "code": 6033,
       "name": "BridgeConfigNotInitialized",
       "msg": "Bridge Config Not Initialized"
     },
     {
-      "code": 6033,
+      "code": 6034,
+      "name": "SupportedChainConfigNotInitialized",
+      "msg": "Supported Chain Config Not Initialized"
+    },
+    {
+      "code": 6035,
+      "name": "TokenConfigNotInitialized",
+      "msg": "Token Config Not Initialized"
+    },
+    {
+      "code": 6036,
+      "name": "SupportedChainConfigNoSupported",
+      "msg": "Supported Chain Config Not Supported"
+    },
+    {
+      "code": 6037,
       "name": "ChainIdMismatch",
       "msg": "Chain Id Mismatch"
     },
     {
-      "code": 6034,
+      "code": 6038,
       "name": "DuplicateSignature",
       "msg": "Duplicate Signature"
     },
     {
-      "code": 6035,
+      "code": 6039,
       "name": "SubmitterNotInitialized",
       "msg": "Submitter Not Initialized"
     },
     {
-      "code": 6036,
+      "code": 6040,
       "name": "NotSubmitter",
       "msg": "Not A Submitter"
     },
     {
-      "code": 6037,
+      "code": 6041,
       "name": "SigVerificationFailed",
       "msg": "Signature verification failed"
     },
     {
-      "code": 6038,
+      "code": 6042,
       "name": "InstructionMissing",
       "msg": "InstructionMissing"
     },
     {
-      "code": 6039,
+      "code": 6043,
       "name": "InvalidSigner",
       "msg": "Invalid Signer"
     },
     {
-      "code": 6040,
+      "code": 6044,
       "name": "InvalidNonce",
       "msg": "Invalid Nonce"
     },
     {
-      "code": 6041,
+      "code": 6045,
       "name": "WithdrawPaused",
       "msg": "Withdraw Paused"
     },
     {
-      "code": 6042,
+      "code": 6046,
+      "name": "BridgeWithdrawPaused",
+      "msg": "Bridge Withdraw Paused"
+    },
+    {
+      "code": 6047,
       "name": "InvalidAddress",
       "msg": "Invalid Address"
     },
     {
-      "code": 6043,
+      "code": 6048,
       "name": "InvalidMinAmount",
       "msg": "Invalid Min Amount"
     },
     {
-      "code": 6044,
+      "code": 6049,
       "name": "InvalidUserAddress",
       "msg": "Invalid User Address"
     },
     {
-      "code": 6045,
+      "code": 6050,
       "name": "InvalidFeeRecipient",
       "msg": "Invalid Fee Recipient"
     },
     {
-      "code": 6046,
+      "code": 6051,
       "name": "LackTargetMint",
       "msg": "Lack Target Mint"
     },
     {
-      "code": 6047,
+      "code": 6052,
       "name": "ChainIdShouldDiffFromSolanaChainId",
       "msg": "ChainId Should Diff From Solana Chain Id"
     },
     {
-      "code": 6048,
+      "code": 6053,
       "name": "AccountNotFound",
       "msg": "AccountNotFound"
     },
     {
-      "code": 6049,
+      "code": 6054,
       "name": "FeeRecipientNotFound",
       "msg": "Fee Recipient Not Found"
     },
     {
-      "code": 6050,
+      "code": 6055,
       "name": "FeeRecipientSbtcAtaNotFound",
       "msg": "Fee Recipient Sbtc Ata Not Found"
     },
     {
-      "code": 6051,
+      "code": 6056,
       "name": "UserAccountNotFound",
       "msg": "User Account Not Found"
     },
     {
-      "code": 6052,
+      "code": 6057,
       "name": "UserSbtcAtaNotFound",
       "msg": "User Sbtc Ata Not Found"
     },
     {
-      "code": 6053,
+      "code": 6058,
       "name": "SbtcMintAccountNotFound",
       "msg": "Sbtc Mint Account Not Found"
     },
     {
-      "code": 6054,
+      "code": 6059,
       "name": "TimeError",
       "msg": "Time Error"
     },
     {
-      "code": 6055,
+      "code": 6060,
       "name": "TransferLimitExceeded",
       "msg": "Transfer Limit Exceeded"
     },
     {
-      "code": 6056,
+      "code": 6061,
       "name": "BiggerThanFeeDenominator",
       "msg": "Bigger Than Fee Denominator"
     }
@@ -1481,6 +1602,11 @@ export const IDL: Bridge = {
       "value": "\"SUPPORTED_CHAINS_CONFIG\""
     },
     {
+      "name": "LIMITER_CONFIG",
+      "type": "string",
+      "value": "\"LIMITER_CONFIG\""
+    },
+    {
       "name": "DECIMALS9",
       "type": "u8",
       "value": "9"
@@ -1515,7 +1641,6 @@ export const IDL: Bridge = {
         "* `chain_id` - The ID of the chain for which the bridge configuration is being created.",
         "* `fee_recipient` - The public key of the account that will receive fees.",
         "* `token_ids` - A vector of token IDs that will be supported by the bridge.",
-        "* `token_prices` - A vector of token prices corresponding to the token IDs.",
         "* `supported_chains` - A vector of chain IDs that will be supported by the bridge.",
         "* `token_fee_percentages` - A vector of fee percentages for each token.",
         "* `token_min_amount` - A vector of minimum amounts for each token.",
@@ -1972,6 +2097,71 @@ export const IDL: Bridge = {
           }
         }
       ]
+    },
+    {
+      "name": "addOrUpdateLimiterWithSignatures",
+      "accounts": [
+        {
+          "name": "submitter",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The submitter calls it"
+          ]
+        },
+        {
+          "name": "submitterAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bridgeConfig",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "supportedChainConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenConfig",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nonce",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "limiter",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "numberOfSignatures",
+          "type": "u8"
+        },
+        {
+          "name": "msg",
+          "type": {
+            "defined": "UpdateLimiterMsg"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -2213,6 +2403,10 @@ export const IDL: Bridge = {
         "kind": "struct",
         "fields": [
           {
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
             "name": "chainId",
             "type": "u8"
           },
@@ -2292,7 +2486,7 @@ export const IDL: Bridge = {
       }
     },
     {
-      "name": "UpdateTokenPriceMsg",
+      "name": "UpdateLimiterMsg",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2313,13 +2507,16 @@ export const IDL: Bridge = {
             "type": "u8"
           },
           {
-            "name": "payload",
-            "type": {
-              "array": [
-                "u8",
-                9
-              ]
-            }
+            "name": "targetChainId",
+            "type": "u8"
+          },
+          {
+            "name": "tokenId",
+            "type": "u8"
+          },
+          {
+            "name": "totalLimit",
+            "type": "u64"
           }
         ]
       }
@@ -2464,6 +2661,26 @@ export const IDL: Bridge = {
     }
   ],
   "events": [
+    {
+      "name": "LimitUpdated",
+      "fields": [
+        {
+          "name": "chainId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "tokenId",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "totalLimit",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
     {
       "name": "MintSbtcEvent",
       "fields": [
@@ -2618,266 +2835,291 @@ export const IDL: Bridge = {
     },
     {
       "code": 6004,
+      "name": "InvalidChain",
+      "msg": "Invalid Chain"
+    },
+    {
+      "code": 6005,
       "name": "InvalidTokenFeePercentage",
       "msg": "Invalid Token Fee Percentage"
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "InvalidIdsLength",
       "msg": "Invalid Ids Length"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "InvalidTokenMinimumAmount",
       "msg": "Invalid Token Minimum Amount"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "InvalidTokenIds",
       "msg": "Invalid Token Ids"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "InvalidAdminAddress",
       "msg": "Invalid Admin Address"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "InvalidFeeRecipientAddress",
       "msg": "Invalid Fee Recipient Address"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "CannotSupportSelf",
       "msg": "Cannot Support Self"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "TokenConfigAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "SupportedChainAddressMissing",
       "msg": "Token Config Address Missing"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "DeserializeAirdropMessageError",
       "msg": "Deserialize Airdrop Message Error"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "DeserializeWhitelistMessageError",
       "msg": "Deserialize Whitelist Message Error"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "DeserializationError",
       "msg": "Deserialization Error"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "BridgeConfigSerializationError",
       "msg": "Bridge Config Serialization Error"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "SupportedChainSerializationError",
       "msg": "Supported Chain Serialization Error"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "CommitteeLengthExceedsLimit",
       "msg": "Committee Length Exceeds Limit"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "CommitteeAndStakeLengthMismatch",
       "msg": "Committee And Stake Length Mismatch"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "InsufficientTotalStake",
       "msg": "Insufficient Total Stake"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "CommitteeConfigAddressMissing",
       "msg": "Committee Config Address Missing"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "BridgeCommitteeSerializationError",
       "msg": "Bridge Committee Serialization Error"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "SubmitterConfigAddressMissing",
       "msg": "Submitter Config Address Missing"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "Expired",
       "msg": "Expired"
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "InvalidPayloadLength",
       "msg": "InvalidPay load Length"
     },
     {
-      "code": 6026,
+      "code": 6027,
       "name": "FailedToParseTokenPrice",
       "msg": "Failed To  Parse Token Price"
     },
     {
-      "code": 6027,
+      "code": 6028,
       "name": "InsufficientSignatures",
       "msg": "Insufficient Signatures"
     },
     {
-      "code": 6028,
+      "code": 6029,
       "name": "DeserializeMessageError",
       "msg": "Deserialize Message Error"
     },
     {
-      "code": 6029,
+      "code": 6030,
       "name": "MessageMismatch",
       "msg": "Message Mismatch"
     },
     {
-      "code": 6030,
+      "code": 6031,
       "name": "SupportedChainNotInitialized",
       "msg": "Supported Chain Not Initialized"
     },
     {
-      "code": 6031,
+      "code": 6032,
       "name": "MessageOpTypeMismatch",
       "msg": "Message Op Type Mismatch"
     },
     {
-      "code": 6032,
+      "code": 6033,
       "name": "BridgeConfigNotInitialized",
       "msg": "Bridge Config Not Initialized"
     },
     {
-      "code": 6033,
+      "code": 6034,
+      "name": "SupportedChainConfigNotInitialized",
+      "msg": "Supported Chain Config Not Initialized"
+    },
+    {
+      "code": 6035,
+      "name": "TokenConfigNotInitialized",
+      "msg": "Token Config Not Initialized"
+    },
+    {
+      "code": 6036,
+      "name": "SupportedChainConfigNoSupported",
+      "msg": "Supported Chain Config Not Supported"
+    },
+    {
+      "code": 6037,
       "name": "ChainIdMismatch",
       "msg": "Chain Id Mismatch"
     },
     {
-      "code": 6034,
+      "code": 6038,
       "name": "DuplicateSignature",
       "msg": "Duplicate Signature"
     },
     {
-      "code": 6035,
+      "code": 6039,
       "name": "SubmitterNotInitialized",
       "msg": "Submitter Not Initialized"
     },
     {
-      "code": 6036,
+      "code": 6040,
       "name": "NotSubmitter",
       "msg": "Not A Submitter"
     },
     {
-      "code": 6037,
+      "code": 6041,
       "name": "SigVerificationFailed",
       "msg": "Signature verification failed"
     },
     {
-      "code": 6038,
+      "code": 6042,
       "name": "InstructionMissing",
       "msg": "InstructionMissing"
     },
     {
-      "code": 6039,
+      "code": 6043,
       "name": "InvalidSigner",
       "msg": "Invalid Signer"
     },
     {
-      "code": 6040,
+      "code": 6044,
       "name": "InvalidNonce",
       "msg": "Invalid Nonce"
     },
     {
-      "code": 6041,
+      "code": 6045,
       "name": "WithdrawPaused",
       "msg": "Withdraw Paused"
     },
     {
-      "code": 6042,
+      "code": 6046,
+      "name": "BridgeWithdrawPaused",
+      "msg": "Bridge Withdraw Paused"
+    },
+    {
+      "code": 6047,
       "name": "InvalidAddress",
       "msg": "Invalid Address"
     },
     {
-      "code": 6043,
+      "code": 6048,
       "name": "InvalidMinAmount",
       "msg": "Invalid Min Amount"
     },
     {
-      "code": 6044,
+      "code": 6049,
       "name": "InvalidUserAddress",
       "msg": "Invalid User Address"
     },
     {
-      "code": 6045,
+      "code": 6050,
       "name": "InvalidFeeRecipient",
       "msg": "Invalid Fee Recipient"
     },
     {
-      "code": 6046,
+      "code": 6051,
       "name": "LackTargetMint",
       "msg": "Lack Target Mint"
     },
     {
-      "code": 6047,
+      "code": 6052,
       "name": "ChainIdShouldDiffFromSolanaChainId",
       "msg": "ChainId Should Diff From Solana Chain Id"
     },
     {
-      "code": 6048,
+      "code": 6053,
       "name": "AccountNotFound",
       "msg": "AccountNotFound"
     },
     {
-      "code": 6049,
+      "code": 6054,
       "name": "FeeRecipientNotFound",
       "msg": "Fee Recipient Not Found"
     },
     {
-      "code": 6050,
+      "code": 6055,
       "name": "FeeRecipientSbtcAtaNotFound",
       "msg": "Fee Recipient Sbtc Ata Not Found"
     },
     {
-      "code": 6051,
+      "code": 6056,
       "name": "UserAccountNotFound",
       "msg": "User Account Not Found"
     },
     {
-      "code": 6052,
+      "code": 6057,
       "name": "UserSbtcAtaNotFound",
       "msg": "User Sbtc Ata Not Found"
     },
     {
-      "code": 6053,
+      "code": 6058,
       "name": "SbtcMintAccountNotFound",
       "msg": "Sbtc Mint Account Not Found"
     },
     {
-      "code": 6054,
+      "code": 6059,
       "name": "TimeError",
       "msg": "Time Error"
     },
     {
-      "code": 6055,
+      "code": 6060,
       "name": "TransferLimitExceeded",
       "msg": "Transfer Limit Exceeded"
     },
     {
-      "code": 6056,
+      "code": 6061,
       "name": "BiggerThanFeeDenominator",
       "msg": "Bigger Than Fee Denominator"
     }

@@ -11,15 +11,17 @@ import { Schema } from "borsh";
 import { Bridge } from "../../target/types/bridge";
 import { BaseMsg } from "./base-msg";
 
-export class UpdateTokenPriceMsg extends BaseMsg {
+export class UpdateLimiterMsg extends BaseMsg {
     messageType: number;
     version: number;
     nonce: anchor.BN;
     chainId: number;
-    payload: Uint8Array;
+    targetChainId: number;
+    tokenId: number;
+    totalLimit: anchor.BN;
 
     static schema: Schema = new Map([
-        [UpdateTokenPriceMsg,
+        [UpdateLimiterMsg,
             {
                 kind: 'struct',
                 fields: [
@@ -27,23 +29,31 @@ export class UpdateTokenPriceMsg extends BaseMsg {
                     ['version', "u8"],
                     ["nonce", "u64"],
                     ['chainId', "u8"],
-                    ["payload", ["u8", 9]],
+                    ['targetChainId', "u8"],
+                    ['tokenId', "u8"],
+                    ["totalLimit", "u64"],
                 ]
             }],
     ]);
 
-    constructor(obj: { messageType: number, version: number, nonce: anchor.BN, chainId: number, payload: Uint8Array }) {
+    constructor(obj: {
+        targetChainId: number;
+        tokenId: number;
+        totalLimit: anchor.BN; messageType: number, version: number, nonce: anchor.BN, chainId: number
+    }) {
         super();
         this.messageType = obj.messageType;
         this.version = obj.version;
         this.nonce = obj.nonce;
         this.chainId = obj.chainId;
-        this.payload = obj.payload;
+        this.targetChainId = obj.targetChainId;
+        this.tokenId = obj.tokenId;
+        this.totalLimit = obj.totalLimit;
     }
 }
 
 
-type UpdateTokenPriceMsgTxnDetails = {
+type UpdateLimiterMsgTxnDetails = {
     signatures: {
         data: {
             encoded: Uint8Array;
@@ -51,19 +61,20 @@ type UpdateTokenPriceMsgTxnDetails = {
         };
         publicKey: anchor.web3.PublicKey;
     }[],
-    msg: UpdateTokenPriceMsg;
+    msg: UpdateLimiterMsg;
     chainID: number;
     numberOfSignatures: number;
-    payer: PublicKey;
-    bridgeConfigPDA: PublicKey;
-    noncePdaUpdateTokenPrice: PublicKey;
+    bridgeConfigPda: PublicKey;
+    noncePdaUpdateLimter: PublicKey;
     submitterPda: PublicKey;
     submitter: PublicKey;
     committeePdas: PublicKey[];
-    tokenConfigPdas: PublicKey;
+    tokenConfigPda: PublicKey;
+    supportChainPda: PublicKey;
+    limiterPda: PublicKey;
 };
 
-export class UpdateTokenPriceMsgTxn {
+export class UpdateLimiterMsgTxn {
     constructor(private readonly programAPI: Program<Bridge>) { }
 
     async createTx({
@@ -71,15 +82,16 @@ export class UpdateTokenPriceMsgTxn {
         msg,
         chainID,
         numberOfSignatures,
-        payer,
-        bridgeConfigPDA,
-        noncePdaUpdateTokenPrice,
-        submitterPda,
         submitter,
+        submitterPda,
+        bridgeConfigPda: bridgeConfigPda,
+        noncePdaUpdateLimter: noncePdaUpdateLimter,
         committeePdas,
-        tokenConfigPdas,
-    }: UpdateTokenPriceMsgTxnDetails) {
-        console.log(`signature is ${signatures.length}, bridgeConfigPDA is ${bridgeConfigPDA}, chainID is ${chainID}`)
+        tokenConfigPda,
+        supportChainPda,
+        limiterPda: limiterPda,
+    }: UpdateLimiterMsgTxnDetails) {
+        console.log(`signature is ${signatures.length}, bridgeConfigPDA is ${bridgeConfigPda}, chainID is ${chainID}`)
 
         const ixEd25519Programs = signatures.map(signature =>
             Ed25519Program.createInstructionWithPublicKey({
@@ -90,25 +102,28 @@ export class UpdateTokenPriceMsgTxn {
         );
 
         return this.programAPI.methods
-            .updateTokenPriceWithSignatures(
-                chainID,
+            .addOrUpdateLimiterWithSignatures(
                 numberOfSignatures,
                 msg as any,
             )
             .accounts({
-                bridgeConfig: bridgeConfigPDA,
-                nonce: noncePdaUpdateTokenPrice,
-                submitterAccount: submitterPda,
                 submitter: submitter,
+                submitterAccount: submitterPda,
+                bridgeConfig: bridgeConfigPda,
+                limiter: limiterPda,
+                supportedChainConfig:supportChainPda,
+                tokenConfig:tokenConfigPda,
+                nonce: noncePdaUpdateLimter,
                 instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
             })
             .remainingAccounts([
                 ...committeePdas.map(pubkey => ({ pubkey, isSigner: false, isWritable: true }))
-                , {
-                    pubkey: tokenConfigPdas,
-                    isSigner: false,
-                    isWritable: true,
-                },
+                , 
+                // {
+                //     pubkey: tokenConfigPdas,
+                //     isSigner: false,
+                //     isWritable: true,
+                // },
             ])
             .preInstructions(
                 [ComputeBudgetProgram.setComputeUnitLimit({ units: 10000000 }), ...ixEd25519Programs]
