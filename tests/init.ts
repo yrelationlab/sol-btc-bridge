@@ -77,8 +77,9 @@ import {
   MSG_VERSION,
   getLimiterPda,
 } from "./constants";
-import { MintSbtcMessage, MintSbtcMessageTxn } from "../sdk/txns/mint-sbtc-message ";
-import { UpdateLimiterMsg, UpdateLimiterMsgTxn } from "../sdk/txns/update-limiter-message";
+import { MintSbtcMessage, MintSbtcMessageTxn } from "../sdk/txns/mint-sbtc ";
+import { UpdateLimiterMsg, UpdateLimiterMsgTxn } from "../sdk/txns/update-limiter";
+import { CreateBridgeConfigMessageTxn } from "../sdk/txns/bridge-config";
 
 export interface TestValues {
   payerAdmin: Keypair;
@@ -367,32 +368,34 @@ export async function createBridgeConfig(
   program: anchor.Program<Bridge>,
   values: TestValues
 ) {
-  return await program.methods
-    .createBridgeConfig(
-      values.chainId,
-      values.payerAdmin.publicKey,
-      values.feeRecipient,
-      Buffer.from(new Uint8Array(values.supportedTokensIndex)),
-      values.supportedChainsBuffer,
-      values.tokenFeePercentages,
-      values.tokenMinAmounts
-    )
-    .accounts({
-      payer: values.payerAdmin.publicKey, bridgeConfig: values.bridgeConfigPDA, sbtcMint: values.sbtcMint,
-    })
-    .remainingAccounts([
-      ...values.tokenConfigPdas.map((pubkey) => ({
-        pubkey,
-        isSigner: false,
-        isWritable: true,
-      })),
-      ...values.supportedChainsPdas.map((pubkey) => ({
-        pubkey,
-        isSigner: false,
-        isWritable: true,
-      })),
-    ])
-    .rpc({ skipPreflight: false });
+  let tx = await new CreateBridgeConfigMessageTxn(program).createTx({
+    chainId: values.chainId,
+    payerAdmin: values.payerAdmin.publicKey,
+    feeRecipient: values.feeRecipient,
+    chainIds: values.supportedChainsBuffer,
+    tokenIds: Buffer.from(new Uint8Array(values.supportedTokensIndex)),
+    tokenFeePercentages: values.tokenFeePercentages,
+    tokenMinAmounts: values.tokenMinAmounts,
+
+    bridgeConfigPda: values.bridgeConfigPDA,
+    sbtcMint: values.sbtcMint,
+
+    tokenConfigPdas: values.tokenConfigPdas.map((pubkey) => ({
+      pubkey,
+      isSigner: false,
+      isWritable: true,
+    })),
+    supportedChainsPdas: values.supportedChainsPdas.map((pubkey) => ({
+      pubkey,
+      isSigner: false,
+      isWritable: true,
+    }))
+  });
+
+  console.log(`createBridgeConfig...start...`);
+  const txid = await createAndSendV0Tx(tx.instructions, [values.payerAdmin], program.provider.connection);
+  console.log(`createBridgeConfig....end...`);
+  return txid;
 }
 
 export async function createAndSendV0Tx(txInstructions: TransactionInstruction[], signers: Array<Signer>, connection: Connection, lookupTable?: AddressLookupTableAccount[], skipPreflight: boolean = false, confirm: boolean = true): Promise<string> {

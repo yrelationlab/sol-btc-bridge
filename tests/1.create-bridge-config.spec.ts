@@ -2,10 +2,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
 import { Bridge } from "../target/types/bridge";
-import { TestValues, airdrop, createBridgeConfig, createValues, expectRevert } from "./init";
+import { TestValues, airdrop, createAndSendV0Tx, createBridgeConfig, createValues, expectRevert } from "./init";
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
 import { getSupportChainPda, getTokenConfigPda } from "./constants";
+import { CreateBridgeConfigMessageTxn } from "../sdk/txns/bridge-config";
 describe("Create Bridge Config", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -14,7 +15,6 @@ describe("Create Bridge Config", () => {
   beforeEach(async () => {
     values = await createValues();
     await airdrop(provider.connection, values.submitter.publicKey);
-
   });
 
   it("create_bridge_config should work", async () => {
@@ -43,25 +43,40 @@ describe("Create Bridge Config", () => {
       console.log(`supportedChain is ${JSON.stringify(supportedChain)}`);
       expect(supportedChain.chainId.toString()).to.equal(values.supportedChainsBuffer[index].toString());
     }
-  });
+  }, 100000);
 
-  it.skip("only config admin & feeRecipient", async () => {
+  it.only("only config admin & feeRecipient", async () => {
     console.log(`values.chainId is ${values.chainId}`)
     console.log(`values.feeRecipient is ${values.feeRecipient}`)
-    const tx = await program.methods
-      .createBridgeConfig(
-        values.chainId,
-        values.payerAdmin.publicKey,
-        values.feeRecipient,
-        Buffer.from(""),
-        Buffer.from(""),
-        [],
-        []
-      )
-      .accounts({
-        payer: values.payerAdmin.publicKey, bridgeConfig: values.bridgeConfigPDA, sbtcMint: values.sbtcMint,
-      })
-      .rpc({ skipPreflight: false });
+
+    let tx = await new CreateBridgeConfigMessageTxn(program).createTx({
+      chainId: values.chainId,
+      payerAdmin: values.payerAdmin.publicKey,
+      feeRecipient: values.feeRecipient,
+      chainIds: Buffer.from(""),
+      tokenIds: Buffer.from(""),
+      tokenFeePercentages: [],
+      tokenMinAmounts: [],
+
+      bridgeConfigPda: values.bridgeConfigPDA,
+      sbtcMint: values.sbtcMint,
+
+      tokenConfigPdas: values.tokenConfigPdas.map((pubkey) => ({
+        pubkey,
+        isSigner: false,
+        isWritable: true,
+      })),
+      supportedChainsPdas: values.supportedChainsPdas.map((pubkey) => ({
+        pubkey,
+        isSigner: false,
+        isWritable: true,
+      }))
+    });
+
+    console.log(`createBridgeConfig...start...`);
+    const txid = await createAndSendV0Tx(tx.instructions, [values.payerAdmin], program.provider.connection);
+    console.log(`createBridgeConfig....end...`);
+
     console.log(`tx is ${tx}`)
     const configAccount = await program.account.bridgeConfig.fetch(values.bridgeConfigPDA);
     console.log(`configAccount is ${JSON.stringify(configAccount)}`)
@@ -70,7 +85,7 @@ describe("Create Bridge Config", () => {
     );
     expect(configAccount.chainId.toString()).to.equal(values.chainId.toString());
     expect(configAccount.feeRecipient.toString()).to.equal(values.feeRecipient.toString());
-  });
+  }, 100000);
 
   it("add chain", async () => {
     // await createBridgeConfig(program, values);

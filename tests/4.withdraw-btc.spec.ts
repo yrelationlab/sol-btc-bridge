@@ -49,10 +49,10 @@ import {
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
 import { BRIDGE_SBTC_AUTH, DECIMALS9, FEE_DENOMINATOR, MSG_VERSION } from "./constants";
-import { MintSbtcMessage } from "../sdk/txns/mint-sbtc-message ";
+import { MintSbtcMessage } from "../sdk/txns/mint-sbtc ";
 import { MessageIds } from "./types";
 import { BaseMsg } from "../sdk/txns/base-msg";
-import { WithdrawBtcMessage, WithdrawBtcMessageTxn } from "../sdk/txns/withdraw-btc-message";
+import { WithdrawBtcMessage, WithdrawBtcMessageTxn } from "../sdk/txns/withdraw-btc";
 
 describe("Withdraw Btc", () => {
     const provider = anchor.AnchorProvider.env();
