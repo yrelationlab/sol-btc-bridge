@@ -66,3 +66,80 @@ export class CreateBridgeConfigMessageTxn {
             .transaction();
     }
 }
+
+type AddOrUpdateChainMessage = {
+    chainId: number;
+    payerAdmin: PublicKey;
+    supportedChainId: number;
+    supported: boolean;
+    bridgeConfigPda: PublicKey;
+    supportedChainPda: PublicKey;
+};
+
+export class AddOrUpdateChainMessageTxn {
+    constructor(private readonly program: Program<Bridge>) { }
+
+    async createTx({
+        chainId,
+        payerAdmin,
+        supportedChainId,
+        supported,
+        bridgeConfigPda,
+        supportedChainPda
+    }: AddOrUpdateChainMessage) {
+        return this.program.methods
+            .addOrUpdateChain(
+                chainId,
+                supportedChainId,
+                supported
+            )
+            .accounts({
+                payer: payerAdmin, bridgeConfig: bridgeConfigPda, supportedChainConfig: supportedChainPda,
+            })
+            .transaction();
+    }
+}
+
+type AddOrUpdateChainTokenMessage = {
+    chainId: number;
+    payerAdmin: PublicKey;
+    supportedChainId: number;
+    tokenId: number,
+    tokenFeePercentages: anchor.BN,
+    tokenMinAmount: anchor.BN,
+    withdrawPaused: boolean,
+    bridgeConfigPda: PublicKey;
+    supportedChainPda: PublicKey;
+    tokenConfigPda: PublicKey;
+};
+
+export class AddOrUpdateChainTokenMessageTxn {
+    constructor(private readonly program: Program<Bridge>) { }
+
+    async createTx({
+        chainId,
+        payerAdmin,
+        supportedChainId,
+        tokenId,
+        tokenFeePercentages,
+        tokenMinAmount,
+        withdrawPaused,
+        bridgeConfigPda,
+        supportedChainPda,
+        tokenConfigPda
+    }: AddOrUpdateChainTokenMessage) {
+        return this.program.methods
+            .addOrUpdateChainToken(
+                chainId,
+                supportedChainId,
+                tokenId,
+                tokenFeePercentages,
+                tokenMinAmount,
+                withdrawPaused
+            )
+            .accounts({
+                payer: payerAdmin, bridgeConfig: bridgeConfigPda, supportedChainConfig: supportedChainPda, tokenConfig: tokenConfigPda
+            })
+            .transaction();
+    }
+}

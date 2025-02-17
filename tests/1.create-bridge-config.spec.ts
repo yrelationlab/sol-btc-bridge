@@ -6,7 +6,7 @@ import { TestValues, airdrop, createAndSendV0Tx, createBridgeConfig, createValue
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
 import { getSupportChainPda, getTokenConfigPda } from "./constants";
-import { CreateBridgeConfigMessageTxn } from "../sdk/txns/bridge-config";
+import { AddOrUpdateChainMessageTxn, AddOrUpdateChainTokenMessageTxn, CreateBridgeConfigMessageTxn } from "../sdk/txns/bridge-config";
 describe("Create Bridge Config", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
@@ -45,7 +45,7 @@ describe("Create Bridge Config", () => {
     }
   }, 100000);
 
-  it.only("only config admin & feeRecipient", async () => {
+  it("only config admin & feeRecipient", async () => {
     console.log(`values.chainId is ${values.chainId}`)
     console.log(`values.feeRecipient is ${values.feeRecipient}`)
 
@@ -92,24 +92,26 @@ describe("Create Bridge Config", () => {
     const supported_chain_id = 100;
     const supported = true;
     const supportedChainPda = getSupportChainPda(new anchor.BN(supported_chain_id));
-    await program.methods
-      .addOrUpdateChain(
-        values.chainId,
-        supported_chain_id,
-        supported
-      )
-      .accounts({
-        payer: values.payerAdmin.publicKey, bridgeConfig: values.bridgeConfigPDA, supportedChainConfig: supportedChainPda,
-      })
-      .signers([values.payerAdmin])
-      .rpc({ skipPreflight: false });
+
+    let tx = await new AddOrUpdateChainMessageTxn(program).createTx({
+      chainId: values.chainId,
+      payerAdmin: values.payerAdmin.publicKey,
+      supportedChainId: supported_chain_id,
+      supported: supported,
+      bridgeConfigPda: values.bridgeConfigPDA,
+      supportedChainPda: supportedChainPda
+    });
+
+    console.log(`add chain...start...`);
+    const txid = await createAndSendV0Tx(tx.instructions, [values.payerAdmin], program.provider.connection);
+    console.log(`add chain....end...`);
 
     const supportedChain = await program.account.supportedChainConfig.fetch(supportedChainPda);
     console.log(`supportedChain is ${JSON.stringify(supportedChain)}`);
     expect(supportedChain.chainId.toString()).to.equal(supported_chain_id.toString());
     expect(supportedChain.supported.toString()).to.equal(supported.toString());
 
-  });
+  }, 100000);
 
   it("disable chain", async () => {
     // await createBridgeConfig(program, values);
@@ -134,30 +136,50 @@ describe("Create Bridge Config", () => {
     expect(supportedChain.supported.toString()).to.equal(supported.toString());
   });
 
-  it("add chain & token", async () => {
-    const supported_chain_id = 100;
-    const supported = true;
-    const supportedChainPda = getSupportChainPda(new anchor.BN(supported_chain_id));
-    const token_id = 99;
-    const token_fee_percentages = 1000;
-    const token_min_amount = 100;
-    const withdraw_paused = false;
-    const tokenConfigPda = getTokenConfigPda(supported_chain_id, token_id);
+  it.only("add chain & token", async () => {
+    await createBridgeConfig(program, values);
+    {
+      const supported_chain_id = 100;
+      const supported = true;
+      const supportedChainPda = getSupportChainPda(new anchor.BN(supported_chain_id));
 
-    await program.methods
-      .addOrUpdateChainToken(
-        values.chainId,
-        supported_chain_id,
-        token_id,
-        new anchor.BN(token_fee_percentages),
-        new anchor.BN(token_min_amount),
-        withdraw_paused
-      )
-      .accounts({
-        payer: values.payerAdmin.publicKey, bridgeConfig: values.bridgeConfigPDA, supportedChainConfig: supportedChainPda, tokenConfig: tokenConfigPda
-      })
-      .signers([values.payerAdmin])
-      .rpc({ skipPreflight: false });
+      let tx = await new AddOrUpdateChainMessageTxn(program).createTx({
+        chainId: values.chainId,
+        payerAdmin: values.payerAdmin.publicKey,
+        supportedChainId: supported_chain_id,
+        supported: supported,
+        bridgeConfigPda: values.bridgeConfigPDA,
+        supportedChainPda: supportedChainPda
+      });
+
+      console.log(`add chain...start...`);
+      const txid = await createAndSendV0Tx(tx.instructions, [values.payerAdmin], program.provider.connection);
+      console.log(`add chain....end...`);
+    }
+    const supported_chain_id = 100;
+    const supportedChainPda = getSupportChainPda(new anchor.BN(supported_chain_id));
+    const tokenId = 99;
+    const tokenFeePercentages = 1000;
+    const tokenMinAmount = 100;
+    const withdrawPaused = false;
+    const tokenConfigPda = getTokenConfigPda(supported_chain_id, tokenId);
+
+    let tx = await new AddOrUpdateChainTokenMessageTxn(program).createTx({
+      chainId: values.chainId,
+      payerAdmin: values.payerAdmin.publicKey,
+      supportedChainId: supported_chain_id,
+      tokenId: tokenId,
+      tokenFeePercentages: new anchor.BN(tokenFeePercentages),
+      tokenMinAmount: new anchor.BN(tokenMinAmount),
+      withdrawPaused: withdrawPaused,
+      bridgeConfigPda: values.bridgeConfigPDA,
+      supportedChainPda: supportedChainPda,
+      tokenConfigPda: tokenConfigPda
+    });
+
+    console.log(`addOrUpdateChainToken...start...`);
+    const txid = await createAndSendV0Tx(tx.instructions, [values.payerAdmin], program.provider.connection);
+    console.log(`addOrUpdateChainToken....end...`);
 
     const tokenConfig = await program.account.tokenConfig.fetch(tokenConfigPda);
     const supportedChain = await program.account.supportedChainConfig.fetch(supportedChainPda);
@@ -165,14 +187,13 @@ describe("Create Bridge Config", () => {
 
     console.log(`tokenConfig is ${JSON.stringify(tokenConfig)}`);
     expect(tokenConfig.chainId.toString()).to.equal(supportedChain.chainId.toString());
-    expect(tokenConfig.tokenFeePercentage.toString()).to.equal(token_fee_percentages.toString());
-    expect(tokenConfig.tokenMinAmount.toString()).to.equal(token_min_amount.toString());
-    expect(tokenConfig.withdrawPaused.toString()).to.equal(withdraw_paused.toString());
-  });
+    expect(tokenConfig.tokenFeePercentage.toString()).to.equal(tokenFeePercentages.toString());
+    expect(tokenConfig.tokenMinAmount.toString()).to.equal(tokenMinAmount.toString());
+    expect(tokenConfig.withdrawPaused.toString()).to.equal(withdrawPaused.toString());
+  }, 100000);
 
   it("update chain & token", async () => {
     const supported_chain_id = 100;
-    const supported = true;
     const supportedChainPda = getSupportChainPda(new anchor.BN(supported_chain_id));
     const token_id = 99;
     const token_fee_percentages = 500;
