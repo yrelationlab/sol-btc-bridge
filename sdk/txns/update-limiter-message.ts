@@ -1,11 +1,7 @@
 
 import * as anchor from "@coral-xyz/anchor";
-import { BN, Program } from "@coral-xyz/anchor";
-import { assert, expect } from "chai";
-import { ComputeBudgetProgram, Ed25519Program, Keypair, PublicKey, sendAndConfirmTransaction, SYSVAR_INSTRUCTIONS_PUBKEY, Transaction } from "@solana/web3.js";
-import { getAccount, NATIVE_MINT } from "@solana/spl-token";
-import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
-import { getAssociatedTokenAddress } from "@solana/spl-token";
+import { Program } from "@coral-xyz/anchor";
+import { ComputeBudgetProgram, Ed25519Program, PublicKey, SYSVAR_INSTRUCTIONS_PUBKEY } from "@solana/web3.js";
 import { Schema } from "borsh";
 
 import { Bridge } from "../../target/types/bridge";
@@ -75,7 +71,7 @@ type UpdateLimiterMsgTxnDetails = {
 };
 
 export class UpdateLimiterMsgTxn {
-    constructor(private readonly programAPI: Program<Bridge>) { }
+    constructor(private readonly program: Program<Bridge>) { }
 
     async createTx({
         signatures,
@@ -84,12 +80,12 @@ export class UpdateLimiterMsgTxn {
         numberOfSignatures,
         submitter,
         submitterPda,
-        bridgeConfigPda: bridgeConfigPda,
-        noncePdaUpdateLimter: noncePdaUpdateLimter,
+        bridgeConfigPda,
+        noncePdaUpdateLimter,
         committeePdas,
         tokenConfigPda,
         supportChainPda,
-        limiterPda: limiterPda,
+        limiterPda,
     }: UpdateLimiterMsgTxnDetails) {
         console.log(`signature is ${signatures.length}, bridgeConfigPDA is ${bridgeConfigPda}, chainID is ${chainID}`)
 
@@ -101,7 +97,7 @@ export class UpdateLimiterMsgTxn {
             })
         );
 
-        return this.programAPI.methods
+        return this.program.methods
             .addOrUpdateLimiterWithSignatures(
                 numberOfSignatures,
                 msg as any,

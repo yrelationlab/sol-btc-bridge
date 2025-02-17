@@ -14,6 +14,7 @@ import {
     getTxnAddress,
     mintSBtc,
     getBalance,
+    updateLimiter,
 } from "./init";
 import {
     clusterApiUrl,
@@ -48,10 +49,10 @@ import {
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
 import { BRIDGE_SBTC_AUTH, DECIMALS9, FEE_DENOMINATOR, MSG_VERSION } from "./constants";
-import { MintSbtcMessage } from "./txns/mint-sbtc-message ";
+import { MintSbtcMessage } from "../sdk/txns/mint-sbtc-message ";
 import { MessageIds } from "./types";
-import { BaseMsg } from "./txns/base-msg";
-import { WithdrawBtcMessage } from "./txns/withdraw-btc-message";
+import { BaseMsg } from "../sdk/txns/base-msg";
+import { WithdrawBtcMessage, WithdrawBtcMessageTxn } from "../sdk/txns/withdraw-btc-message";
 
 describe("Withdraw Btc", () => {
     const provider = anchor.AnchorProvider.env();
@@ -61,15 +62,17 @@ describe("Withdraw Btc", () => {
     let mintAmout: anchor.BN;
     beforeAll(async () => {
         values = await createValues();
-        await createBridgeConfig(program, values);
-        await createCommitteeConfig(program, values);
         await airdrop(provider.connection, values.submitter.publicKey, 1)
         await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
         await airdrop(provider.connection, values.user.publicKey, 1)
-        mintAmout = (await mintSBtc(values, program, provider, false)).mintAmout;
+
+        await createBridgeConfig(program, values);
+        await createCommitteeConfig(program, values);
+        await updateLimiter(values, program, provider);
+        mintAmout = (await mintSBtc(values, program, provider)).mintAmout;
     }, 700000);
 
-    it("should process withdrawal correctly", async () => {
+    it.only("should process withdrawal correctly", async () => {
         const withdrawAmount = mintAmout;
         const feePercentage = values.tokenFeePercentages[0];
         const feeAmount = withdrawAmount.mul(new anchor.BN(feePercentage)).div(FEE_DENOMINATOR); // Calculate fee
@@ -118,52 +121,21 @@ async function withdrawBtc(values: TestValues, withdrawAmount: anchor.BN, provid
     console.log("User sBTC balance before withdrawal:", userBeforeBalance);
     console.log("Fee Recipient sBTC balance after withdrawal:", feeRecipientBeforeBalance);
 
+    let tx = await new WithdrawBtcMessageTxn(program).createTx({
+        msg,
+        bridgeConfigPda: values.bridgeConfigPDA,
+        supportChainPda: values.supportedChainsPdas[0],
+        tokenConfigPda: values.tokenConfigPdas[0],
+        nonceWithdrawBtc: values.nonceWithdrawBtc,
 
-    const tx = await program.methods
-        .withdrawBtc(msg as any)
-        .accounts({
-            user: values.user.publicKey,
-            bridgeConfig: values.bridgeConfigPDA,
-            supportedChainConfig: values.supportedChainsPdas[0],
-            tokenConfig: values.tokenConfigPdas[0],
-            // sbtcMint: values.sbtcMint,
-            // userSbtcAta: values.userSbtcAta,
-            // user: values.user.publicKey,
-            // feeRecipientSbtcAta: values.feeRecipientSbtcAta,
-            // feeRecipient: values.feeRecipient,
-            nonce: values.nonceWithdrawBtc,
-        })
-        .remainingAccounts(
-            values.committeePdas.map(pubkey => ({
-                pubkey,
-                isSigner: false,
-                isWritable: true,
-            })).concat([{
-                pubkey: values.sbtcMint,
-                isSigner: false,
-                isWritable: true,
-            }, {
-                pubkey: values.userSbtcAta,
-                isSigner: false,
-                isWritable: true,
-            }, {
-                pubkey: values.user.publicKey,
-                isSigner: false,
-                isWritable: true,
-            }, {
-                pubkey: values.feeRecipientSbtcAta,
-                isSigner: false,
-                isWritable: true,
-            }, {
-                pubkey: values.feeRecipient,
-                isSigner: false,
-                isWritable: true,
-            }])
-        )
-        .preInstructions([
-            ComputeBudgetProgram.setComputeUnitLimit({ units: 1000000 }),
-        ])
-        .transaction();
+        committeePdas: values.committeePdas,
+        sbtcMint: values.sbtcMint,
+
+        userSbtcAta: values.userSbtcAta,
+        user: values.user.publicKey,
+        feeRecipientSbtcAta: values.feeRecipientSbtcAta,
+        feeRecipient: values.feeRecipient
+    });
 
     console.log(`tx.instructions[0] is ${JSON.stringify(tx.instructions[0].programId, null, 2)}`);
     console.log(`tx.instructions[1] is ${JSON.stringify(tx.instructions[1].programId, null, 2)}`);

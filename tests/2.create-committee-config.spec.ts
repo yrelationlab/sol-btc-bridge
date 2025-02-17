@@ -6,8 +6,8 @@ import { TestValues, createAndSendV0Tx, createBridgeConfig, createCommitteeConfi
 import { describe, beforeEach, it } from 'vitest'
 import { expect } from "chai";
 import { Keypair } from "@solana/web3.js";
-import cm8 from "../cli/.config/cm8.json";
-import cm7 from "../cli/.config/cm7.json";
+import cm8 from "../sdk/.config/cm8.json";
+import cm7 from "../sdk/.config/cm7.json";
 
 import { getCommitteePda, getSubmitterPda } from "./constants";
 

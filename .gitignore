@@ -16,4 +16,5 @@ target/deploy/bridge.so
 test-ledger
 .local.id.json
 /cli/.config/** 
+/sdk/.config/** 
 *.key

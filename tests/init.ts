@@ -40,20 +40,20 @@ import {
 } from "@raydium-io/raydium-sdk";
 import fs from "fs";
 import path from "path";
-import secret from "../cli/.config/secret.json";
-import cm1 from "../cli/.config/cm1.json";
-import cm2 from "../cli/.config/cm2.json";
-import cm3 from "../cli/.config/cm3.json";
-import cm4 from "../cli/.config/cm4.json";
-import cm5 from "../cli/.config/cm5.json";
-import cm6 from "../cli/.config/cm6.json";
-import cm7 from "../cli/.config/cm7.json";
-import cm8 from "../cli/.config/cm8.json";
-import fee from "../cli/.config/fee.json";
-import t1 from "../cli/.config/t1.json";
-import t2 from "../cli/.config/t2.json";
-import t3 from "../cli/.config/t3.json";
-import u1 from "../cli/.config/u1.json";
+import secret from "../sdk/.config/secret.json";
+import cm1 from "../sdk/.config/cm1.json";
+import cm2 from "../sdk/.config/cm2.json";
+import cm3 from "../sdk/.config/cm3.json";
+import cm4 from "../sdk/.config/cm4.json";
+import cm5 from "../sdk/.config/cm5.json";
+import cm6 from "../sdk/.config/cm6.json";
+import cm7 from "../sdk/.config/cm7.json";
+import cm8 from "../sdk/.config/cm8.json";
+import fee from "../sdk/.config/fee.json";
+import t1 from "../sdk/.config/t1.json";
+import t2 from "../sdk/.config/t2.json";
+import t3 from "../sdk/.config/t3.json";
+import u1 from "../sdk/.config/u1.json";
 
 
 import { assert, expect } from "chai";
@@ -77,8 +77,8 @@ import {
   MSG_VERSION,
   getLimiterPda,
 } from "./constants";
-import { MintSbtcMessage } from "./txns/mint-sbtc-message ";
-import { UpdateLimiterMsg, UpdateLimiterMsgTxn } from "./txns/update-limiter-message";
+import { MintSbtcMessage, MintSbtcMessageTxn } from "../sdk/txns/mint-sbtc-message ";
+import { UpdateLimiterMsg, UpdateLimiterMsgTxn } from "../sdk/txns/update-limiter-message";
 
 export interface TestValues {
   payerAdmin: Keypair;
@@ -586,42 +586,23 @@ export async function mintSBtc(values: TestValues, program: anchor.Program<Bridg
   })
   );
 
-  const tx = await program.methods
-    .mintSbtcWithSignatures(numberOfSignatures, msg as any)
-    .accounts({
-      bridgeConfig: values.bridgeConfigPDA,
-      supportedChainConfig: values.supportedChainsPdas[0],
-      tokenConfig: values.tokenConfigPdas[0],
-      nonce: values.nonceMintSbtc,
-      submitterAccount: values.submitterPda,
-      submitter: values.submitter.publicKey,
-      limiter: values.limiterPdas[0],
-      // userSbtcAta: values.userSbtcAta,
-      // user: values.user.publicKey,
-      // sbtcMint: values.sbtcMint,
-      instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
-    })
-    .remainingAccounts([
-      ...values.committeePdas.map((pubkey) => ({
-        pubkey,
-        isSigner: false,
-        isWritable: true,
-      })).concat([{
-        pubkey: values.sbtcMint,
-        isSigner: false,
-        isWritable: true,
-      }, {
-        pubkey: values.userSbtcAta,
-        isSigner: false,
-        isWritable: true,
-      }, {
-        pubkey: values.user.publicKey,
-        isSigner: false,
-        isWritable: true,
-      }]),
-    ]).preInstructions(
-      [ComputeBudgetProgram.setComputeUnitLimit({ units: 10000000 }), ...ixEd25519Programs]
-    ).transaction();
+  let tx = await new MintSbtcMessageTxn(program).createTx({
+    signatures,
+    msg,
+    chainID: values.chainId,
+    numberOfSignatures,
+    submitter: values.submitter.publicKey,
+    submitterPda: values.submitterPda,
+    bridgeConfigPda: values.bridgeConfigPDA,
+    nonceMintSbtc: values.nonceMintSbtc,
+    committeePdas: values.committeePdas,
+    tokenConfigPda: values.tokenConfigPdas[0],
+    supportChainPda: values.supportedChainsPdas[0],
+    limiterPda: values.limiterPdas[0],
+    userSbtcAta: values.userSbtcAta,
+    user: values.user.publicKey,
+    sbtcMint: values.sbtcMint,
+  });
 
   if (withTable) {
     // const LOOKUP_TABLE_ADDRESS = new PublicKey("8j3Tgegjq5hY2joaC6hGUZQZhTg2cohkxVhCPVxYj3WP")

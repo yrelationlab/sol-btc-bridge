@@ -47,9 +47,9 @@ import {
 import { describe, beforeAll, it } from "vitest";
 import { expect, assert } from "chai";
 import { BRIDGE_SBTC_AUTH, DECIMALS9, MSG_VERSION } from "./constants";
-import { MintSbtcMessage } from "./txns/mint-sbtc-message ";
+import { MintSbtcMessage } from "../sdk/txns/mint-sbtc-message ";
 import { MessageIds } from "./types";
-import { BaseMsg } from "./txns/base-msg";
+import { BaseMsg } from "../sdk/txns/base-msg";
 
 describe("Mint sbtc", () => {
   const provider = anchor.AnchorProvider.env();
