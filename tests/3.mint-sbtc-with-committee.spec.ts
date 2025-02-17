@@ -13,6 +13,7 @@ import {
   createLookupTable,
   getTxnAddress,
   mintSBtc,
+  updateLimiter,
 } from "./init";
 import {
   clusterApiUrl,
@@ -60,7 +61,9 @@ describe("Mint sbtc", () => {
     await createCommitteeConfig(program, values);
     await airdrop(provider.connection, values.submitter.publicKey, 1)
     await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
-  });
+    const { totalLimit } = await updateLimiter(values, program, provider);
+    console.log("totalLimit:", totalLimit);
+  },100000);
 
   it("mint sbtc with committee", async () => {
 

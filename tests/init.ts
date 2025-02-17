@@ -595,9 +595,10 @@ export async function mintSBtc(values: TestValues, program: anchor.Program<Bridg
       nonce: values.nonceMintSbtc,
       submitterAccount: values.submitterPda,
       submitter: values.submitter.publicKey,
-      userSbtcAta: values.userSbtcAta,
-      user: values.user.publicKey,
-      sbtcMint: values.sbtcMint,
+      limiter: values.limiterPdas[0],
+      // userSbtcAta: values.userSbtcAta,
+      // user: values.user.publicKey,
+      // sbtcMint: values.sbtcMint,
       instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
     })
     .remainingAccounts([
@@ -605,7 +606,19 @@ export async function mintSBtc(values: TestValues, program: anchor.Program<Bridg
         pubkey,
         isSigner: false,
         isWritable: true,
-      })),
+      })).concat([{
+        pubkey: values.sbtcMint,
+        isSigner: false,
+        isWritable: true,
+      }, {
+        pubkey: values.userSbtcAta,
+        isSigner: false,
+        isWritable: true,
+      }, {
+        pubkey: values.user.publicKey,
+        isSigner: false,
+        isWritable: true,
+      }]),
     ]).preInstructions(
       [ComputeBudgetProgram.setComputeUnitLimit({ units: 10000000 }), ...ixEd25519Programs]
     ).transaction();

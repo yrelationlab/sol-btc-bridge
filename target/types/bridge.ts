@@ -419,29 +419,16 @@ export type Bridge = {
           "isSigner": false
         },
         {
-          "name": "sbtcMint",
+          "name": "nonce",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "userSbtcAta",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "the user's sBTC Token Account"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
           "isSigner": false,
           "docs": [
             "the user to receive minted sBTC"
           ]
         },
         {
-          "name": "nonce",
-          "isMut": true,
+          "name": "limiter",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -706,7 +693,7 @@ export type Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -762,7 +749,7 @@ export type Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -798,7 +785,7 @@ export type Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -826,7 +813,7 @@ export type Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -1558,6 +1545,11 @@ export type Bridge = {
       "code": 6061,
       "name": "BiggerThanFeeDenominator",
       "msg": "Bigger Than Fee Denominator"
+    },
+    {
+      "code": 6062,
+      "name": "UserNotFound",
+      "msg": "User Not Found"
     }
   ]
 };
@@ -1983,29 +1975,16 @@ export const IDL: Bridge = {
           "isSigner": false
         },
         {
-          "name": "sbtcMint",
+          "name": "nonce",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "userSbtcAta",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "the user's sBTC Token Account"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
           "isSigner": false,
           "docs": [
             "the user to receive minted sBTC"
           ]
         },
         {
-          "name": "nonce",
-          "isMut": true,
+          "name": "limiter",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -2270,7 +2249,7 @@ export const IDL: Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -2326,7 +2305,7 @@ export const IDL: Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -2362,7 +2341,7 @@ export const IDL: Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -2390,7 +2369,7 @@ export const IDL: Bridge = {
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -3122,6 +3101,11 @@ export const IDL: Bridge = {
       "code": 6061,
       "name": "BiggerThanFeeDenominator",
       "msg": "Bigger Than Fee Denominator"
+    },
+    {
+      "code": 6062,
+      "name": "UserNotFound",
+      "msg": "User Not Found"
     }
   ]
 };

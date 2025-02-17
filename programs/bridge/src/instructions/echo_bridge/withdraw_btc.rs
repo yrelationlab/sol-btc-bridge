@@ -1,7 +1,4 @@
-use anchor_lang::{
-    prelude::*,
-    solana_program::pubkey::Pubkey,
-};
+use anchor_lang::{ prelude::*, solana_program::pubkey::Pubkey };
 use anchor_spl::associated_token::{ get_associated_token_address, AssociatedToken };
 use crate::{
     bridge::{
@@ -157,9 +154,9 @@ pub struct WithdrawBtc<'info> {
         ],
         bump,
         constraint = token_config.is_initialized @ ErrorCode::TokenConfigNotInitialized,
+        constraint = !token_config.withdraw_paused @ ErrorCode::WithdrawPaused,
         constraint = msg.amount >= token_config.token_min_amount @ ErrorCode::InvalidMinAmount,
         constraint = (msg.amount as u128) <= token_config.mint_total @ ErrorCode::LackTargetMint,
-        constraint = !token_config.withdraw_paused @ ErrorCode::WithdrawPaused
     )]
     pub token_config: Box<Account<'info, TokenConfig>>,
 
@@ -206,7 +203,7 @@ pub struct WithdrawBtc<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn get_accounts<'info>(
+fn get_accounts<'info>(
     program_id: &Pubkey,
     remaining_accounts: &'info [AccountInfo<'info>], // 显式指定生命周期
     user: &Pubkey,

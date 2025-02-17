@@ -419,29 +419,16 @@
           "isSigner": false
         },
         {
-          "name": "sbtcMint",
+          "name": "nonce",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "userSbtcAta",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "the user's sBTC Token Account"
-          ]
-        },
-        {
-          "name": "user",
-          "isMut": false,
           "isSigner": false,
           "docs": [
             "the user to receive minted sBTC"
           ]
         },
         {
-          "name": "nonce",
-          "isMut": true,
+          "name": "limiter",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -706,7 +693,7 @@
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -762,7 +749,7 @@
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -798,7 +785,7 @@
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -826,7 +813,7 @@
             "type": {
               "array": [
                 "u64",
-                16
+                10
               ]
             }
           }
@@ -1558,6 +1545,11 @@
       "code": 6061,
       "name": "BiggerThanFeeDenominator",
       "msg": "Bigger Than Fee Denominator"
+    },
+    {
+      "code": 6062,
+      "name": "UserNotFound",
+      "msg": "User Not Found"
     }
   ],
   "metadata": {

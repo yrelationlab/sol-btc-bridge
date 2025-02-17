@@ -127,5 +127,7 @@ pub enum ErrorCode {
     #[msg("Transfer Limit Exceeded")]
     TransferLimitExceeded,
     #[msg("Bigger Than Fee Denominator")]
-    BiggerThanFeeDenominator
+    BiggerThanFeeDenominator,
+    #[msg("User Not Found")]
+    UserNotFound
 }

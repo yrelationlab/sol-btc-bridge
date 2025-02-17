@@ -10,7 +10,7 @@ pub struct BridgeConfig {
     pub fee_recipient: Pubkey,
     pub sbtc_mint: Pubkey,
     /// padding
-    pub padding: [u64; 16],
+    pub padding: [u64; 10],
 }
 impl BridgeConfig {
     pub const LEN: usize = 8
@@ -22,7 +22,7 @@ impl BridgeConfig {
         + 32 // sbtc_mint
         + BridgeConfig::LEN_OF_PADDING * 8 // padding
         ;
-    pub const LEN_OF_PADDING: usize = 16; //128 bytes padding
+    pub const LEN_OF_PADDING: usize = 10; //128 bytes padding
 }
 #[account]
 #[derive(Default)]
@@ -37,7 +37,7 @@ pub struct TokenConfig {
     pub token_min_amount: u64,
     pub mint_total: u128,
     /// padding
-    pub padding: [u64; 16],
+    pub padding: [u64; 10],
 }
 impl TokenConfig {
     pub const LEN: usize = 8
@@ -52,7 +52,7 @@ impl TokenConfig {
     + 16 // mint_total
     + TokenConfig::LEN_OF_PADDING * 8 // padding
     ;
-    pub const LEN_OF_PADDING: usize = 16; //128 bytes padding
+    pub const LEN_OF_PADDING: usize = 10; //128 bytes padding
 }
 
 #[account]
@@ -63,7 +63,7 @@ pub struct SupportedChainConfig {
     pub supported: bool,
     pub mint_total: u128,
     /// padding
-    pub padding: [u64; 16],
+    pub padding: [u64; 10],
 }
 impl SupportedChainConfig {
     pub const LEN: usize = 8
@@ -73,7 +73,7 @@ impl SupportedChainConfig {
     + 16 // mint_total
     + SupportedChainConfig::LEN_OF_PADDING * 8 // padding
     ;
-    pub const LEN_OF_PADDING: usize = 16; //128 bytes padding
+    pub const LEN_OF_PADDING: usize = 10; //128 bytes padding
 }
 
 
@@ -83,7 +83,7 @@ pub struct Nonces {
     pub is_initialized: bool, // 1 byte
     pub nonce: u64,
     /// padding
-    pub padding: [u64; 16],
+    pub padding: [u64; 10],
 }
 impl Nonces {
     pub const LEN: usize = 8
@@ -91,5 +91,5 @@ impl Nonces {
     + 8 // nonce
     + Nonces::LEN_OF_PADDING * 8 // padding
     ;
-    pub const LEN_OF_PADDING: usize = 16; //128 bytes padding
+    pub const LEN_OF_PADDING: usize = 10; //128 bytes padding
 }
