@@ -1,6 +1,15 @@
 /// Creates a new bridge configuration.
 use crate::{
-    bridge::{ verify, ChainTokenLimiter, Nonces, Operation, Submitter, SupportedChainConfig, TokenConfig, UpdateLimiterMsg },
+    bridge::{
+        verify,
+        ChainTokenLimiter,
+        Nonces,
+        Operation,
+        Submitter,
+        SupportedChainConfig,
+        TokenConfig,
+        UpdateLimiterMsg,
+    },
     constants::{
         COMMITTEE_SUBMITTER_CONFIG,
         GLOBAL_CONFIG,
@@ -164,14 +173,29 @@ pub fn check_transfer<'info>(
     }
 
     // 获取当前小时对应的槽位
-    let current_slot = (current_h % 24) as usize;
+    let current_slot: u8 = (current_h % 24) as u8;
 
     // 检查总限额
     let total: u64 = limiter.hourly_transfers.iter().sum();
     require!(total + amount <= limiter.total_limit, ErrorCode::TransferLimitExceeded);
 
     // 更新当前小时数据
-    limiter.hourly_transfers[current_slot] += amount;
+    limiter.hourly_transfers[current_slot as usize] += amount;
 
+    emit!(LimitEvent {
+        current_h: current_h,
+        current_slot: current_slot,
+        total_before: total,
+        total_after: total + amount,
+    });
     Ok(())
+}
+
+#[derive(Debug)]
+#[event]
+pub struct LimitEvent {
+    pub current_h: u32,
+    pub current_slot: u8,
+    pub total_before: u64,
+    pub total_after: u64,
 }

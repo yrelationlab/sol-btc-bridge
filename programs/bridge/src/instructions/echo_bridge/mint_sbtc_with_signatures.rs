@@ -195,6 +195,7 @@ pub struct MintSbtc<'info> {
     pub nonce: Box<Account<'info, Nonces>>,
 
     #[account(
+        mut,
         seeds = [
             LIMITER_CONFIG.as_bytes(),
             &msg.source_chain_id.to_be_bytes(),

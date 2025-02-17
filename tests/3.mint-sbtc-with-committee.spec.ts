@@ -14,6 +14,7 @@ import {
   getTxnAddress,
   mintSBtc,
   updateLimiter,
+  currentHourTotal,
 } from "./init";
 import {
   clusterApiUrl,
@@ -55,15 +56,16 @@ describe("Mint sbtc", () => {
   anchor.setProvider(provider);
   const program = anchor.workspace.Bridge as Program<Bridge>;
   let values: TestValues;
+  let totalLimit: anchor.BN;
   beforeAll(async () => {
     values = await createValues();
     await createBridgeConfig(program, values);
     await createCommitteeConfig(program, values);
     await airdrop(provider.connection, values.submitter.publicKey, 1)
     await airdrop(provider.connection, values.payerAdmin.publicKey, 1)
-    const { totalLimit } = await updateLimiter(values, program, provider);
-    console.log("totalLimit:", totalLimit);
-  },100000);
+    totalLimit = (await updateLimiter(values, program, provider)).totalLimit;
+    console.log("totalLimit:", totalLimit.toString(10));
+  }, 100000);
 
   it("mint sbtc with committee", async () => {
 
@@ -111,11 +113,32 @@ describe("Mint sbtc", () => {
       for (let event of events) {
         console.log(event);
         // **转换 ETH 地址**
-        const fromEthAddress = "0x" + event.data.fromAddress.toString("hex");
-        const toSolAddress = new PublicKey(event.data.toAddress).toBase58();
-        console.log("ETH Address:", fromEthAddress);
-        console.log("Solana Address:", toSolAddress);
+        // const fromEthAddress = "0x" + event.data.fromAddress.toString("hex");
+        // const toSolAddress = new PublicKey(event.data.toAddress).toBase58();
+        // console.log("ETH Address:", fromEthAddress);
+        // console.log("Solana Address:", toSolAddress);
       }
+    }
+
+    const limiterConfig = await program.account.chainTokenLimiter.fetch(values.limiterPdas[0]);
+    console.log(`limiterConfig is ${JSON.stringify(limiterConfig)}`)
+    expect(totalLimit.toString()).to.be.eq(limiterConfig.totalLimit.toString());
+    expect(limiterConfig.isInitialized).to.be.true;
+    const val = currentHourTotal(limiterConfig);
+    console.log(`val.total is ${val.total}, totalLimit is ${totalLimit}`)
+    expect(val.total.toString(10)).to.be.eq(totalLimit.toString(10))
+
+    try {
+      // limit exceed
+      await mintSBtc(values, program, provider, new anchor.BN(1));
+    } catch (error) {
+      assert.ok(
+        error
+          .toString()
+          .includes(
+            'TransferLimitExceeded'
+          )
+      );
     }
   }, 700000);
 });

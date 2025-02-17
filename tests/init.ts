@@ -555,14 +555,14 @@ export function getTxnAddress(tx: Transaction) {
   return accounts;
 }
 
-export async function mintSBtc(values: TestValues, program: anchor.Program<Bridge>, provider: anchor.AnchorProvider, withTable: boolean = true) {
+export async function mintSBtc(values: TestValues, program: anchor.Program<Bridge>, provider: anchor.AnchorProvider, nonce: anchor.BN = new anchor.BN(0), withTable: boolean = true) {
   console.log("mintSBtc");
 
   const mintAmout = new anchor.BN(1000).mul(DECIMALS9);
   const msg = new MintSbtcMessage({
     messageType: MessageIds.TokenTransfer, // for Mint_SBTC
     version: MSG_VERSION,
-    nonce: new anchor.BN(0),
+    nonce: nonce,
     toAddress: values.user.publicKey.toBuffer(),
     amount: mintAmout,
     sourceChainId: values.supportedChains[0], // 转换为数字
@@ -722,4 +722,14 @@ export async function getBalance(ata: PublicKey, connection: anchor.web3.Connect
     console.log("No existing ATA info, assume zero balance:", err);
     return 0;
   }
+}
+export function currentHourTotal(chainTokenLimiter): { currentH: number, currentSlot: number, total: number } {
+  const currentH = Math.floor(Date.now() / 1000 / 3600);
+  const currentSlot = currentH % 24;
+  console.log(`chainTokenLimiter.hourlyTransfers=${JSON.stringify(chainTokenLimiter.hourlyTransfers)}`)
+  const total: number = chainTokenLimiter.hourlyTransfers
+    .map((hexValue: string) => parseInt(hexValue.toString(), 10)) // 将十六进制字符串转为十进制数字
+    .reduce((acc, val) => acc + val, 0); // 对转换后的十进制数字求和
+  console.log(`chainTokenLimiter.total=${JSON.stringify(total)}`)
+  return { currentH, currentSlot, total };
 }

@@ -428,7 +428,7 @@ export type Bridge = {
         },
         {
           "name": "limiter",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1099,6 +1099,31 @@ export type Bridge = {
         },
         {
           "name": "totalLimit",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "LimitEvent",
+      "fields": [
+        {
+          "name": "currentH",
+          "type": "u32",
+          "index": false
+        },
+        {
+          "name": "currentSlot",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "totalBefore",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "totalAfter",
           "type": "u64",
           "index": false
         }
@@ -1984,7 +2009,7 @@ export const IDL: Bridge = {
         },
         {
           "name": "limiter",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -2655,6 +2680,31 @@ export const IDL: Bridge = {
         },
         {
           "name": "totalLimit",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "LimitEvent",
+      "fields": [
+        {
+          "name": "currentH",
+          "type": "u32",
+          "index": false
+        },
+        {
+          "name": "currentSlot",
+          "type": "u8",
+          "index": false
+        },
+        {
+          "name": "totalBefore",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "totalAfter",
           "type": "u64",
           "index": false
         }
