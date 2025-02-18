@@ -97,6 +97,7 @@ pub mod bridge {
         instructions::create_bridge_committee(ctx, _chian_id, committee, stake)
     }
 
+    //TODO: check committee is_blocklisted
     pub fn add_or_update_committee<'info>(
         ctx: Context<'_, '_, 'info, 'info, AddOrUpdateCommittee<'info>>,
         _chian_id: u8,

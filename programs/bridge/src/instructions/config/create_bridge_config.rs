@@ -183,7 +183,7 @@ pub struct CreateBridgeConfig<'info> {
         payer = payer,
         seeds = [SBTC_MINT.as_bytes(), &chain_id.to_be_bytes()],
         bump,
-        mint::decimals = 9,
+        mint::decimals = 10, // TODO: token config 
         mint::authority = sbtc_mint,
         mint::freeze_authority = sbtc_mint
     )]

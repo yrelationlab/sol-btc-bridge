@@ -2,7 +2,7 @@ import * as anchor from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 
 export const MSG_VERSION = 1;
-export const DECIMALS9 = new anchor.BN(1_000_000_000);
+export const DECIMALS10 = new anchor.BN(10_000_000_000);
 export const FEE_DENOMINATOR = new anchor.BN(1000000);
 export const GLOBAL_CONFIG = Buffer.from("GLOBAL_CONFIG");
 export const BRIDGE_SBTC_AUTH = Buffer.from("BRIDGE_SBTC_AUTH");

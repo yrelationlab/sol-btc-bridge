@@ -65,7 +65,7 @@ import {
   BRIDGE_COMMITTEE_SUBMITTER_CONFIG,
   BRIDGE_SBTC_AUTH,
   SBTC_MINT,
-  DECIMALS9,
+  DECIMALS10,
   getCommitteePda,
   getSubmitterPda,
   getSupportChainPda,
@@ -191,7 +191,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     { length: supportedTokensKeypairs.length },
     (_, i) => i + 10
   );
-  const decimals = [DECIMALS9, DECIMALS9, DECIMALS9];
+  const decimals = [DECIMALS10, DECIMALS10, DECIMALS10];
   const prices = [
     new anchor.BN(9999).mul(decimals[0]),
     new anchor.BN(8888).mul(decimals[1]),
@@ -561,7 +561,7 @@ export function getTxnAddress(tx: Transaction) {
 export async function mintSBtc(values: TestValues, program: anchor.Program<Bridge>, provider: anchor.AnchorProvider, nonce: anchor.BN = new anchor.BN(0), withTable: boolean = true) {
   console.log("mintSBtc");
 
-  const mintAmout = new anchor.BN(1000).mul(DECIMALS9);
+  const mintAmout = new anchor.BN(1000).mul(DECIMALS10);
   const msg = new MintSbtcMessage({
     messageType: MessageIds.TokenTransfer, // for Mint_SBTC
     version: MSG_VERSION,
@@ -638,7 +638,7 @@ export async function mintSBtc(values: TestValues, program: anchor.Program<Bridg
 export async function updateLimiter(values: TestValues, program: anchor.Program<Bridge>, provider: anchor.AnchorProvider, withTable: boolean = true) {
   console.log("mintSBtc");
 
-  const totalLimit = new anchor.BN(1000).mul(DECIMALS9);
+  const totalLimit = new anchor.BN(1000).mul(DECIMALS10);
   const msg = new UpdateLimiterMsg({
     messageType: MessageIds.UpdateBridgeLimit, // for Mint_SBTC
     version: MSG_VERSION,
