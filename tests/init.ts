@@ -226,9 +226,9 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   // https://explorer.solana.com/tx/3gR4kGmU9cQpcQL8wC8HATPVhMghMrKBzqL6aaoHGN2BnoUUbK5dnbxmd1KuLjz4wTtHDWcq93P8evuVK2oUWLUA?cluster=devnet
   const committeeKeypairs = [
     Keypair.fromSecretKey(new Uint8Array(cm1)),
-    // Keypair.fromSecretKey(new Uint8Array(cm2)),
-    // Keypair.fromSecretKey(new Uint8Array(cm3)),
-    // Keypair.fromSecretKey(new Uint8Array(cm4)),
+    Keypair.fromSecretKey(new Uint8Array(cm2)),
+    Keypair.fromSecretKey(new Uint8Array(cm3)),
+    Keypair.fromSecretKey(new Uint8Array(cm4)),
     // Keypair.fromSecretKey(new Uint8Array(cm5)),
     // Keypair.fromSecretKey(new Uint8Array(cm6)),
     // Keypair.fromSecretKey(new Uint8Array(cm7)),
@@ -243,7 +243,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   });
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
-  const stakes = [9000,];
+  const stakes = [9000,9000,9000,9000,];
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
   const noncePdaUpdateLimter = PublicKey.findProgramAddressSync(
@@ -411,7 +411,7 @@ export async function createAndSendV0Tx(txInstructions: TransactionInstruction[]
   }).compileToV0Message(lookupTable);
   console.log("   ✅ - Compiled transaction message");
   const transaction = new VersionedTransaction(messageV0);
-  console.log("   ✅ - Transaction Size < 1232:", transaction.serialize().length);
+  // console.log("   ✅ - Transaction Size < 1232:", transaction.serialize().length);
   // Step 3 - Sign your transaction with the required `Signers`
   transaction.sign(signers);
   console.log("   ✅ - Transaction Signed");

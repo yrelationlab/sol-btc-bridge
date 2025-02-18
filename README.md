@@ -1,5 +1,9 @@
 # sol-btc-bridge
 
+## 签名数量得支持
+1. update limiter： 5个
+2. mint sbtc：4个
+
 ## 命令解释
 
 以下是对给定命令的解释，并以Markdown格式呈现：

@@ -4,8 +4,8 @@ use crate::{
     errors::ErrorCode,
 };
 use anchor_lang::prelude::*;
-
 use super::{ DeserializeMessage, HasMessageType, HasPayload };
+use std::collections::HashSet;
 // Message type stake requirements
 pub const TRANSFER_STAKE_REQUIRED: u16 = 6666;
 pub const FREEZING_STAKE_REQUIRED: u16 = 450;
@@ -31,9 +31,9 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
         return err!(ErrorCode::InsufficientSignatures);
     }
 
-    let mut bitmap: u128 = 0;
     let mut approval_stake: u16 = 0;
     msg!("number_of_signatures={}", number_of_signatures);
+    let mut seen_indices = HashSet::new();
     for i in 1..number_of_signatures + 1 {
         msg!("verify: i={}", i);
 
@@ -65,12 +65,8 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
             ErrorCode::InvalidCommittee
         );
 
-        let mask = u128::from_le_bytes(committee_config.index.to_bytes()[..16].try_into().unwrap());
-        if (bitmap & mask) != 0 {
+        if !seen_indices.insert(committee_config.index) {
             return err!(ErrorCode::DuplicateSignature);
-        } else {
-            // 更新位图
-            bitmap |= mask;
         }
         msg!(
             "signer_pubkey={}, committee_config.stake_amount={:?}",
