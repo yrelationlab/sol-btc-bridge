@@ -129,5 +129,7 @@ pub enum ErrorCode {
     #[msg("Bigger Than Fee Denominator")]
     BiggerThanFeeDenominator,
     #[msg("User Not Found")]
-    UserNotFound
+    UserNotFound,
+    #[msg("Invalid Committee")]
+    InvalidCommittee
 }

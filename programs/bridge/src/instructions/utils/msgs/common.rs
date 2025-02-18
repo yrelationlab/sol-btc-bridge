@@ -60,6 +60,11 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
             &account_data[ANCHOR_HEADER_LEN..]
         ).map_err(|_| ErrorCode::InvalidSigner)?;
 
+        require!(
+            !committee_config.is_blocklisted && committee_config.is_initialized,
+            ErrorCode::InvalidCommittee
+        );
+
         let mask = u128::from_le_bytes(committee_config.index.to_bytes()[..16].try_into().unwrap());
         if (bitmap & mask) != 0 {
             return err!(ErrorCode::DuplicateSignature);

@@ -1575,6 +1575,11 @@ export type Bridge = {
       "code": 6062,
       "name": "UserNotFound",
       "msg": "User Not Found"
+    },
+    {
+      "code": 6063,
+      "name": "InvalidCommittee",
+      "msg": "Invalid Committee"
     }
   ]
 };
@@ -3156,6 +3161,11 @@ export const IDL: Bridge = {
       "code": 6062,
       "name": "UserNotFound",
       "msg": "User Not Found"
+    },
+    {
+      "code": 6063,
+      "name": "InvalidCommittee",
+      "msg": "Invalid Committee"
     }
   ]
 };
