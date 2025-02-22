@@ -7,9 +7,6 @@ import { Schema } from "borsh";
 import { Bridge } from "../../target/types/bridge";
 
 export class WithdrawBtcMessage extends BaseMsg {
-    messageType: number;
-    version: number;
-    nonce: anchor.BN;
     toChainId: number;
     toTokenId: number;
     toAddress: Uint8Array;
@@ -22,9 +19,6 @@ export class WithdrawBtcMessage extends BaseMsg {
             {
                 kind: "struct",
                 fields: [
-                    ["messageType", "u8"],
-                    ["version", "u8"],
-                    ["nonce", "u64"],
                     ["toChainId", "u8"],
                     ["toTokenId", "u8"],
                     ["toAddress", ["u8"]], // 动态长度
@@ -37,9 +31,6 @@ export class WithdrawBtcMessage extends BaseMsg {
     ]);
 
     constructor(obj: {
-        messageType: number,
-        version: number,
-        nonce: anchor.BN,
         toChainId: number,
         toTokenId: number,
         toAddress: Uint8Array,
@@ -48,9 +39,6 @@ export class WithdrawBtcMessage extends BaseMsg {
         amount: anchor.BN
     }) {
         super();
-        this.messageType = obj.messageType;
-        this.version = obj.version;
-        this.nonce = obj.nonce;
         this.toChainId = obj.toChainId;
         this.toTokenId = obj.toTokenId;
         this.toAddress = obj.toAddress;

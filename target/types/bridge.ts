@@ -950,18 +950,6 @@ export type Bridge = {
         "kind": "struct",
         "fields": [
           {
-            "name": "messageType",
-            "type": "u8"
-          },
-          {
-            "name": "version",
-            "type": "u8"
-          },
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
             "name": "toChainId",
             "type": "u8"
           },
@@ -1202,16 +1190,6 @@ export type Bridge = {
     {
       "name": "WithdrawBtctcEvent",
       "fields": [
-        {
-          "name": "messageType",
-          "type": "u8",
-          "index": false
-        },
-        {
-          "name": "version",
-          "type": "u8",
-          "index": false
-        },
         {
           "name": "nonce",
           "type": "u64",
@@ -1528,61 +1506,66 @@ export type Bridge = {
     },
     {
       "code": 6052,
+      "name": "LackTargetMintOfChain",
+      "msg": "Lack Target Mint Of Chain"
+    },
+    {
+      "code": 6053,
       "name": "ChainIdShouldDiffFromSolanaChainId",
       "msg": "ChainId Should Diff From Solana Chain Id"
     },
     {
-      "code": 6053,
+      "code": 6054,
       "name": "AccountNotFound",
       "msg": "AccountNotFound"
     },
     {
-      "code": 6054,
+      "code": 6055,
       "name": "FeeRecipientNotFound",
       "msg": "Fee Recipient Not Found"
     },
     {
-      "code": 6055,
+      "code": 6056,
       "name": "FeeRecipientSbtcAtaNotFound",
       "msg": "Fee Recipient Sbtc Ata Not Found"
     },
     {
-      "code": 6056,
+      "code": 6057,
       "name": "UserAccountNotFound",
       "msg": "User Account Not Found"
     },
     {
-      "code": 6057,
+      "code": 6058,
       "name": "UserSbtcAtaNotFound",
       "msg": "User Sbtc Ata Not Found"
     },
     {
-      "code": 6058,
+      "code": 6059,
       "name": "SbtcMintAccountNotFound",
       "msg": "Sbtc Mint Account Not Found"
     },
     {
-      "code": 6059,
+      "code": 6060,
       "name": "TimeError",
       "msg": "Time Error"
     },
     {
-      "code": 6060,
+      "code": 6061,
       "name": "TransferLimitExceeded",
       "msg": "Transfer Limit Exceeded"
     },
     {
-      "code": 6061,
+      "code": 6062,
       "name": "BiggerThanFeeDenominator",
       "msg": "Bigger Than Fee Denominator"
     },
     {
-      "code": 6062,
+      "code": 6063,
       "name": "UserNotFound",
       "msg": "User Not Found"
     },
     {
-      "code": 6063,
+      "code": 6064,
       "name": "InvalidCommittee",
       "msg": "Invalid Committee"
     }
@@ -2541,18 +2524,6 @@ export const IDL: Bridge = {
         "kind": "struct",
         "fields": [
           {
-            "name": "messageType",
-            "type": "u8"
-          },
-          {
-            "name": "version",
-            "type": "u8"
-          },
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
             "name": "toChainId",
             "type": "u8"
           },
@@ -2793,16 +2764,6 @@ export const IDL: Bridge = {
     {
       "name": "WithdrawBtctcEvent",
       "fields": [
-        {
-          "name": "messageType",
-          "type": "u8",
-          "index": false
-        },
-        {
-          "name": "version",
-          "type": "u8",
-          "index": false
-        },
         {
           "name": "nonce",
           "type": "u64",
@@ -3119,61 +3080,66 @@ export const IDL: Bridge = {
     },
     {
       "code": 6052,
+      "name": "LackTargetMintOfChain",
+      "msg": "Lack Target Mint Of Chain"
+    },
+    {
+      "code": 6053,
       "name": "ChainIdShouldDiffFromSolanaChainId",
       "msg": "ChainId Should Diff From Solana Chain Id"
     },
     {
-      "code": 6053,
+      "code": 6054,
       "name": "AccountNotFound",
       "msg": "AccountNotFound"
     },
     {
-      "code": 6054,
+      "code": 6055,
       "name": "FeeRecipientNotFound",
       "msg": "Fee Recipient Not Found"
     },
     {
-      "code": 6055,
+      "code": 6056,
       "name": "FeeRecipientSbtcAtaNotFound",
       "msg": "Fee Recipient Sbtc Ata Not Found"
     },
     {
-      "code": 6056,
+      "code": 6057,
       "name": "UserAccountNotFound",
       "msg": "User Account Not Found"
     },
     {
-      "code": 6057,
+      "code": 6058,
       "name": "UserSbtcAtaNotFound",
       "msg": "User Sbtc Ata Not Found"
     },
     {
-      "code": 6058,
+      "code": 6059,
       "name": "SbtcMintAccountNotFound",
       "msg": "Sbtc Mint Account Not Found"
     },
     {
-      "code": 6059,
+      "code": 6060,
       "name": "TimeError",
       "msg": "Time Error"
     },
     {
-      "code": 6060,
+      "code": 6061,
       "name": "TransferLimitExceeded",
       "msg": "Transfer Limit Exceeded"
     },
     {
-      "code": 6061,
+      "code": 6062,
       "name": "BiggerThanFeeDenominator",
       "msg": "Bigger Than Fee Denominator"
     },
     {
-      "code": 6062,
+      "code": 6063,
       "name": "UserNotFound",
       "msg": "User Not Found"
     },
     {
-      "code": 6063,
+      "code": 6064,
       "name": "InvalidCommittee",
       "msg": "Invalid Committee"
     }

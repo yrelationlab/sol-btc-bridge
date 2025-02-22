@@ -41,35 +41,32 @@ describe("Withdraw Btc", () => {
         mintAmout = (await mintSBtc(values, program, provider)).mintAmout;
     }, 700000);
 
-    it.only("should process withdrawal correctly", async () => {
+    it("should process withdrawal correctly", async () => {
         const withdrawAmount = mintAmout;
         const feePercentage = values.tokenFeePercentages[0];
         const feeAmount = withdrawAmount.mul(new anchor.BN(feePercentage)).div(FEE_DENOMINATOR); // Calculate fee
-        await withdrawBtc(values, withdrawAmount, provider, program, feeAmount, new anchor.BN(1));
+        await withdrawBtc(values, withdrawAmount, provider, program, feeAmount);
     }, 700000);
 
-    it("should process withdrawal failed, nonce error", async () => {
-        const withdrawAmount = mintAmout;
+    it("should process withdrawal failed, token exceed", async () => {
+        const withdrawAmount = mintAmout.add(new anchor.BN(1));
         const feePercentage = values.tokenFeePercentages[0];
         const feeAmount = withdrawAmount.mul(new anchor.BN(feePercentage)).div(FEE_DENOMINATOR); // Calculate fee
         try {
-            await withdrawBtc(values, withdrawAmount, provider, program, feeAmount, new anchor.BN(0));
+            await withdrawBtc(values, withdrawAmount, provider, program, feeAmount);
         } catch (error) {
             assert.ok(
                 error
                     .toString()
                     .includes(
-                        'InvalidNonce'
+                        'LackTargetMint'
                     )
             );
         }
     }, 700000);
 });
-async function withdrawBtc(values: TestValues, withdrawAmount: anchor.BN, provider: anchor.AnchorProvider, program: anchor.Program<Bridge>, feeAmount: anchor.BN, nonce: anchor.BN) {
+async function withdrawBtc(values: TestValues, withdrawAmount: anchor.BN, provider: anchor.AnchorProvider, program: anchor.Program<Bridge>, feeAmount: anchor.BN) {
     const msg = new WithdrawBtcMessage({
-        messageType: MessageIds.TokenTransfer,
-        version: MSG_VERSION,
-        nonce: nonce, // mint use 0
         toChainId: values.supportedChains[0],
         toTokenId: values.supportedTokensIndex[0],
         toAddress: values.ethBtcAddress, // BTC地址

@@ -108,6 +108,8 @@ pub enum ErrorCode {
     InvalidFeeRecipient,
     #[msg("Lack Target Mint")]
     LackTargetMint,
+    #[msg("Lack Target Mint Of Chain")]
+    LackTargetMintOfChain,
     #[msg("ChainId Should Diff From Solana Chain Id")]
     ChainIdShouldDiffFromSolanaChainId,
     #[msg("AccountNotFound")]

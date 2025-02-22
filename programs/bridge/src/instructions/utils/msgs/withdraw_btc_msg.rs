@@ -1,15 +1,10 @@
-use crate::
-    errors::ErrorCode
-;
+use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
-use super::{DeserializeMessage, HasMessageType, HasPayload};
+use super::{ DeserializeMessage, HasMessageType, HasPayload, Operation };
 
 #[derive(AnchorSerialize, AnchorDeserialize, Eq, PartialEq, Debug, Clone)]
 pub struct WithdrawBtcMessage {
-    pub message_type: u8,
-    pub version: u8,
-    pub nonce: u64,
     pub to_chain_id: u8,
     pub to_token_id: u8,
     pub to_address: Vec<u8>,
@@ -18,10 +13,9 @@ pub struct WithdrawBtcMessage {
     pub amount: u64,
 }
 
-
 impl HasMessageType for WithdrawBtcMessage {
     fn message_type(&self) -> u8 {
-        self.message_type
+        Operation::TokenTransfer as u8
     }
 
     fn chain_id(&self) -> u8 {
@@ -29,13 +23,15 @@ impl HasMessageType for WithdrawBtcMessage {
     }
     
     fn nonce(&self) -> u64 {
-        self.nonce
+        todo!()
     }
+
+    
 }
 
 impl HasPayload for WithdrawBtcMessage {
     fn payload(&self) -> Vec<u8> {
-       return Vec::new();
+        return Vec::new();
     }
 }
 
@@ -51,8 +47,6 @@ impl DeserializeMessage for WithdrawBtcMessage {
 #[derive(Debug)]
 #[event]
 pub struct WithdrawBtctcEvent {
-    pub message_type: u8,
-    pub version: u8,
     pub nonce: u64,
     pub to_chain_id: u8,
     pub to_token_id: u8,
