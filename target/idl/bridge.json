@@ -1101,6 +1101,11 @@
           "name": "totalLimit",
           "type": "u64",
           "index": false
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "index": false
         }
       ]
     },
@@ -1581,8 +1586,5 @@
       "name": "InvalidCommittee",
       "msg": "Invalid Committee"
     }
-  ],
-  "metadata": {
-    "address": "Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs"
-  }
+  ]
 }

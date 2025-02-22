@@ -35,11 +35,7 @@ pub fn withdraw_btc<'info>(
 
     require!(msg.to_address.len() <= MAX_STRING_LENGTH, ErrorCode::InvalidAddress);
 
-    if nonce_config.nonce != msg.nonce {
-        msg!("nonce_config nonce: {:?}", nonce_config.nonce);
-        msg!("msg nonce: {:?}", msg.nonce);
-        return err!(ErrorCode::InvalidNonce);
-    }
+    // fix: 在withdraw 的时候不需要判断 nonce，仅需要做 nonce 的自增，并抛出到日志中
     nonce_config.nonce += 1;
 
     //get ata
@@ -99,7 +95,7 @@ pub fn withdraw_btc<'info>(
     emit!(WithdrawBtctcEvent {
         message_type: msg.message_type,
         version: msg.version,
-        nonce: msg.nonce,
+        nonce: nonce_config.nonce,
         to_chain_id: msg.to_chain_id,
         to_token_id: msg.to_token_id,
         from_address: msg.from_address,

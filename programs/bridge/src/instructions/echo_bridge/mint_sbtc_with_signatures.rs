@@ -91,7 +91,7 @@ pub fn mint_sbtc_with_signatures<'info>(
     emit!(MintSbtcEvent {
         message_type: msg.message_type,
         version: msg.version,
-        nonce: msg.nonce,
+        nonce: nonce_config.nonce,
         source_chain_id: msg.source_chain_id,
         source_token_id: msg.source_token_id,
         from_address: msg.from_address,

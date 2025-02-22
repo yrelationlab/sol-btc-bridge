@@ -57,6 +57,7 @@ pub fn add_or_update_limiter_with_signatures<'info>(
         chain_id: limiter.chain_id,
         token_id: limiter.token_id,
         total_limit: msg.total_limit,
+        nonce: nonce_config.nonce,
     });
     Ok(())
 }
@@ -67,6 +68,7 @@ pub struct LimitUpdated {
     pub chain_id: u8,
     pub token_id: u8,
     pub total_limit: u64,
+    pub nonce: u64,
 }
 
 #[derive(Accounts)]

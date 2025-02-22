@@ -1101,6 +1101,11 @@ export type Bridge = {
           "name": "totalLimit",
           "type": "u64",
           "index": false
+        },
+        {
+          "name": "nonce",
+          "type": "u64",
+          "index": false
         }
       ]
     },
@@ -2685,6 +2690,11 @@ export const IDL: Bridge = {
         },
         {
           "name": "totalLimit",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "nonce",
           "type": "u64",
           "index": false
         }
