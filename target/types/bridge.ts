@@ -43,9 +43,9 @@ export type Bridge = {
       "value": "\"LIMITER_CONFIG\""
     },
     {
-      "name": "DECIMALS9",
+      "name": "DECIMALS10",
       "type": "u8",
-      "value": "9"
+      "value": "10"
     },
     {
       "name": "ANCHOR_HEADER_LEN",
@@ -719,10 +719,6 @@ export type Bridge = {
           },
           {
             "name": "chainId",
-            "type": "u8"
-          },
-          {
-            "name": "decimal",
             "type": "u8"
           },
           {
@@ -1617,9 +1613,9 @@ export const IDL: Bridge = {
       "value": "\"LIMITER_CONFIG\""
     },
     {
-      "name": "DECIMALS9",
+      "name": "DECIMALS10",
       "type": "u8",
-      "value": "9"
+      "value": "10"
     },
     {
       "name": "ANCHOR_HEADER_LEN",
@@ -2293,10 +2289,6 @@ export const IDL: Bridge = {
           },
           {
             "name": "chainId",
-            "type": "u8"
-          },
-          {
-            "name": "decimal",
             "type": "u8"
           },
           {

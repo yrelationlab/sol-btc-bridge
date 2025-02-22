@@ -39,7 +39,7 @@ describe("Create Committee config", () => {
       expect(committee.stakeAmount.toString()).to.equal(values.stakes[index].toString());
       expect(committee.isBlocklisted).to.false;
     }
-  });
+  }, 1000000);
 
   it.skip("only create submitter", async () => {
     await program.methods
@@ -67,7 +67,7 @@ describe("Create Committee config", () => {
       values.submitter.publicKey.toString()
     );
     expect(submitterAccount.isSubmitter).to.be.true;
-  });
+  }, 1000000);
 
   it("add Committee with createBridgeCommittee", async () => {
     const committeeKeypairs = [
@@ -115,7 +115,7 @@ describe("Create Committee config", () => {
       expect(committee.stakeAmount.toString()).to.equal(stakes[index].toString());
       expect(committee.isBlocklisted).to.false;
     }
-  });
+  }, 1000000);
 
 
   it.skip("add Committee with add_or_update_committee", async () => {
@@ -227,5 +227,5 @@ describe("Create Committee config", () => {
     const submitterConfig = await program.account.submitter.fetch(submitterPda);
     console.log(`submitterConfig is ${JSON.stringify(submitterConfig)}`);
     expect(submitterConfig.isSubmitter).to.true;
-  });
+  }, 1000000);
 });

@@ -31,7 +31,6 @@ pub struct TokenConfig {
     pub withdraw_paused: bool,
     pub token_id: u8,
     pub chain_id: u8,
-    pub decimal: u8,
     pub native: bool,
     pub token_fee_percentage: u64,
     pub token_min_amount: u64,
@@ -45,7 +44,6 @@ impl TokenConfig {
     + 1 // withdraw_paused
     + 1 // chain_id
     + 1 // token_id
-    + 1 // decimal
     + 1 // native
     + 8 // token_fee_percentage
     + 8 // token_min_amount

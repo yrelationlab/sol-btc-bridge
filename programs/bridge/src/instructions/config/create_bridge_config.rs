@@ -1,7 +1,7 @@
 /// Creates a new bridge configuration.
 use crate::{
     bridge::create_account_ifn_exist,
-    constants::{ ANCHOR_HEADER_LEN, DECIMALS9, FEE_DENOMINATOR, GLOBAL_CONFIG, SBTC_MINT },
+    constants::{ ANCHOR_HEADER_LEN, DECIMALS10, FEE_DENOMINATOR, GLOBAL_CONFIG, SBTC_MINT },
     errors::ErrorCode,
     find_ata_in_accounts,
     get_support_chains_pda_bump_seeds,
@@ -85,7 +85,6 @@ pub fn create_bridge_config<'info>(
                 is_initialized: true,
                 token_id: token_ids[i],
                 chain_id: *supported_chain_id,
-                decimal: DECIMALS9,
                 native: false,
                 token_fee_percentage: token_fee_percentages[i],
                 token_min_amount: token_min_amount[i],
@@ -183,7 +182,7 @@ pub struct CreateBridgeConfig<'info> {
         payer = payer,
         seeds = [SBTC_MINT.as_bytes(), &chain_id.to_be_bytes()],
         bump,
-        mint::decimals = 10,
+        mint::decimals = DECIMALS10,
         mint::authority = sbtc_mint,
         mint::freeze_authority = sbtc_mint
     )]

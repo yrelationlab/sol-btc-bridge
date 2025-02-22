@@ -23,7 +23,7 @@ pub const LIMITER_CONFIG: &str = "LIMITER_CONFIG";
 // #[constant]
 // pub const AUTHORITY_SEED: &str = "authority";
 #[constant]
-pub const DECIMALS9: u8 = 9;
+pub const DECIMALS10: u8 = 10;
 #[constant]
 pub const ANCHOR_HEADER_LEN: usize = 8;
 

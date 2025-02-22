@@ -98,10 +98,12 @@ export interface TestValues {
   tokenConfigPdas: PublicKey[];
   supportedChainsPdas: PublicKey[];
   committeeKeypairs: Keypair[];
+  dupCommitteeKeypairs:Keypair[];
   stakes: number[];
   submitter: Keypair;
   submitterPda: PublicKey;
   committeePdas: PublicKey[];
+  dupCommitteePdas: PublicKey[];
   noncePdaUpdateLimter: PublicKey;
   nonceMintSbtc: PublicKey;
   nonceWithdrawBtc: PublicKey;
@@ -243,6 +245,15 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   });
   console.log(`committeePdas is ${JSON.stringify(committeePdas)}`);
 
+
+  const dupCommitteeKeypairs = [
+    Keypair.fromSecretKey(new Uint8Array(cm1)),
+    Keypair.fromSecretKey(new Uint8Array(cm1)),
+  ];
+  const dupCommitteePdas = dupCommitteeKeypairs.map((committeeAddress) => {
+    return getCommitteePda(committeeAddress);
+  });
+
   const stakes = [9000,9000,9000,9000,];
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
@@ -289,10 +300,12 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     tokenConfigPdas,
     supportedChainsPdas,
     committeeKeypairs,
+    dupCommitteeKeypairs: dupCommitteeKeypairs,
     stakes,
     submitter,
     submitterPda,
     committeePdas,
+    dupCommitteePdas,
     noncePdaUpdateLimter: noncePdaUpdateLimter,
     supportedChains,
     bridgeSbtcAuth: bridgeSbtcAuth,

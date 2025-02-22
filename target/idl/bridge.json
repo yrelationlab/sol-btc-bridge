@@ -43,9 +43,9 @@
       "value": "\"LIMITER_CONFIG\""
     },
     {
-      "name": "DECIMALS9",
+      "name": "DECIMALS10",
       "type": "u8",
-      "value": "9"
+      "value": "10"
     },
     {
       "name": "ANCHOR_HEADER_LEN",
@@ -719,10 +719,6 @@
           },
           {
             "name": "chainId",
-            "type": "u8"
-          },
-          {
-            "name": "decimal",
             "type": "u8"
           },
           {
