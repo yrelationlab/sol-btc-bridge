@@ -8,7 +8,7 @@ use crate::{
         SupportedChainConfig,
         TokenConfig,
         WithdrawBtcMessage,
-        WithdrawBtctcEvent,
+        WithdrawBtcEvent,
     },
     constants::{
         FEE_DENOMINATOR,
@@ -92,7 +92,7 @@ pub fn withdraw_btc<'info>(
     supported_chain_config.mint_total -= (amount + fee) as u128;
     token_config.mint_total -= (amount + fee) as u128;
 
-    emit!(WithdrawBtctcEvent {
+    emit!(WithdrawBtcEvent {
         nonce: nonce_config.nonce,
         to_chain_id: msg.to_chain_id,
         to_token_id: msg.to_token_id,

@@ -46,7 +46,7 @@ impl DeserializeMessage for WithdrawBtcMessage {
 
 #[derive(Debug)]
 #[event]
-pub struct WithdrawBtctcEvent {
+pub struct WithdrawBtcEvent {
     pub nonce: u64,
     pub to_chain_id: u8,
     pub to_token_id: u8,

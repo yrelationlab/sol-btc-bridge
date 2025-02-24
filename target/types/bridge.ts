@@ -1191,7 +1191,7 @@ export type Bridge = {
       ]
     },
     {
-      "name": "WithdrawBtctcEvent",
+      "name": "WithdrawBtcEvent",
       "fields": [
         {
           "name": "nonce",
@@ -2768,7 +2768,7 @@ export const IDL: Bridge = {
       ]
     },
     {
-      "name": "WithdrawBtctcEvent",
+      "name": "WithdrawBtcEvent",
       "fields": [
         {
           "name": "nonce",

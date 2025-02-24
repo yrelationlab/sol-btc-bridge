@@ -1191,7 +1191,7 @@
       ]
     },
     {
-      "name": "WithdrawBtctcEvent",
+      "name": "WithdrawBtcEvent",
       "fields": [
         {
           "name": "nonce",
@@ -1572,8 +1572,5 @@
       "name": "InvalidCommittee",
       "msg": "Invalid Committee"
     }
-  ],
-  "metadata": {
-    "address": "Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs"
-  }
+  ]
 }
