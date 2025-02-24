@@ -98,7 +98,7 @@ export interface TestValues {
   tokenConfigPdas: PublicKey[];
   supportedChainsPdas: PublicKey[];
   committeeKeypairs: Keypair[];
-  dupCommitteeKeypairs:Keypair[];
+  dupCommitteeKeypairs: Keypair[];
   stakes: number[];
   submitter: Keypair;
   submitterPda: PublicKey;
@@ -254,7 +254,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
     return getCommitteePda(committeeAddress);
   });
 
-  const stakes = [9000,9000,9000,9000,];
+  const stakes = [9000, 9000, 9000, 9000,];
   const submitter = committeeKeypairs[0];
   const submitterPda = getSubmitterPda(submitter);
   const noncePdaUpdateLimter = PublicKey.findProgramAddressSync(
@@ -264,7 +264,7 @@ export async function createValues(defaults?: TestValuesDefaults): Promise<TestV
   console.log(`noncePdaUpdateLimter is ${JSON.stringify(noncePdaUpdateLimter)}`);
 
   const nonceMintSbtc = PublicKey.findProgramAddressSync(
-    [NONCE_CONFIG, new anchor.BN(MessageIds.TokenTransfer.toString()).toArrayLike(Buffer, 'be', 1)],
+    [NONCE_CONFIG, new anchor.BN(MessageIds.TokenTransfer.toString()).toArrayLike(Buffer, 'be', 1), new anchor.BN(supportedChains[0]).toArrayLike(Buffer, 'be', 1), new anchor.BN(0).toArrayLike(Buffer, 'be', 8)],
     anchor.workspace.bridge.programId
   )[0];
   console.log(`nonceMintSbtc is ${JSON.stringify(nonceMintSbtc)}`);
@@ -586,7 +586,12 @@ export async function mintSBtc(values: TestValues, program: anchor.Program<Bridg
     fromAddress: values.ethBtcAddress,
     toChainId: values.chainId
   });
+  const nonceMintSbtc = PublicKey.findProgramAddressSync(
+    [NONCE_CONFIG, new anchor.BN(MessageIds.TokenTransfer.toString()).toArrayLike(Buffer, 'be', 1), new anchor.BN(values.supportedChains[0]).toArrayLike(Buffer, 'be', 1), nonce.toArrayLike(Buffer, 'be', 8)],
+    anchor.workspace.bridge.programId
+  )[0];
 
+  console.log(`custom nonceMintSbtc is ${nonceMintSbtc}`);
   const signatures = values.committeeKeypairs.map(committeeKeypair => {
     return {
       data: msg.createSignature(committeeKeypair),
@@ -610,7 +615,7 @@ export async function mintSBtc(values: TestValues, program: anchor.Program<Bridg
     submitter: values.submitter.publicKey,
     submitterPda: values.submitterPda,
     bridgeConfigPda: values.bridgeConfigPDA,
-    nonceMintSbtc: values.nonceMintSbtc,
+    nonceMintSbtc: nonceMintSbtc,
     committeePdas: values.committeePdas,
     tokenConfigPda: values.tokenConfigPdas[0],
     supportChainPda: values.supportedChainsPdas[0],

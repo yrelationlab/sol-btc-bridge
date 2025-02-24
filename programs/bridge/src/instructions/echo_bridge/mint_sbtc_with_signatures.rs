@@ -10,6 +10,7 @@ use crate::bridge::{
     ChainTokenLimiter,
     MintSbtcEvent,
     Nonces,
+    NoncesDummy,
     Operation,
     SupportedChainConfig,
     TokenConfig,
@@ -91,7 +92,7 @@ pub fn mint_sbtc_with_signatures<'info>(
     emit!(MintSbtcEvent {
         message_type: msg.message_type,
         version: msg.version,
-        nonce: nonce_config.nonce,
+        nonce: msg.nonce,
         source_chain_id: msg.source_chain_id,
         source_token_id: msg.source_token_id,
         from_address: msg.from_address,
@@ -186,13 +187,18 @@ pub struct MintSbtc<'info> {
     // pub user: UncheckedAccount<'info>,
 
     #[account(
-        init_if_needed,
+        init,
         payer = submitter,
         space = Nonces::LEN,
-        seeds = [NONCE_CONFIG.as_ref(), Operation::TokenTransfer.to_bytes().as_slice()],
+        seeds = [
+            NONCE_CONFIG.as_ref(),
+            Operation::TokenTransfer.to_bytes().as_slice(),
+            &msg.source_chain_id.to_be_bytes(),
+            &msg.nonce.to_be_bytes(),
+        ],
         bump
     )]
-    pub nonce: Box<Account<'info, Nonces>>,
+    pub nonce: Box<Account<'info, NoncesDummy>>,
 
     #[account(
         mut,

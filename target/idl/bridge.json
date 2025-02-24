@@ -817,6 +817,13 @@
       }
     },
     {
+      "name": "NoncesDummy",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
       "name": "ChainTokenLimiter",
       "type": {
         "kind": "struct",

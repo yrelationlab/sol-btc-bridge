@@ -817,6 +817,13 @@ export type Bridge = {
       }
     },
     {
+      "name": "noncesDummy",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
       "name": "chainTokenLimiter",
       "type": {
         "kind": "struct",
@@ -2384,6 +2391,13 @@ export const IDL: Bridge = {
             }
           }
         ]
+      }
+    },
+    {
+      "name": "noncesDummy",
+      "type": {
+        "kind": "struct",
+        "fields": []
       }
     },
     {

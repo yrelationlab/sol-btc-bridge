@@ -1,5 +1,10 @@
 use crate::{
-    bridge::{ get_commitee_account, resolve_ed25519_with_index, Committee, Nonces },
+    bridge::{
+        get_commitee_account,
+        resolve_ed25519_with_index,
+        Committee,
+        NoncesTrait,
+    },
     constants::ANCHOR_HEADER_LEN,
     errors::ErrorCode,
 };
@@ -18,14 +23,18 @@ pub const ADD_EVM_TOKENS_STAKE_REQUIRED: u16 = 5001;
 pub const UPDATE_CHAINID_STAKE_REQUIRED: u16 = 5001;
 pub const MINT_SBTC_STAKE_REQUIRED: u16 = 5001;
 
-pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + PartialEq>(
+pub fn verify<
+    'info,
+    T: HasPayload + HasMessageType + DeserializeMessage + PartialEq,
+    F: NoncesTrait + anchor_lang::AccountSerialize + anchor_lang::AccountDeserialize + Clone
+>(
     remaining_accounts: &[AccountInfo<'info>],
     instructions_sysvar: &AccountInfo<'info>,
     program_id: &Pubkey,
     number_of_signatures: u8,
     msg: &T,
     op_type: Operation,
-    nonce_config: &mut Box<Account<'info, Nonces>>
+    nonce_config: &mut Box<Account<'info, F>>
 ) -> Result<()> {
     if number_of_signatures < 1 {
         return err!(ErrorCode::InsufficientSignatures);
@@ -35,18 +44,11 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
     msg!("number_of_signatures={}", number_of_signatures);
     let mut seen_indices = HashSet::new();
     for i in 1..number_of_signatures + 1 {
-        msg!("verify: i={}", i);
-
         let signer_pubkey = resolve_ed25519_with_index(instructions_sysvar, i as usize, msg)?;
-        msg!("verify: resolve_ed25519_with_index success");
-
         if Operation::try_from(msg.message_type()) != Ok(op_type) {
             return err!(ErrorCode::MessageOpTypeMismatch);
         }
-
-        if nonce_config.nonce != msg.nonce() {
-            msg!("nonce_config nonce: {:?}", nonce_config.nonce);
-            msg!("msg nonce: {:?}", msg.nonce());
+        if !nonce_config.nonce_equal(msg.nonce()) {
             return err!(ErrorCode::InvalidNonce);
         }
 
@@ -76,7 +78,7 @@ pub fn verify<'info, T: HasPayload + HasMessageType + DeserializeMessage + Parti
         approval_stake += committee_config.stake_amount;
     }
 
-    nonce_config.nonce += 1;
+    nonce_config.increment_nonce();
 
     Ok(
         if approval_stake < required_stake(msg)? {
