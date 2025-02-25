@@ -1234,6 +1234,11 @@ export type Bridge = {
           "index": false
         },
         {
+          "name": "originalAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
           "name": "chainMintTotal",
           "type": "u128",
           "index": false
@@ -2807,6 +2812,11 @@ export const IDL: Bridge = {
         },
         {
           "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "originalAmount",
           "type": "u64",
           "index": false
         },

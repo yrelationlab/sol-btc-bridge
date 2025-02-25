@@ -1234,6 +1234,11 @@
           "index": false
         },
         {
+          "name": "originalAmount",
+          "type": "u64",
+          "index": false
+        },
+        {
           "name": "chainMintTotal",
           "type": "u128",
           "index": false

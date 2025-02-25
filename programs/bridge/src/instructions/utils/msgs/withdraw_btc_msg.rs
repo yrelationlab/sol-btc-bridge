@@ -21,12 +21,10 @@ impl HasMessageType for WithdrawBtcMessage {
     fn chain_id(&self) -> u8 {
         self.chain_id
     }
-    
+
     fn nonce(&self) -> u64 {
         todo!()
     }
-
-    
 }
 
 impl HasPayload for WithdrawBtcMessage {
@@ -54,6 +52,7 @@ pub struct WithdrawBtcEvent {
     pub chain_id: u8,
     pub from_address: [u8; 32],
     pub amount: u64,
+    pub original_amount: u64,
     pub chain_mint_total: u128,
     pub token_mint_total: u128,
 }

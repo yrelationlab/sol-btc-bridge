@@ -99,7 +99,8 @@ pub fn withdraw_btc<'info>(
         from_address: msg.from_address,
         chain_id: msg.chain_id,
         to_address: msg.to_address,
-        amount: msg.amount,
+        amount: amount,
+        original_amount: msg.amount,
         chain_mint_total: supported_chain_config.mint_total,
         token_mint_total: token_config.mint_total,
     });
