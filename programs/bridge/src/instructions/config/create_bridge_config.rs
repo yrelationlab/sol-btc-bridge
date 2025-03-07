@@ -13,11 +13,22 @@ use crate::{
 use anchor_lang::solana_program::pubkey::Pubkey;
 use anchor_lang::{ prelude::*, Discriminator };
 
-use anchor_spl::token::{ Mint, Token };
+use anchor_spl::{
+    metadata::{
+        create_metadata_accounts_v3,
+        mpl_token_metadata::types::DataV2,
+        CreateMetadataAccountsV3,
+        Metadata,
+    },
+    token::{ Mint, Token },
+};
 
 pub fn create_bridge_config<'info>(
     ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
     chain_id: u8,
+    token_name: &str,
+    token_symbol: &str,
+    token_uri: &str,
     administrator: Pubkey,
     fee_recipient: Pubkey,
     token_ids: Vec<u8>,
@@ -144,6 +155,41 @@ pub fn create_bridge_config<'info>(
         }
     }
 
+    let seeds = [SBTC_MINT.as_bytes(), &chain_id.to_be_bytes(), &[ctx.bumps.sbtc_mint]];
+
+    // Prepare signer with the bump included
+    let signer = &[&seeds[..]];
+
+    // Cross Program Invocation (CPI)
+    // Invoking the create_metadata_account_v3 instruction on the token metadata program
+    create_metadata_accounts_v3(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_metadata_program.to_account_info(),
+            CreateMetadataAccountsV3 {
+                metadata: ctx.accounts.metadata_account.to_account_info(),
+                mint: ctx.accounts.sbtc_mint.to_account_info(),
+                mint_authority: ctx.accounts.sbtc_mint.to_account_info(),
+                update_authority: ctx.accounts.sbtc_mint.to_account_info(),
+                payer: ctx.accounts.payer.to_account_info(),
+                system_program: ctx.accounts.system_program.to_account_info(),
+                rent: ctx.accounts.rent.to_account_info(),
+            },
+            signer,
+        ),
+        DataV2 {
+            name: token_name.to_string(),
+            symbol: token_symbol.to_string(),
+            uri: token_uri.to_string(),
+            seller_fee_basis_points: 0,
+            creators: None,
+            collection: None,
+            uses: None,
+        },
+        false, // Is mutable
+        true, // Update authority is signer
+        None // Collection details
+    )?;
+
     Ok(())
 }
 
@@ -188,6 +234,17 @@ pub struct CreateBridgeConfig<'info> {
     )]
     pub sbtc_mint: Account<'info, Mint>,
 
+    /// CHECK: Validate address by deriving pda
+    #[account(
+        mut,
+        seeds = [b"metadata", token_metadata_program.key().as_ref(), sbtc_mint.key().as_ref()],
+        bump,
+        seeds::program = token_metadata_program.key(),
+    )]
+    pub metadata_account: AccountInfo<'info>,
+
+    pub token_metadata_program: Program<'info, Metadata>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
 }

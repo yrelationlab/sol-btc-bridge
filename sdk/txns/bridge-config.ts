@@ -29,8 +29,17 @@ type CreateBridgeConfigTxnDetails = {
     }[];
 };
 
+export const metadata = {
+    name: "SBTC",
+    symbol: "SBTC",
+    uri: "https://app.sbtc.ai/logo.svg",
+  };
+  
+
 export class CreateBridgeConfigMessageTxn {
     constructor(private readonly program: Program<Bridge>) { }
+
+
 
     async createTx({
         chainId,
@@ -46,9 +55,22 @@ export class CreateBridgeConfigMessageTxn {
         supportedChainsPdas
     }: CreateBridgeConfigTxnDetails) {
 
+        // Derive PDA for metadata account
+        const [metadataPDA, _] = await PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("metadata"),
+                new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s").toBuffer(),
+                sbtcMint.toBuffer(),
+            ],
+            new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s") // The public key of the token metadata program
+        );
+
         return this.program.methods
             .createBridgeConfig(
                 chainId,
+                metadata.name,
+                metadata.symbol,
+                metadata.uri,
                 payerAdmin,
                 feeRecipient,
                 tokenIds,
@@ -58,6 +80,10 @@ export class CreateBridgeConfigMessageTxn {
             )
             .accounts({
                 payer: payerAdmin, bridgeConfig: bridgeConfigPda, sbtcMint: sbtcMint,
+                tokenMetadataProgram: new PublicKey(
+                    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+                ),
+                metadataAccount: metadataPDA,
             })
             .remainingAccounts([
                 ...tokenConfigPdas,

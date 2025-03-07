@@ -107,6 +107,16 @@
           "isSigner": false
         },
         {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -115,12 +125,29 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
         {
           "name": "chainId",
           "type": "u8"
+        },
+        {
+          "name": "tokenName",
+          "type": "string"
+        },
+        {
+          "name": "tokenSymbol",
+          "type": "string"
+        },
+        {
+          "name": "tokenUri",
+          "type": "string"
         },
         {
           "name": "administrator",
@@ -1577,5 +1604,8 @@
       "name": "InvalidCommittee",
       "msg": "Invalid Committee"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs"
+  }
 }

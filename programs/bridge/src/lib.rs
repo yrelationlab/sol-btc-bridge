@@ -40,6 +40,9 @@ pub mod bridge {
     pub fn create_bridge_config<'info>(
         ctx: Context<'_, '_, 'info, 'info, CreateBridgeConfig<'info>>,
         chain_id: u8,
+        token_name: String,
+        token_symbol: String,
+        token_uri: String,
         administrator: Pubkey,
         fee_recipient: Pubkey,
         token_ids: Vec<u8>,
@@ -50,6 +53,9 @@ pub mod bridge {
         instructions::create_bridge_config(
             ctx,
             chain_id,
+            &token_name,
+            &token_symbol,
+            &token_uri,
             administrator,
             fee_recipient,
             token_ids,
@@ -129,7 +135,7 @@ pub mod bridge {
     ) -> Result<()> {
         instructions::withdraw_btc(ctx, msg)
     }
-    
+
     pub fn add_or_update_limiter_with_signatures<'info>(
         ctx: Context<'_, '_, 'info, 'info, AddOrUpdateLimiter<'info>>,
         number_of_signatures: u8,
