@@ -18,7 +18,7 @@
     "deploy:local": "solana program deploy target/deploy/bridge.so -k ./sdk/.config/secret.json -u http://localhost:8899",
     "deploy:dev": "env-cmd -f .env.devnet -x anchor deploy --provider.cluster  \\$RPC_URL",
     "deploy:main": "env-cmd -f .env.mainnet -x anchor deploy --provider.cluster  \\$RPC_URL",
-    "deploy:upgrade": "env-cmd -f .env.mainnet -x anchor upgrade --program-id 9q7cek9TaaRvExbAfKdAgUTzu92RvNTzCxVutXV1nDRC --provider.cluster \\$RPC_URL target/deploy/memoo.so",
+    "deploy:upgrade": "env-cmd -f .env.mainnet -x anchor upgrade --program-id Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs --provider.cluster \\$RPC_URL target/deploy/bridge.so",
     "deploy:test": "anchor deploy --provider.cluster testnet",
     "build:program-rust": "cargo build-bpf --manifest-path=./src/program-rust/Cargo.toml --bpf-out-dir=dist/program",
     "pgid": "solana address -k target/deploy/bridge-keypair.json",

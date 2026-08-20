@@ -23,6 +23,7 @@ Operational notes moved out of the root README. Commands come from `package.json
 | `yarn test-in-remote-node` | `anchor run test` |
 | `yarn node:local` | local validator (see `package.json` for clone flags) |
 | `yarn deploy:local` / `deploy:dev` / `deploy:main` | deploy; uses env files, not committed keys |
+| `yarn deploy:upgrade` | `anchor upgrade` → `target/deploy/bridge.so` @ `Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs` |
 | `yarn network` / `url:local` / `url:dev` / `url:test` / `url:main` | `solana config` |
 | `yarn addr` / `balance` / `airdrop` | wallet under `sdk/.config/secret.json` (gitignored) |
 | `yarn pgid` | program id from `target/deploy/bridge-keypair.json` |
@@ -60,4 +61,6 @@ solana program deploy -k ./sdk/.config/secret.json \
 
 ## Secrets
 
-Gitignore already covers `.env.devnet`, `.env.mainnet`, `sdk/.config/**`, `*.key`. Never commit RPC tokens or upgrade keypairs. `package.json` `deploy:upgrade` still points at an old `memoo.so` program id — do not use that path for this bridge without fixing the artifact and program id.
+Gitignore already covers `.env.devnet`, `.env.mainnet`, `sdk/.config/**`, `*.key`. Never commit RPC tokens or upgrade keypairs.
+
+`yarn deploy:upgrade` writes `target/deploy/bridge.so` to program id `Am2aeLabeQBtENUpMvEv8cWqnaiFzFBF1GtS8gHkhLLs` (same as `Anchor.toml` / `declare_id!`). The wallet in `.env.mainnet` must be the upgrade authority.
